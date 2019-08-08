@@ -5,7 +5,9 @@ INTERFACE
 
    USES
       oxuScene, oxuSceneLoader, oxuProjectionType, oxuProjection,
-      oxuCameraComponent, oxuCameraEntity;
+      oxuCameraComponent, oxuCameraEntity,
+      {game}
+      uSnek, uGrid, uGame;
 
 IMPLEMENTATION
 
@@ -18,8 +20,13 @@ begin
    oxScene.Empty();
 
    camera := oxCameraEntity.CreateInScene();
+
    projection := camera.GetProjection();
    projection^.DefaultOrtho();
+
+   grid.Initialize();
+
+   game.New();
 end;
 
 INITIALIZATION
