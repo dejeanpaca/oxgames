@@ -94,8 +94,8 @@ begin
    camera := oxTCameraComponent(oxScene.GetComponentInChildren('oxTCameraComponent'));
    projection := camera.GetProjection();
 
-   w := projection^.p.r / (game.Grid.Width / 2);
-   h := projection^.p.t / (game.Grid.Height / 2);
+   w := projection^.p.GetWidth() / game.Grid.Width;
+   h := projection^.p.GetHeight() / game.Grid.Height;
 
    halfGridW := w * game.Grid.Width / 2;
    halfGridH := h * game.Grid.Height / 2;
