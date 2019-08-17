@@ -7,7 +7,7 @@ INTERFACE
       oxuScene, oxuSceneLoader, oxuProjectionType, oxuProjection,
       oxuCameraComponent, oxuCameraEntity,
       {game}
-      uSnek, uGrid, uGame;
+      uSnek, uGrid, uGame, uSnakeComponent;
 
 IMPLEMENTATION
 
@@ -25,6 +25,7 @@ begin
    projection^.DefaultOrtho();
 
    grid.Initialize();
+   snakeComponent.Initialize();
 
    game.New();
 end;

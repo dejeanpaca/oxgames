@@ -4,7 +4,7 @@ UNIT uGame;
 INTERFACE
 
    USES
-      uStd,
+      uStd, uLog, StringUtils,
       oxuEntity;
 
 CONST
@@ -21,6 +21,13 @@ CONST
 
 TYPE
    PGridElement = ^TGridElement;
+
+   TSnakeDirection = (
+      SNAKE_DIRECTION_RIGHT,
+      SNAKE_DIRECTION_LEFT,
+      SNAKE_DIRECTION_UP,
+      SNAKE_DIRECTION_DOWN
+   );
 
    { TGridElement }
 
@@ -51,9 +58,11 @@ TYPE
       procedure CreateWalls();
 
       procedure SetPoint(x, y: loopint; what: TBitSet);
-      procedure SetNibble(x, y: loopint);
+      procedure MarkNibble(x, y: loopint);
+      procedure MarkDirty(x, y: loopint);
       procedure MarkSolid(x, y: loopint);
       function GetPoint(x, y: loopint): PGridElement;
+      function ValidPoint(x, y: loopint): boolean;
    end;
 
    { TSnakePart }
@@ -72,16 +81,16 @@ TYPE
    TSnake = record
       {snake}
       Body: TSnakeBody;
-      {snake head}
-      Head,
-      {snake tail}
-      Tail,
       {snake length}
       Length: loopint;
 
+      Direction: TSnakeDirection;
       Dirty: boolean;
 
+      UpdateTime: single;
+
       procedure Initialize();
+      procedure Move();
    end;
 
    { TGame }
@@ -118,14 +127,51 @@ begin
    x := game.Grid.Width div 2;
    y := game.Grid.Width div 2;
 
-   Body[0].Assign(x, y);
+   Body[2].Assign(x, y);
    Body[1].Assign(x - 1, y);
-   Body[2].Assign(x - 2, y);
+   Body[0].Assign(x - 2, y);
 
-   Head := 0;
-   Tail := 2;
+   Length := 3;
+   Direction := SNAKE_DIRECTION_RIGHT;
 
    Dirty := true;
+end;
+
+procedure TSnake.Move();
+var
+   i,
+   mX,
+   my,
+   head: loopint;
+
+begin
+   mX := 0;
+   mY := 0;
+
+   if(Direction = SNAKE_DIRECTION_RIGHT) then
+      mX := 1
+   else if(Direction = SNAKE_DIRECTION_LEFT) then
+      mX := -1
+   else if(Direction = SNAKE_DIRECTION_UP) then
+      mY := 1
+   else if(Direction = SNAKE_DIRECTION_DOWN) then
+      mY := -1;
+
+   head := Length - 1;
+
+   if(Length > 1) then begin
+      for i := 0 to head - 1 do begin
+         Body[i] := Body[i + 1];
+      end;
+   end;
+
+   game.Grid.MarkDirty(Body[0].x, Body[0].y);
+   game.Grid.MarkDirty(Body[head].x, Body[head].y);
+
+   inc(Body[Length - 1].x, mX);
+   inc(Body[Length - 1].y, my);
+
+   game.Snake.Dirty := true;
 end;
 
 { TGridElement }
@@ -194,9 +240,14 @@ begin
    Dirty := true;
 end;
 
-procedure TGrid.SetNibble(x, y: loopint);
+procedure TGrid.MarkNibble(x, y: loopint);
 begin
    SetPoint(x, y, GRID_ELEMENT_NIBBLE);
+end;
+
+procedure TGrid.MarkDirty(x, y: loopint);
+begin
+   SetPoint(x, y, GRID_ELEMENT_DIRTY);
 end;
 
 procedure TGrid.MarkSolid(x, y: loopint);
@@ -206,10 +257,19 @@ end;
 
 function TGrid.GetPoint(x, y: loopint): PGridElement;
 begin
-   Result := @Area[y][x];
+   if(ValidPoint(x, y)) then
+      Result := @Area[y][x]
+   else
+      Result := nil;
+end;
+
+function TGrid.ValidPoint(x, y: loopint): boolean;
+begin
+   Result := (x >= 0) and (y >= 0) and (x < game.Grid.Width) and (y < game.Grid.Height);
 end;
 
 INITIALIZATION
    game.OnNew.Initialize(game.OnNew);
+   game.Snake.UpdateTime := 0.50;
 
 END.
