@@ -20,10 +20,7 @@ TYPE
       public
 
       procedure Load(); override;
-      procedure Start(); override;
       procedure Update(); override;
-
-      procedure OnAdd(); override;
 
       function GetDescriptor(): oxPComponentDescriptor; override;
    end;
@@ -66,27 +63,28 @@ end;
 procedure TGridComponent.Load();
 begin
    Materials.Solid := oxMaterial.Make();
+   Materials.Solid.MarkPermanent();
    Materials.Solid.Name := 'Solid';
    Materials.Solid.SetColor('color', cWhite4ub);
 
    Materials.NonSolid := oxMaterial.Make();
+   Materials.NonSolid.MarkPermanent();
    Materials.NonSolid.Name := 'Non Solid';
    Materials.NonSolid.SetColor('color', cBlack4ub);
 
    Materials.Snake := oxMaterial.Make();
+   Materials.Snake.MarkPermanent();
    Materials.Snake.Name := 'Snake';
    Materials.Snake.SetColor('color', cBlue4ub);
 end;
 
-procedure TGridComponent.Start();
-begin
-end;
-
 function getElementMesh(x, y: loopint; out mesh: oxTPrimitiveModelComponent): PGridElement;
 begin
+   mesh := nil;
    Result := game.Grid.GetPoint(x, y);
 
-   mesh := oxTPrimitiveModelComponent(Result^.Entity.GetComponent('oxTPrimitiveModelComponent'));
+   if(Result <> nil) and (Result^.Entity <> nil) then
+      mesh := oxTPrimitiveModelComponent(Result^.Entity.GetComponent('oxTPrimitiveModelComponent'));
 end;
 
 procedure TGridComponent.Update();
@@ -102,32 +100,25 @@ begin
       for x := 0 to game.Grid.Width - 1 do begin
          for y := 0 to game.Grid.Height - 1 do begin
             element := getElementMesh(x, y, mesh);
-            if element^.IsDirty() and (mesh <> nil) then begin
-               if(mesh <> nil) then
-                  mesh.Model.SetMaterial(GetMaterial(x, y));
-            end;
+
+            if element^.IsDirty() and (mesh <> nil) then
+               mesh.Model.SetMaterial(GetMaterial(x, y));
          end;
       end;
 
       game.Grid.Dirty := false;
    end;
 
-
    if(game.Snake.Dirty) then begin
-      for x := game.Snake.Head to game.Snake.Tail do begin
+      for x := 0 to game.Snake.Length - 1 do begin
          element := getElementMesh(game.Snake.Body[x].x, game.Snake.Body[x].y, mesh);
 
-         if(mesh <> nil) then
+         if(element <> nil) and (mesh <> nil) then
             mesh.Model.SetMaterial(Materials.Snake);
       end;
 
       game.Snake.Dirty := false;
    end;
-end;
-
-procedure TGridComponent.OnAdd();
-begin
-   inherited OnAdd();
 end;
 
 function TGridComponent.GetDescriptor(): oxPComponentDescriptor;
