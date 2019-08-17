@@ -4,11 +4,12 @@ UNIT uGrid;
 INTERFACE
 
    USES
-      uStd, StringUtils,
+      uStd, StringUtils, uColors,
       {oX}
       oxuScene, oxuEntity,
       oxuComponent, oxuComponentDescriptors, oxuPrimitiveModelEntities,
       oxuCameraComponent, oxuProjectionType,
+      oxuMaterial, oxumPrimitive, oxuPrimitiveModelComponent,
       {game}
       uGame;
 
@@ -16,9 +17,13 @@ TYPE
    { TGridComponent }
 
    TGridComponent = class(oxTComponent)
+      public
+
       procedure Load(); override;
       procedure Start(); override;
       procedure Update(); override;
+
+      procedure OnAdd(); override;
 
       function GetDescriptor(): oxPComponentDescriptor; override;
    end;
@@ -36,27 +41,99 @@ VAR
 
 IMPLEMENTATION
 
+VAR
+   gridEntity: oxTEntity;
+
+   Materials: record
+      Solid,
+      NonSolid,
+      Snake: oxTMaterial;
+   end;
+
+function GetMaterial(x, y: loopint): oxTMaterial;
+begin
+   if(game.Grid.GetPoint(x, y)^.IsSolid()) then
+      Result := Materials.Solid
+   else
+      Result := Materials.NonSolid;
+
+   if(Result = nil) then
+      Result := oxMaterial.Default;
+end;
+
 { TGridComponent }
 
 procedure TGridComponent.Load();
 begin
+   Materials.Solid := oxMaterial.Make();
+   Materials.Solid.Name := 'Solid';
+   Materials.Solid.SetColor('color', cWhite4ub);
+
+   Materials.NonSolid := oxMaterial.Make();
+   Materials.NonSolid.Name := 'Non Solid';
+   Materials.NonSolid.SetColor('color', cBlack4ub);
+
+   Materials.Snake := oxMaterial.Make();
+   Materials.Snake.Name := 'Snake';
+   Materials.Snake.SetColor('color', cBlue4ub);
 end;
 
 procedure TGridComponent.Start();
 begin
 end;
 
-procedure TGridComponent.Update();
+function getElementMesh(x, y: loopint; out mesh: oxTPrimitiveModelComponent): PGridElement;
 begin
+   Result := game.Grid.GetPoint(x, y);
+
+   mesh := oxTPrimitiveModelComponent(Result^.Entity.GetComponent('oxTPrimitiveModelComponent'));
+end;
+
+procedure TGridComponent.Update();
+var
+   x,
+   y: loopint;
+
+   mesh: oxTPrimitiveModelComponent;
+   element: PGridElement;
+
+begin
+   if(game.Grid.Dirty) then begin
+      for x := 0 to game.Grid.Width - 1 do begin
+         for y := 0 to game.Grid.Height - 1 do begin
+            element := getElementMesh(x, y, mesh);
+            if element^.IsDirty() and (mesh <> nil) then begin
+               if(mesh <> nil) then
+                  mesh.Model.SetMaterial(GetMaterial(x, y));
+            end;
+         end;
+      end;
+
+      game.Grid.Dirty := false;
+   end;
+
+
+   if(game.Snake.Dirty) then begin
+      for x := game.Snake.Head to game.Snake.Tail do begin
+         element := getElementMesh(game.Snake.Body[x].x, game.Snake.Body[x].y, mesh);
+
+         if(mesh <> nil) then
+            mesh.Model.SetMaterial(Materials.Snake);
+      end;
+
+      game.Snake.Dirty := false;
+   end;
+end;
+
+procedure TGridComponent.OnAdd();
+begin
+   inherited OnAdd();
 end;
 
 function TGridComponent.GetDescriptor(): oxPComponentDescriptor;
 begin
    Result := @grid.Descriptor;
 end;
-
-VAR
-   gridEntity: oxTEntity;
 
 { TGridGlobal }
 
@@ -68,6 +145,8 @@ begin
    gridEntity := oxEntity.New('Grid');
    gridEntity.Add(TGridComponent.Create());
 
+   gridEntity.LoadComponentsInChildren();
+
    oxScene.Add(gridEntity);
 end;
 
@@ -76,7 +155,7 @@ var
    i,
    j: loopint;
 
-   entity: oxTEntity;
+   element: PGridElement;
 
    camera: oxTCameraComponent;
    projection: oxPProjection;
@@ -89,26 +168,28 @@ begin
    if(gridEntity = nil) then
       exit;
 
-   gridEntity.Empty();
+   gridEntity.EmptyChildren();
 
    camera := oxTCameraComponent(oxScene.GetComponentInChildren('oxTCameraComponent'));
    projection := camera.GetProjection();
 
-   w := projection^.p.GetWidth() / game.Grid.Width;
-   h := projection^.p.GetHeight() / game.Grid.Height;
+   w := (projection^.p.GetWidth() / 2) / game.Grid.Width;
+   h := (projection^.p.GetHeight() / 2) / game.Grid.Height;
 
-   halfGridW := w * game.Grid.Width / 2;
-   halfGridH := h * game.Grid.Height / 2;
+   halfGridW := w * game.Grid.Width / 2 - w  / 2;
+   halfGridH := h * game.Grid.Height / 2 - h / 2;
 
    for i := 0 to game.Grid.Width - 1 do begin
       for j := 0 to game.Grid.Height - 1 do begin
-         entity := oxPrimitiveModelEntities.Plane();
-         entity.Name := sf(i) + 'x' + sf(j);
-         game.Grid.GetPoint(i, j)^.Entity := entity;
-         entity.SetPosition(i * w  - halfGridW, j * h - halfGridH, 0);
-         entity.SetScale(w, h, 1);
+         element := game.Grid.GetPoint(i, j);
 
-         gridEntity.Add(entity);
+         element^.Entity := oxPrimitiveModelEntities.Plane();
+
+         element^.Entity.Name := sf(i) + 'x' + sf(j);
+         element^.Entity.SetPosition(i * w  - halfGridW, j * h - halfGridH, 0);
+         element^.Entity.SetScale(w, h, 1);
+
+         gridEntity.Add(element^.Entity);
       end;
    end;
 end;
