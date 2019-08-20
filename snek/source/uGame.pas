@@ -4,7 +4,7 @@ UNIT uGame;
 INTERFACE
 
    USES
-      uStd, uLog, StringUtils,
+      uStd, uLog,
       oxuEntity;
 
 CONST
@@ -21,6 +21,7 @@ CONST
 
 TYPE
    PGridElement = ^TGridElement;
+   PSnakePart =  ^TSnakePart;
 
    TSnakeDirection = (
       SNAKE_DIRECTION_RIGHT,
@@ -84,6 +85,7 @@ TYPE
       {snake length}
       Length: loopint;
 
+      Alive: boolean;
       Direction: TSnakeDirection;
       Dirty: boolean;
 
@@ -91,6 +93,8 @@ TYPE
 
       procedure Initialize();
       procedure Move();
+      procedure CheckCollision();
+      function GetHead(): PSnakePart;
    end;
 
    { TGame }
@@ -99,7 +103,8 @@ TYPE
       Grid: TGrid;
       Snake: TSnake;
 
-      OnNew: TProcedures;
+      OnNew,
+      OnCollision: TProcedures;
 
       procedure New();
    end;
@@ -124,6 +129,8 @@ var
    x, y: loopint;
 
 begin
+   Alive := true;
+
    x := game.Grid.Width div 2;
    y := game.Grid.Width div 2;
 
@@ -145,6 +152,9 @@ var
    head: loopint;
 
 begin
+   if(not Alive) then
+      exit;
+
    mX := 0;
    mY := 0;
 
@@ -172,6 +182,31 @@ begin
    inc(Body[Length - 1].y, my);
 
    game.Snake.Dirty := true;
+
+   // check for collision
+
+   CheckCollision();
+end;
+
+procedure TSnake.CheckCollision();
+var
+   head: PSnakePart;
+   element: PGridElement;
+
+begin
+   head := GetHead();
+   element := game.Grid.GetPoint(head^.x, head^.y);
+
+   if element^.IsSolid() then begin
+      Alive := false;
+
+      game.OnCollision.Call();
+   end;
+end;
+
+function TSnake.GetHead(): PSnakePart;
+begin
+   Result := @Body[Length - 1];
 end;
 
 { TGridElement }
@@ -270,6 +305,6 @@ end;
 
 INITIALIZATION
    game.OnNew.Initialize(game.OnNew);
-   game.Snake.UpdateTime := 0.50;
+   game.Snake.UpdateTime := 0.2;
 
 END.
