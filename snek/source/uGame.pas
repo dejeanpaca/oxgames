@@ -101,7 +101,7 @@ TYPE
       procedure CheckEat();
 
       function GetHead(): PSnakePart;
-      function InSnake(x, y: loopint): boolean;
+      function InSnake(x, y: loopint; ignoreHead: boolean = false): boolean;
    end;
 
    { TGame }
@@ -224,9 +224,8 @@ begin
    head := GetHead();
    element := game.Grid.GetPoint(head^.x, head^.y);
 
-   if element^.IsSolid() then begin
+   if element^.IsSolid() or InSnake(head^.x, head^.y, true) then begin
       Alive := false;
-
       game.OnCollision.Call();
    end;
 end;
@@ -250,12 +249,18 @@ begin
    Result := @Body[Length - 1];
 end;
 
-function TSnake.InSnake(x, y: loopint): boolean;
+function TSnake.InSnake(x, y: loopint; ignoreHead: boolean): boolean;
 var
-   i: loopint;
+   i,
+   currentLength: loopint;
 
 begin
-   for i := 0 to Length - 1 do begin
+   currentLength := Length - 1;
+
+   if(ignoreHead) then
+      dec(currentLength);
+
+   for i := 0 to currentLength do begin
       if(x = Body[i].x) and (y = Body[i].y) then
          exit(true);
    end;
