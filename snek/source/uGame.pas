@@ -95,7 +95,10 @@ TYPE
 
       procedure Initialize();
       procedure Move();
+      procedure Grow();
+
       procedure CheckCollision();
+      procedure CheckEat();
 
       function GetHead(): PSnakePart;
       function InSnake(x, y: loopint): boolean;
@@ -194,9 +197,22 @@ begin
 
    game.Snake.Dirty := true;
 
-   // check for collision
+   {checks new position}
 
    CheckCollision();
+   CheckEat();
+end;
+
+procedure TSnake.Grow();
+var
+   i: loopint;
+
+begin
+   inc(Length);
+
+   for i := Length - 1 downto 1 do begin
+      Body[i] := Body[i - 1];
+   end;
 end;
 
 procedure TSnake.CheckCollision();
@@ -212,6 +228,20 @@ begin
       Alive := false;
 
       game.OnCollision.Call();
+   end;
+end;
+
+procedure TSnake.CheckEat();
+var
+   head: PSnakePart;
+   element: PGridElement;
+
+begin
+   head := GetHead();
+   element := game.Grid.GetPoint(head^.x, head^.y);
+
+   if element^.IsNibble() then begin
+      game.EatNibble(head^.x, head^.y);
    end;
 end;
 
@@ -301,6 +331,10 @@ begin
 
    if(element^.IsNibble()) then begin
       Dec(NibbleCount);
+      element^.Properties.Clear(GRID_ELEMENT_NIBBLE);
+
+      {grow snake}
+      Snake.Grow();
 
       OnNibbleEaten.Call();
    end;
