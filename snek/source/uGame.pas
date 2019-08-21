@@ -17,7 +17,7 @@ CONST
    GRID_ELEMENT_SOLID   = $01;
    GRID_ELEMENT_NIBBLE  = $02;
    {is this element dirty and needs to have it's materials updated}
-   GRID_ELEMENT_DIRTY  = $02;
+   GRID_ELEMENT_DIRTY  = $04;
 
 TYPE
    PGridElement = ^TGridElement;
@@ -36,6 +36,7 @@ TYPE
       Properties: TBitSet;
       Entity: oxTEntity;
 
+      function IsNibble(): boolean;
       function IsSolid(): boolean;
       function IsDirty(): boolean;
    end;
@@ -49,6 +50,7 @@ TYPE
       Width,
       {grid current height}
       Height: loopint;
+
       {grid area}
       Area: TGridArea;
 
@@ -94,7 +96,9 @@ TYPE
       procedure Initialize();
       procedure Move();
       procedure CheckCollision();
+
       function GetHead(): PSnakePart;
+      function InSnake(x, y: loopint): boolean;
    end;
 
    { TGame }
@@ -103,10 +107,17 @@ TYPE
       Grid: TGrid;
       Snake: TSnake;
 
+      {how many nibbles do we have on the screen currently}
+      NibbleCount: loopint;
+
       OnNew,
-      OnCollision: TProcedures;
+      OnCollision,
+      OnNibbleEaten: TProcedures;
 
       procedure New();
+
+      procedure GenerateNibbles(count: loopint = 1);
+      procedure EatNibble(x, y: loopint);
    end;
 
 VAR
@@ -209,7 +220,25 @@ begin
    Result := @Body[Length - 1];
 end;
 
+function TSnake.InSnake(x, y: loopint): boolean;
+var
+   i: loopint;
+
+begin
+   for i := 0 to Length - 1 do begin
+      if(x = Body[i].x) and (y = Body[i].y) then
+         exit(true);
+   end;
+
+   Result := false;
+end;
+
 { TGridElement }
+
+function TGridElement.IsNibble(): boolean;
+begin
+   Result := Properties.IsSet(GRID_ELEMENT_NIBBLE);
+end;
 
 function TGridElement.IsSolid(): boolean;
 begin
@@ -228,8 +257,53 @@ begin
    Grid.Create(GRID_WIDTH, GRID_HEIGHT);
    Grid.CreateWalls();
 
-   OnNew.Call();
    Snake.Initialize();
+   NibbleCount := 0;
+   GenerateNibbles();
+
+   OnNew.Call();
+end;
+
+procedure TGame.GenerateNibbles(count: loopint);
+var
+   i: loopint;
+
+   x,
+   y: loopint;
+
+begin
+   for i := 0 to count - 1 do begin
+      repeat
+        x := Random(Grid.Width);
+        y := Random(Grid.Height);
+
+        if(Grid.GetPoint(x, y)^.IsSolid()) then
+           continue;
+
+        if(Snake.InSnake(x, y)) then
+           continue;
+
+        break;
+      until false;
+
+      Grid.MarkNibble(x, y);
+
+      Inc(NibbleCount);
+   end;
+end;
+
+procedure TGame.EatNibble(x, y: loopint);
+var
+   element: PGridElement;
+
+begin
+   element := Grid.GetPoint(x, y);
+
+   if(element^.IsNibble()) then begin
+      Dec(NibbleCount);
+
+      OnNibbleEaten.Call();
+   end;
 end;
 
 { TGrid }
@@ -303,8 +377,18 @@ begin
    Result := (x >= 0) and (y >= 0) and (x < game.Grid.Width) and (y < game.Grid.Height);
 end;
 
+procedure nibbleEaten();
+begin
+   game.GenerateNibbles();
+end;
+
 INITIALIZATION
    game.OnNew.Initialize(game.OnNew);
+   game.OnCollision.Initialize(game.OnCollision);
+   game.OnNibbleEaten.Initialize(game.OnNibbleEaten);
+
+   game.OnNibbleEaten.Add(@nibbleEaten);
+
    game.Snake.UpdateTime := 0.2;
 
 END.

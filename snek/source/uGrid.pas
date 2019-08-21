@@ -44,15 +44,19 @@ VAR
    Materials: record
       Solid,
       NonSolid,
+      Nibble,
       Snake: oxTMaterial;
    end;
 
 function GetMaterial(x, y: loopint): oxTMaterial;
 begin
-   if(game.Grid.GetPoint(x, y)^.IsSolid()) then
-      Result := Materials.Solid
-   else
-      Result := Materials.NonSolid;
+   if(not game.Grid.GetPoint(x, y)^.IsNibble()) then begin
+      if(game.Grid.GetPoint(x, y)^.IsSolid()) then
+         Result := Materials.Solid
+      else
+         Result := Materials.NonSolid;
+   end else
+      Result := Materials.Nibble;
 
    if(Result = nil) then
       Result := oxMaterial.Default;
@@ -72,11 +76,15 @@ begin
    Materials.NonSolid.Name := 'Non Solid';
    Materials.NonSolid.SetColor('color', cBlack4ub);
 
+   Materials.Nibble := oxMaterial.Make();
+   Materials.Nibble.MarkPermanent();
+   Materials.Nibble.Name := 'Nibble';
+   Materials.Nibble.SetColor('color', TColor4ub.Create(255, 255, 0, 255));
+
    Materials.Snake := oxMaterial.Make();
    Materials.Snake.MarkPermanent();
    Materials.Snake.Name := 'Snake';
-   Materials.Snake.SetColor('color', cBlue4ub);
-end;
+   Materials.Snake.SetColor('color', cBlue4ub);end;
 
 function getElementMesh(x, y: loopint; out mesh: oxTPrimitiveModelComponent): PGridElement;
 begin
