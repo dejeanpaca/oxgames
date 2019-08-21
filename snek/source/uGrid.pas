@@ -64,27 +64,21 @@ end;
 
 { TGridComponent }
 
+function CreateMaterial(const name: string; color: TColor4ub): oxTMaterial;
+begin
+   Result := oxMaterial.Make();
+   Result.MarkPermanent();
+   Result.Name := name;
+   Result.SetColor('color', color);
+end;
+
 procedure TGridComponent.Load();
 begin
-   Materials.Solid := oxMaterial.Make();
-   Materials.Solid.MarkPermanent();
-   Materials.Solid.Name := 'Solid';
-   Materials.Solid.SetColor('color', cWhite4ub);
-
-   Materials.NonSolid := oxMaterial.Make();
-   Materials.NonSolid.MarkPermanent();
-   Materials.NonSolid.Name := 'Non Solid';
-   Materials.NonSolid.SetColor('color', cBlack4ub);
-
-   Materials.Nibble := oxMaterial.Make();
-   Materials.Nibble.MarkPermanent();
-   Materials.Nibble.Name := 'Nibble';
-   Materials.Nibble.SetColor('color', TColor4ub.Create(255, 255, 0, 255));
-
-   Materials.Snake := oxMaterial.Make();
-   Materials.Snake.MarkPermanent();
-   Materials.Snake.Name := 'Snake';
-   Materials.Snake.SetColor('color', cBlue4ub);end;
+   Materials.Solid := CreateMaterial('Solid', cWhite4ub);
+   Materials.NonSolid := CreateMaterial('NonSolid', cBlack4ub);
+   Materials.Nibble := CreateMaterial('Nibble', TColor4ub.Create(255, 255, 0, 255));
+   Materials.Snake := CreateMaterial('Solid', cBlue4ub);
+end;
 
 function getElementMesh(x, y: loopint; out mesh: oxTPrimitiveModelComponent): PGridElement;
 begin
