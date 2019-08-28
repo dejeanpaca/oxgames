@@ -50,26 +50,28 @@ end;
 
 procedure TSnakeComponent.Update();
 begin
-   lastUpdate := lastUpdate + oxTime.Flow;
+   if(not oxTime.Paused()) then begin
+      lastUpdate := lastUpdate + oxTime.Flow;
 
-   if(lastUpdate >= game.Snake.UpdateTime) then begin
-      game.Snake.Move();
+      if(lastUpdate >= game.Snake.UpdateTime) then begin
+         game.Snake.Move();
 
-      lastUpdate := lastUpdate - game.Snake.UpdateTime;
-   end;
+         lastUpdate := lastUpdate - game.Snake.UpdateTime;
+      end;
 
-   if appk.IsPressed(kcUP) or appk.IsPressed(kcA) then begin
-      if(game.Snake.Direction <> SNAKE_DIRECTION_DOWN) then
-         game.Snake.Direction := SNAKE_DIRECTION_UP;
-   end else if appk.IsPressed(kcDOWN) or appk.IsPressed(kcS) then begin
-      if(game.Snake.Direction <> SNAKE_DIRECTION_UP) then
-         game.Snake.Direction := SNAKE_DIRECTION_DOWN;
-   end else if appk.IsPressed(kcLEFT) or appk.IsPressed(kcA) then begin
-      if(game.Snake.Direction <> SNAKE_DIRECTION_RIGHT) then
-         game.Snake.Direction := SNAKE_DIRECTION_LEFT;
-   end else if appk.IsPressed(kcRIGHT) or appk.IsPressed(kcD) then begin
-      if(game.Snake.Direction <> SNAKE_DIRECTION_LEFT) then
-         game.Snake.Direction := SNAKE_DIRECTION_RIGHT;
+      if appk.IsPressed(kcUP) or appk.IsPressed(kcA) then begin
+         if(game.Snake.Direction <> SNAKE_DIRECTION_DOWN) then
+            game.Snake.Direction := SNAKE_DIRECTION_UP;
+      end else if appk.IsPressed(kcDOWN) or appk.IsPressed(kcS) then begin
+         if(game.Snake.Direction <> SNAKE_DIRECTION_UP) then
+            game.Snake.Direction := SNAKE_DIRECTION_DOWN;
+      end else if appk.IsPressed(kcLEFT) or appk.IsPressed(kcA) then begin
+         if(game.Snake.Direction <> SNAKE_DIRECTION_RIGHT) then
+            game.Snake.Direction := SNAKE_DIRECTION_LEFT;
+      end else if appk.IsPressed(kcRIGHT) or appk.IsPressed(kcD) then begin
+         if(game.Snake.Direction <> SNAKE_DIRECTION_LEFT) then
+            game.Snake.Direction := SNAKE_DIRECTION_RIGHT;
+      end;
    end;
 
    if appk.JustPressed(kcP) then

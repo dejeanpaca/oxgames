@@ -4,7 +4,7 @@ UNIT uGame;
 INTERFACE
 
    USES
-      uStd, uLog,
+      uStd, uLog, oxuTimer,
       oxuEntity;
 
 CONST
@@ -312,6 +312,8 @@ begin
    Snake.Initialize();
    NibbleCount := 0;
    GenerateNibbles();
+
+   oxTime.Resume();
 
    OnNew.Call();
 end;
