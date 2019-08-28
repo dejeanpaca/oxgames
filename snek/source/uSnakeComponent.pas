@@ -71,6 +71,12 @@ begin
       if(game.Snake.Direction <> SNAKE_DIRECTION_LEFT) then
          game.Snake.Direction := SNAKE_DIRECTION_RIGHT;
    end;
+
+   if appk.JustPressed(kcP) then
+      oxTime.TogglePause();
+
+   if appk.JustPressed(kcF2) then
+      game.New();
 end;
 
 function TSnakeComponent.GetDescriptor(): oxPComponentDescriptor;
