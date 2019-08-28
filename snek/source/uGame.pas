@@ -164,6 +164,7 @@ var
    mX,
    my,
    head: loopint;
+   pHead: PSnakePart;
 
 begin
    if(not Alive) then
@@ -194,6 +195,22 @@ begin
 
    inc(Body[Length - 1].x, mX);
    inc(Body[Length - 1].y, my);
+
+   pHead := GetHead();
+
+   {if we go out of game grid bounds, teleport onto the other side}
+
+   if(pHead^.x < 0) then
+      pHead^.x := game.Grid.Width - 1;
+
+   if(pHead^.x >= game.Grid.Width) then
+      pHead^.x := 0;
+
+   if(pHead^.y < 0) then
+      pHead^.y := game.Grid.Height - 1;
+
+   if(pHead^.y >= game.Grid.Height) then
+      pHead^.y := 0;
 
    game.Snake.Dirty := true;
 
