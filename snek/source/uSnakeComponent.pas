@@ -17,12 +17,16 @@ TYPE
 
    TSnakeComponent = class(oxTComponent)
       public
-      lastUpdate: Single;
 
       procedure Start(); override;
+      procedure ControlSnake();
+      procedure ControlKeys();
       procedure Update(); override;
 
       function GetDescriptor(): oxPComponentDescriptor; override;
+
+      private
+      lastUpdate: Single;
    end;
 
    { TSnakeComponentGlobal }
@@ -48,17 +52,23 @@ begin
    lastUpdate := 0;
 end;
 
-procedure TSnakeComponent.Update();
+procedure TSnakeComponent.ControlSnake();
+begin
+   if(oxTime.Paused()) then
+      exit;
+
+   lastUpdate := lastUpdate + oxTime.Flow;
+
+   if(lastUpdate >= game.Snake.UpdateTime) then begin
+      game.Snake.Move();
+
+      lastUpdate := lastUpdate - game.Snake.UpdateTime;
+   end;
+end;
+
+procedure TSnakeComponent.ControlKeys();
 begin
    if(not oxTime.Paused()) then begin
-      lastUpdate := lastUpdate + oxTime.Flow;
-
-      if(lastUpdate >= game.Snake.UpdateTime) then begin
-         game.Snake.Move();
-
-         lastUpdate := lastUpdate - game.Snake.UpdateTime;
-      end;
-
       if appk.IsPressed(kcUP) or appk.IsPressed(kcA) then begin
          if(game.Snake.Direction <> SNAKE_DIRECTION_DOWN) then
             game.Snake.Direction := SNAKE_DIRECTION_UP;
@@ -79,6 +89,12 @@ begin
 
    if appk.JustPressed(kcF2) then
       game.New();
+end;
+
+procedure TSnakeComponent.Update();
+begin
+   ControlSnake();
+   ControlKeys();
 end;
 
 function TSnakeComponent.GetDescriptor(): oxPComponentDescriptor;
