@@ -166,11 +166,11 @@ begin
    camera := oxTCameraComponent(oxScene.GetComponentInChildren('oxTCameraComponent'));
    projection := camera.GetProjection();
 
-   w := (projection^.p.GetWidth() / 2) / game.Grid.Width;
-   h := (projection^.p.GetHeight() / 2) / game.Grid.Height;
+   w := projection^.p.GetWidth() / game.Grid.Width / 2 ;
+   h := projection^.p.GetHeight() / game.Grid.Height / 2;
 
-   halfGridW := w * game.Grid.Width / 2 - w  / 2;
-   halfGridH := h * game.Grid.Height / 2 - h / 2;
+   halfGridW := w * game.Grid.Width - w;
+   halfGridH := h * game.Grid.Height - h;
 
    for i := 0 to game.Grid.Width - 1 do begin
       for j := 0 to game.Grid.Height - 1 do begin
@@ -179,7 +179,7 @@ begin
          element^.Entity := oxPrimitiveModelEntities.Plane();
 
          element^.Entity.Name := sf(i) + 'x' + sf(j);
-         element^.Entity.SetPosition(i * w  - halfGridW, j * h - halfGridH, 0);
+         element^.Entity.SetPosition(i * (w * 2)  - halfGridW , j * (h * 2) - halfGridH, 0);
          element^.Entity.SetScale(w, h, 1);
 
          gridEntity.Add(element^.Entity);
