@@ -69,7 +69,7 @@ end;
 procedure TSnakeComponent.ControlKeys();
 begin
    if(not oxTime.Paused()) then begin
-      if appk.IsPressed(kcUP) or appk.IsPressed(kcA) then begin
+      if appk.IsPressed(kcUP) or appk.IsPressed(kcW) then begin
          if(game.Snake.Direction <> SNAKE_DIRECTION_DOWN) then
             game.Snake.Direction := SNAKE_DIRECTION_UP;
       end else if appk.IsPressed(kcDOWN) or appk.IsPressed(kcS) then begin
