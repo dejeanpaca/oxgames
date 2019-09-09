@@ -146,7 +146,8 @@ end;
 procedure onNew();
 var
    i,
-   j: loopint;
+   j,
+   gridSize: loopint;
 
    element: PGridElement;
 
@@ -166,8 +167,18 @@ begin
    camera := oxTCameraComponent(oxScene.GetComponentInChildren('oxTCameraComponent'));
    projection := camera.GetProjection();
 
-   w := projection^.p.GetWidth() / game.Grid.Width / 2 ;
-   h := projection^.p.GetHeight() / game.Grid.Height / 2;
+
+   gridSize := game.Grid.Width;
+   if(gridSize > game.Grid.Height) then
+      gridSize := game.Grid.Height;
+
+   if(projection^.p.GetWidth() >= projection^.p.GetHeight()) then begin
+      w := projection^.p.GetHeight() / gridSize / 2;
+      h := w;
+   end else begin
+      w := projection^.p.GetWidth() / gridSize / 2;
+      h := w;
+   end;
 
    halfGridW := w * game.Grid.Width - w;
    halfGridH := h * game.Grid.Height - h;

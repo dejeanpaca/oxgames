@@ -8,7 +8,7 @@ INTERFACE
       oxuEntity;
 
 CONST
-   GRID_WIDTH = 50;
+   GRID_WIDTH = 75;
    GRID_HEIGHT = 50;
 
    GRID_MAX_WIDTH = 1000;
