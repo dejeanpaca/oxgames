@@ -1,0 +1,8 @@
+# DVAR
+
+project.name = OXTris
+project.short_name = oxtris
+project.identifier = Snek
+project.organization = dbx7.games
+project.organization_short = 
+project.line_endings = lf
