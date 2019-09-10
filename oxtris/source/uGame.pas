@@ -11,9 +11,6 @@ CONST
    GRID_WIDTH = 50;
    GRID_HEIGHT = 50;
 
-   GRID_MAX_WIDTH = 1000;
-   GRID_MAX_HEIGHT = 1000;
-
 TYPE
 
    { TGame }

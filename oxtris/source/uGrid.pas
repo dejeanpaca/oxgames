@@ -4,11 +4,11 @@ UNIT uGrid;
 INTERFACE
 
    USES
-      uStd, StringUtils, uColors,
+      uStd, uColors,
       {oX}
       oxuScene, oxuEntity,
-      oxuComponent, oxuComponentDescriptors, oxuPrimitiveModelEntities,
-      oxuCameraComponent, oxuProjectionType,
+      oxuComponent, oxuComponentDescriptors,
+      oxuCameraComponent,
       oxuMaterial, oxumPrimitive, oxuPrimitiveModelComponent,
       {game}
       uGame;
