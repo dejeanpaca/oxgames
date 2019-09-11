@@ -70,17 +70,17 @@ procedure TSnakeComponent.ControlKeys();
 begin
    if(not oxTime.Paused()) then begin
       if appk.IsPressed(kcUP) or appk.IsPressed(kcW) then begin
-         if(game.Snake.Direction <> SNAKE_DIRECTION_DOWN) then
-            game.Snake.Direction := SNAKE_DIRECTION_UP;
+         if(game.Snake.CurrentDirection <> SNAKE_DIRECTION_DOWN) then
+            game.Snake.NextDirection := SNAKE_DIRECTION_UP;
       end else if appk.IsPressed(kcDOWN) or appk.IsPressed(kcS) then begin
-         if(game.Snake.Direction <> SNAKE_DIRECTION_UP) then
-            game.Snake.Direction := SNAKE_DIRECTION_DOWN;
+         if(game.Snake.CurrentDirection <> SNAKE_DIRECTION_UP) then
+            game.Snake.NextDirection := SNAKE_DIRECTION_DOWN;
       end else if appk.IsPressed(kcLEFT) or appk.IsPressed(kcA) then begin
-         if(game.Snake.Direction <> SNAKE_DIRECTION_RIGHT) then
-            game.Snake.Direction := SNAKE_DIRECTION_LEFT;
+         if(game.Snake.CurrentDirection <> SNAKE_DIRECTION_RIGHT) then
+            game.Snake.NextDirection := SNAKE_DIRECTION_LEFT;
       end else if appk.IsPressed(kcRIGHT) or appk.IsPressed(kcD) then begin
-         if(game.Snake.Direction <> SNAKE_DIRECTION_LEFT) then
-            game.Snake.Direction := SNAKE_DIRECTION_RIGHT;
+         if(game.Snake.CurrentDirection <> SNAKE_DIRECTION_LEFT) then
+            game.Snake.NextDirection := SNAKE_DIRECTION_RIGHT;
       end;
    end;
 

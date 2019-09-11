@@ -87,10 +87,21 @@ TYPE
       {snake length}
       Length: loopint;
 
+      {is the snake still alive}
       Alive: boolean;
-      Direction: TSnakeDirection;
+      {snake body is dirty and we have to readjust the rendering}
       Dirty: boolean;
 
+      {what direction the snake is currently going in}
+      CurrentDirection,
+      {next direction we'll turn the snake to}
+      NextDirection: TSnakeDirection;
+
+      {NOTE: The reasoning between two direction properties is, so we don't change the current direction multiple
+      times before the snake actually is moved (during tick), and therefore allowing direction to be changed to the
+      opposite direction, e.g. from DOWN to UP which would cause snake self-collide on the next move.}
+
+      {current accumulated update time}
       UpdateTime: single;
 
       procedure Initialize();
@@ -153,7 +164,8 @@ begin
    Body[0].Assign(x - 2, y);
 
    Length := 3;
-   Direction := SNAKE_DIRECTION_RIGHT;
+   CurrentDirection := SNAKE_DIRECTION_RIGHT;
+   NextDirection := SNAKE_DIRECTION_RIGHT;
 
    Dirty := true;
 end;
@@ -173,13 +185,15 @@ begin
    mX := 0;
    mY := 0;
 
-   if(Direction = SNAKE_DIRECTION_RIGHT) then
+   CurrentDirection := NextDirection;
+
+   if(CurrentDirection = SNAKE_DIRECTION_RIGHT) then
       mX := 1
-   else if(Direction = SNAKE_DIRECTION_LEFT) then
+   else if(CurrentDirection = SNAKE_DIRECTION_LEFT) then
       mX := -1
-   else if(Direction = SNAKE_DIRECTION_UP) then
+   else if(CurrentDirection = SNAKE_DIRECTION_UP) then
       mY := 1
-   else if(Direction = SNAKE_DIRECTION_DOWN) then
+   else if(CurrentDirection = SNAKE_DIRECTION_DOWN) then
       mY := -1;
 
    head := Length - 1;
