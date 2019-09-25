@@ -7,7 +7,7 @@ INTERFACE
       oxuScene, oxuSceneLoader, oxuProjectionType, oxuProjection,
       oxuCameraComponent, oxuCameraEntity,
       {game}
-      uSnek, uGrid, uGame, uTrisComponent;
+      uDropBlocks, uGrid, uGame, uDropBlocksComponent;
 
 IMPLEMENTATION
 
@@ -25,7 +25,7 @@ begin
    projection^.DefaultOrtho();
 
    grid.Initialize();
-   trisComponent.Initialize();
+   DropBlocksComponent.Initialize();
 
    game.New();
 end;
