@@ -38,8 +38,11 @@ TYPE
 
    TGrid = record
       Area: TGridArea;
+
       {is the grid dirty}
       Dirty: boolean;
+
+      procedure New();
 
       procedure SetPoint(x, y: loopint; what: TGridFlags);
       procedure MarkDirty(x, y: loopint);
@@ -77,6 +80,21 @@ end;
 
 { TGrid }
 
+procedure TGrid.New();
+var
+   i,
+   j: loopint;
+
+begin
+   for i := 0 to GRID_HEIGHT - 1 do begin
+      for j := 0 to GRID_WIDTH - 1 do begin
+         Area[i][j].Flags := [GRID_ELEMENT_DIRTY];
+      end;
+   end;
+
+   Dirty := true;
+end;
+
 procedure TGrid.SetPoint(x, y: loopint; what: TGridFlags);
 begin
    Area[y][x].Flags := Area[y][x].Flags + what;
@@ -111,6 +129,7 @@ end;
 procedure TGame.New();
 begin
    oxTime.Resume();
+   game.Grid.New();
 
    OnNew.Call();
 end;

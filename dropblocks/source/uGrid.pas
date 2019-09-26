@@ -85,8 +85,16 @@ begin
          for y := 0 to GRID_HEIGHT - 1 do begin
             element := getElementMesh(x, y, mesh);
 
-            if element^.IsDirty() and (mesh <> nil) then
-               mesh.Model.SetMaterial(Materials.DefaultBlock);
+            if element^.IsDirty() and (mesh <> nil) then begin
+               if(element^.IsSolid()) then begin
+                  element^.Entity.SetEnabled(true);
+
+                  mesh.Model.SetMaterial(Materials.DefaultBlock)
+               end else begin
+                 mesh.Model.SetMaterial(Materials.DefaultBlock);
+                 element^.Entity.SetEnabled(false);
+               end;
+            end;
          end;
       end;
 
@@ -177,7 +185,7 @@ begin
    gridInitialize();
 
    oxScene.Add(gridEntity);
-   oxScene.Add(gridBackground);
+   gridEntity.Add(gridBackground);
 end;
 
 procedure onNew();
