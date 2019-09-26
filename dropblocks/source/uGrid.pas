@@ -124,6 +124,7 @@ begin
    projection := camera.GetProjection();
 
    gridSize := GRID_WIDTH;
+
    if(gridSize > GRID_HEIGHT) then
       gridSize := GRID_HEIGHT;
 
@@ -155,7 +156,8 @@ begin
    gridBackground := oxPrimitiveModelEntities.Plane();
 
    gridBackground.SetPosition(0, 0, -0.5);
-   gridBackground.SetScale(GRID_WIDTH * halfGridW, GRID_HEIGHT * halfGridH, -0.5);
+   gridBackground.SetScale(w * gridSize, h * gridSize, -0.5);
+
    oxTPrimitiveModelComponent(gridBackground.GetComponent('oxTPrimitiveModelComponent')).Model.SetMaterial(Materials.GridBackground);
    gridBackground.Name := 'Background';;
 end;
