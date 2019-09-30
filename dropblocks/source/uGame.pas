@@ -6,7 +6,7 @@ INTERFACE
    USES
       uStd, uLog,
       {ox}
-      oxuTimer, oxuEntity,
+      oxuTypes, oxuTimer, oxuEntity,
       {nase}
       uBase;
 
@@ -57,6 +57,18 @@ TYPE
       OnNew: TProcedures;
 
       Grid: TGrid;
+      {index into the current shape}
+      CurrentBlock: loopint;
+      {current block position}
+      BlockPosition: oxTPoint;
+
+      {get a random block}
+      function RandomizeBlock(): loopint;
+      {get next block}
+      procedure GetNextBlock();
+
+      {get block empty vertical space for all of its configurations}
+      function GetBlockVerticalOffset(): loopint;
 
       procedure New();
    end;
@@ -126,10 +138,29 @@ end;
 
 { TGame }
 
+function TGame.RandomizeBlock(): loopint;
+begin
+   Result := Random(MAX_SHAPES);
+end;
+
+procedure TGame.GetNextBlock();
+begin
+   CurrentBlock := RandomizeBlock();
+
+   BlockPosition.x := BLOCK_START_POSITION_X;
+   BlockPosition.y := BLOCK_START_POSITION_Y;
+end;
+
+function TGame.GetBlockVerticalOffset(): loopint;
+begin
+   Result := Shapes.Shapes[CurrentBlock]^.GetBlockVerticalOffset();
+end;
+
 procedure TGame.New();
 begin
    oxTime.Resume();
    game.Grid.New();
+   GetNextBlock();
 
    OnNew.Call();
 end;

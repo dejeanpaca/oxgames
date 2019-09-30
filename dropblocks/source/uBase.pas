@@ -16,13 +16,22 @@ CONST
    GRID_HEIGHT = 22;
    GRID_WIDTH  = 10;
 
-   MAX_SHAPES = 8;
+   MAX_SHAPES = 7;
+
+   BLOCK_START_POSITION_X = 4;
+   BLOCK_START_POSITION_Y = 22;
 
 TYPE
    TShapeGrid = array[0..3, 0..3] of loopint;
 
    PShareConfigurations = ^TShapeConfigurations;
    TShapeConfigurations = array[0..3] of TShapeGrid;
+
+   { TShapeConfigurationsHelper }
+
+   TShapeConfigurationsHelper = type helper for TShapeConfigurations
+      function GetBlockVerticalOffset(): loopint;
+   end;
 
    TShapes = record
       Shapes: array[0..MAX_SHAPES - 1] of PShareConfigurations;
@@ -186,6 +195,14 @@ VAR
    Shapes: TShapes;
 
 IMPLEMENTATION
+
+{ TShapeConfigurationsHelper }
+
+function TShapeConfigurationsHelper.GetBlockVerticalOffset(): loopint;
+begin
+   Result := 0;
+   {TODO: Implement this}
+end;
 
 INITIALIZATION
    Shapes.Shapes[0] := @IShape;
