@@ -173,7 +173,7 @@ begin
    gridBackground := oxPrimitiveModelEntities.Plane();
 
    gridBackground.SetPosition(0, 0, -0.5);
-   gridBackground.SetScale(GRID_WIDTH * d, GRID_HEIGHT * d, -0.5);
+   gridBackground.SetScale(GRID_WIDTH * d, GRID_HEIGHT * d, 0);
 
    backgroundComponent := oxTPrimitiveModelComponent(gridBackground.GetComponent('oxTPrimitiveModelComponent'));
 
