@@ -33,11 +33,8 @@ begin
    log.i('snek > deinitialized');
 end;
 
-VAR
-   initRoutines: oxTRunRoutine;
-
 INITIALIZATION
    dvar.Add('snek', snek.dv);
-   ox.OnInitialize.Add(initRoutines, 'snek.initialize', @snekInitialize, @snekDeinitialize)
+   ox.OnInitialize.Add('snek.initialize', @snekInitialize, @snekDeinitialize)
 
 END.

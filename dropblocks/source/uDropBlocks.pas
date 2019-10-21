@@ -33,11 +33,8 @@ begin
    log.i('db > deinitialized');
 end;
 
-VAR
-   initRoutines: oxTRunRoutine;
-
 INITIALIZATION
    dvar.Add('dropblocks', DropBlocks.dv);
-   ox.OnInitialize.Add(initRoutines, 'dropblocks.initialize', @dbInitialize, @dbDeinitialize)
+   ox.OnInitialize.Add('dropblocks.initialize', @dbInitialize, @dbDeinitialize)
 
 END.
