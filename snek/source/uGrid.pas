@@ -4,8 +4,9 @@ UNIT uGrid;
 INTERFACE
 
    USES
-      uStd, StringUtils, uColors,
+      uStd, uLog, StringUtils, uColors,
       {oX}
+      oxuPaths, oxuTexture, oxuTextureGenerate,
       oxuScene, oxuEntity,
       oxuComponent, oxuComponentDescriptors, oxuPrimitiveModelEntities,
       oxuCameraComponent, oxuProjectionType,
@@ -39,22 +40,25 @@ VAR
 IMPLEMENTATION
 
 VAR
-   gridEntity: oxTEntity;
+   gridEntity,
+   gridBackground: oxTEntity;
+
+   backgroundComponent: oxTPrimitiveModelComponent;
 
    Materials: record
+      Background,
       Solid,
-      NonSolid,
       Nibble,
       Snake: oxTMaterial;
    end;
 
 function GetMaterial(x, y: loopint): oxTMaterial;
 begin
+   Result := nil;
+
    if(not game.Grid.GetPoint(x, y)^.IsNibble()) then begin
       if(game.Grid.GetPoint(x, y)^.IsSolid()) then
-         Result := Materials.Solid
-      else
-         Result := Materials.NonSolid;
+         Result := Materials.Solid;
    end else
       Result := Materials.Nibble;
 
@@ -67,15 +71,24 @@ end;
 function CreateMaterial(const name: string; color: TColor4ub): oxTMaterial;
 begin
    Result := oxMaterial.Make();
-   Result.MarkPermanent();
    Result.Name := name;
    Result.SetColor('color', color);
 end;
 
 procedure TGridComponent.Load();
+var
+   tex: oxTTexture;
+
 begin
+   oxTextureGenerate.Generate(oxPaths.Find('textures' + DirectorySeparator + 'grid.png'), tex);
+
+   if(tex = nil) then
+      log.w('Failed loading background texture');
+
+   Materials.Background := CreateMaterial('Background', cBlack4ub);
+   Materials.Background.SetTexture('texture', tex);
+
    Materials.Solid := CreateMaterial('Solid', cWhite4ub);
-   Materials.NonSolid := CreateMaterial('NonSolid', cBlack4ub);
    Materials.Nibble := CreateMaterial('Nibble', TColor4ub.Create(255, 255, 0, 255));
    Materials.Snake := CreateMaterial('Solid', cBlue4ub);
 end;
@@ -103,8 +116,16 @@ begin
          for y := 0 to game.Grid.Height - 1 do begin
             element := getElementMesh(x, y, mesh);
 
-            if element^.IsDirty() and (mesh <> nil) then
-               mesh.Model.SetMaterial(GetMaterial(x, y));
+            if element^.IsDirty() then begin
+               if(element^.IsEmpty()) then
+                  element^.Entity.SetEnabled(false)
+               else begin
+                  element^.Entity.SetEnabled(true);
+
+                  if(mesh <> nil) then
+                     mesh.Model.SetMaterial(GetMaterial(x, y));
+               end;
+            end;
          end;
       end;
 
@@ -115,8 +136,12 @@ begin
       for x := 0 to game.Snake.Length - 1 do begin
          element := getElementMesh(game.Snake.Body[x].x, game.Snake.Body[x].y, mesh);
 
-         if(element <> nil) and (mesh <> nil) then
-            mesh.Model.SetMaterial(Materials.Snake);
+         if(element <> nil) then begin
+            element^.Entity.SetEnabled(true);
+
+            if(mesh <> nil) then
+               mesh.Model.SetMaterial(Materials.Snake);
+         end;
       end;
 
       game.Snake.Dirty := false;
@@ -192,6 +217,18 @@ begin
          gridEntity.Add(element^.Entity);
       end;
    end;
+
+   gridBackground := oxPrimitiveModelEntities.Plane();
+
+   gridBackground.SetPosition(0, 0, -0.5);
+   gridBackground.SetScale(GRID_WIDTH * d, GRID_HEIGHT * d, 0);
+
+   backgroundComponent := oxTPrimitiveModelComponent(gridBackground.GetComponent('oxTPrimitiveModelComponent'));
+
+   backgroundComponent.Model.SetMaterial(Materials.Background);
+   backgroundComponent.Model.ScaleTexture(GRID_WIDTH, GRID_HEIGHT);
+
+   gridEntity.Add(gridBackground);
 end;
 
 INITIALIZATION
