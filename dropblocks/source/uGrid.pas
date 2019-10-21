@@ -13,7 +13,7 @@ INTERFACE
       oxuCameraComponent,
       oxumPrimitive, oxuPrimitiveModelComponent, oxuPrimitiveModelEntities,
       {game}
-      uBase, uGame;
+      uBase, uGame, uDropBlocks;
 
 TYPE
    { TGridComponent }
@@ -61,13 +61,6 @@ end;
 
 { TGridComponent }
 
-function CreateMaterial(const name: string; color: TColor4ub): oxTMaterial;
-begin
-   Result := oxMaterial.Make();
-   Result.Name := name;
-   Result.SetColor('color', color);
-end;
-
 procedure TGridComponent.Load();
 var
    tex: oxTTexture;
@@ -76,7 +69,7 @@ begin
    oxTextureGenerate.Generate(oxPaths.Find('textures' + DirectorySeparator + 'grid.png'), tex);
 
    if(tex = nil) then
-      log.w('Failed loading background texture');
+      log.w('Failed loading grid texture');
 
    Materials.GridBackground := CreateMaterial('Background', cWhite4ub);
    Materials.GridBackground.SetTexture('texture', tex);
@@ -181,6 +174,7 @@ begin
    backgroundComponent.Model.ScaleTexture(GRID_WIDTH, GRID_HEIGHT);
 
    gridBackground.Name := 'Background';
+   gridEntity.Add(gridBackground);
 end;
 
 { TGridGlobal }
@@ -198,7 +192,6 @@ begin
    gridInitialize();
 
    oxScene.Add(gridEntity);
-   gridEntity.Add(gridBackground);
 end;
 
 procedure onNew();

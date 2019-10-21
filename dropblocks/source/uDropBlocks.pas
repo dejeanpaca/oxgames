@@ -4,13 +4,15 @@ UNIT uDropBlocks;
 INTERFACE
 
    USES
-      udvars, uLog,
-      uOX, oxuRunRoutines;
+      udvars, uLog, uColors,
+      {ox}
+      uOX, oxuRunRoutines, oxuMaterial;
 
 TYPE
    TDropBlocks = record
       dv: TDVarGroup;
-      Init: oxTRunRoutines;
+      Init,
+      OnInitScene: oxTRunRoutines;
    end;
 
 VAR
@@ -18,6 +20,8 @@ VAR
 
 procedure dbInitialize();
 procedure dbDeinitialize();
+
+function CreateMaterial(const name: string; color: TColor4ub): oxTMaterial;
 
 IMPLEMENTATION
 
@@ -31,6 +35,13 @@ procedure dbDeinitialize();
 begin
    DropBlocks.Init.dCall();
    log.i('db > deinitialized');
+end;
+
+function CreateMaterial(const name: string; color: TColor4ub): oxTMaterial;
+begin
+   Result := oxMaterial.Make();
+   Result.Name := name;
+   Result.SetColor('color', color);
 end;
 
 INITIALIZATION

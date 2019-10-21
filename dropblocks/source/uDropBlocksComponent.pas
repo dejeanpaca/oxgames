@@ -10,7 +10,7 @@ INTERFACE
       oxuComponent, oxuComponentDescriptors,
       oxuMaterial,
       {game}
-      uGame;
+      uGame, uDropBlocks;
 
 TYPE
    { TDropBlocksComponent }
@@ -76,5 +76,13 @@ begin
 
    oxScene.Add(DropBlocksEntity);
 end;
+
+procedure init();
+begin
+   DropBlocksComponent.Initialize();
+end;
+
+INITIALIZATION
+   DropBlocks.OnInitScene.Add('dropblocks.component', @init);
 
 END.

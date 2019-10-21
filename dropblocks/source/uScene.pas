@@ -26,7 +26,8 @@ begin
 
    GameComponent.Initialize();
    grid.Initialize();
-   DropBlocksComponent.Initialize();
+
+   DropBlocks.OnInitScene.Call();
 
    game.New();
 end;
