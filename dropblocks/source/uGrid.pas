@@ -4,9 +4,11 @@ UNIT uGrid;
 INTERFACE
 
    USES
-      uStd, uColors, StringUtils,
+      uStd, uLog, uColors, StringUtils,
       {oX}
-      oxuMaterial, oxuScene, oxuEntity,
+      oxuPaths,
+      oxuMaterial, oxuTexture, oxuTextureGenerate,
+      oxuScene, oxuEntity,
       oxuComponent, oxuComponentDescriptors, oxuProjectionType,
       oxuCameraComponent,
       oxumPrimitive, oxuPrimitiveModelComponent, oxuPrimitiveModelEntities,
@@ -41,6 +43,7 @@ IMPLEMENTATION
 VAR
    gridEntity,
    gridBackground: oxTEntity;
+   backgroundComponent: oxTPrimitiveModelComponent;
 
    Materials: record
       GridBackground,
@@ -66,8 +69,18 @@ begin
 end;
 
 procedure TGridComponent.Load();
+var
+   tex: oxTTexture;
+
 begin
-   Materials.GridBackground := CreateMaterial('Background', cBlack4ub);
+   oxTextureGenerate.Generate(oxPaths.Find('textures' + DirectorySeparator + 'grid.png'), tex);
+
+   if(tex = nil) then
+      log.w('Failed loading background texture');
+
+   Materials.GridBackground := CreateMaterial('Background', cWhite4ub);
+   Materials.GridBackground.SetTexture('texture', tex);
+
    Materials.DefaultBlock := CreateMaterial('DefaultBlock', cWhite4ub);
 end;
 
@@ -117,8 +130,7 @@ var
 
    camera: oxTCameraComponent;
    projection: oxPProjection;
-   w,
-   h,
+   d,
    halfGridW,
    halfGridH: single;
 
@@ -131,21 +143,18 @@ begin
    camera := oxTCameraComponent(oxScene.GetComponentInChildren('oxTCameraComponent'));
    projection := camera.GetProjection();
 
-   gridSize := GRID_WIDTH;
-
-   if(gridSize > GRID_HEIGHT) then
-      gridSize := GRID_HEIGHT;
-
-   if(projection^.p.GetWidth() >= projection^.p.GetHeight()) then begin
-      w := projection^.p.GetHeight() / gridSize / 2;
-      h := w;
+   if(projection^.p.GetWidth() <= projection^.p.GetHeight()) then begin
+      gridSize := GRID_WIDTH;
+      d := projection^.p.GetWidth();
    end else begin
-      w := projection^.p.GetWidth() / gridSize / 2;
-      h := w;
+      gridSize := GRID_HEIGHT;
+      d := projection^.p.GetHeight();
    end;
 
-   halfGridW := w * GRID_WIDTH - w;
-   halfGridH := h * GRID_HEIGHT - h;
+   d := d / gridSize / 2;
+
+   halfGridW := d * GRID_WIDTH - d;
+   halfGridH := d * GRID_HEIGHT - d;
 
    for i := 0 to GRID_WIDTH - 1 do begin
       for j := 0 to GRID_HEIGHT - 1 do begin
@@ -154,8 +163,8 @@ begin
          element^.Entity := oxPrimitiveModelEntities.Plane();
 
          element^.Entity.Name := sf(i) + 'x' + sf(j);
-         element^.Entity.SetPosition(i * (w * 2)  - halfGridW , j * (h * 2) - halfGridH, 0);
-         element^.Entity.SetScale(w, h, 1);
+         element^.Entity.SetPosition(i * d * 2  - halfGridW , j * d * 2 - halfGridH, 0);
+         element^.Entity.SetScale(d, d, 1);
 
          gridEntity.Add(element^.Entity);
       end;
@@ -164,10 +173,14 @@ begin
    gridBackground := oxPrimitiveModelEntities.Plane();
 
    gridBackground.SetPosition(0, 0, -0.5);
-   gridBackground.SetScale(w * gridSize, h * gridSize, -0.5);
+   gridBackground.SetScale(GRID_WIDTH * d, GRID_HEIGHT * d, -0.5);
 
-   oxTPrimitiveModelComponent(gridBackground.GetComponent('oxTPrimitiveModelComponent')).Model.SetMaterial(Materials.GridBackground);
-   gridBackground.Name := 'Background';;
+   backgroundComponent := oxTPrimitiveModelComponent(gridBackground.GetComponent('oxTPrimitiveModelComponent'));
+
+   backgroundComponent.Model.SetMaterial(Materials.GridBackground);
+   backgroundComponent.Model.ScaleTexture(GRID_WIDTH, GRID_HEIGHT);
+
+   gridBackground.Name := 'Background';
 end;
 
 { TGridGlobal }
