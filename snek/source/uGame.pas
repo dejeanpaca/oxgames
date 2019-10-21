@@ -39,6 +39,7 @@ TYPE
       function IsNibble(): boolean;
       function IsSolid(): boolean;
       function IsDirty(): boolean;
+      function IsEmpty(): boolean;
    end;
 
    TGridArea = array[0..GRID_MAX_HEIGHT - 1, 0..GRID_MAX_WIDTH - 1] of TGridElement;
@@ -314,6 +315,11 @@ end;
 function TGridElement.IsDirty(): boolean;
 begin
    Result := Properties.IsSet(GRID_ELEMENT_DIRTY);
+end;
+
+function TGridElement.IsEmpty(): boolean;
+begin
+   Result := not (Properties.IsSet(GRID_ELEMENT_SOLID) or Properties.IsSet(GRID_ELEMENT_NIBBLE));
 end;
 
 { TGame }
