@@ -13,7 +13,7 @@ INTERFACE
       oxuCameraComponent,
       oxumPrimitive, oxuPrimitiveModelComponent, oxuPrimitiveModelEntities,
       {game}
-      uBase, uGame, uDropBlocks;
+      uBase, uGame, uDropBlocks, uBlocks;
 
 TYPE
    { TGridComponent }
@@ -46,8 +46,7 @@ VAR
    backgroundComponent: oxTPrimitiveModelComponent;
 
    Materials: record
-      GridBackground,
-      DefaultBlock: oxTMaterial;
+      GridBackground: oxTMaterial;
    end;
 
 function getElementMesh(x, y: loopint; out mesh: oxTPrimitiveModelComponent): PGridElement;
@@ -73,8 +72,14 @@ begin
 
    Materials.GridBackground := CreateMaterial('Background', cWhite4ub);
    Materials.GridBackground.SetTexture('texture', tex);
+end;
 
-   Materials.DefaultBlock := CreateMaterial('DefaultBlock', cWhite4ub);
+function getMaterial(const element: TGridElement): oxTMaterial;
+begin
+   if element.IsSolid() then
+      Result := blocks.Materials[element.Shape]
+   else
+      Result := blocks.DefaultMaterial;
 end;
 
 procedure TGridComponent.Update();
@@ -91,15 +96,14 @@ begin
          for y := 0 to GRID_HEIGHT - 1 do begin
             element := getElementMesh(x, y, mesh);
 
-            if element^.IsDirty() and (mesh <> nil) then begin
-               if(element^.IsSolid()) then begin
+            if element^.IsDirty() then begin
+               if element^.IsSolid()  then begin
                   element^.Entity.SetEnabled(true);
 
-                  mesh.Model.SetMaterial(Materials.DefaultBlock)
-               end else begin
-                 mesh.Model.SetMaterial(Materials.DefaultBlock);
-                 element^.Entity.SetEnabled(false);
-               end;
+                  if(mesh <> nil) then
+                     mesh.Model.SetMaterial(getMaterial(element^));
+               end else
+                  element^.Entity.SetEnabled(false);
             end;
          end;
       end;
@@ -162,6 +166,8 @@ begin
          gridEntity.Add(element^.Entity);
       end;
    end;
+
+   game.Grid.Dirty := true;
 
    gridBackground := oxPrimitiveModelEntities.Plane();
 
