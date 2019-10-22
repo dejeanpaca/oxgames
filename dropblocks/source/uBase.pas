@@ -33,6 +33,7 @@ TYPE
    { TShapeGridHelper }
 
    TShapeGridHelper = type helper for TShapeGrid
+      {get value at the given coordinates (this assumes bottom left origin, unlike top-left of the array)}
       function GetValue(x, y: loopint): loopint;
    end;
 
