@@ -16,6 +16,9 @@ INTERFACE
       uBase, uGame, uDropBlocks, uBlocks;
 
 TYPE
+   {method which goes through current shape points in the grid}
+   TGridShapeWalker = procedure(x, y: loopint; element: PGridElement);
+
    { TGridComponent }
 
    TGridComponent = class(oxTComponent)
@@ -33,6 +36,7 @@ TYPE
       Descriptor: oxTComponentDescriptor;
 
       procedure Initialize();
+      procedure WalkShape(walker: TGridShapeWalker);
    end;
 
 VAR
@@ -203,7 +207,7 @@ begin
    oxScene.Add(gridEntity);
 end;
 
-procedure beforeMove();
+procedure TGridGlobal.WalkShape(walker: TGridShapeWalker);
 var
    x,
    y,
@@ -227,10 +231,7 @@ begin
          if(py < GRID_HEIGHT) then begin
             element := game.Grid.GetPoint(px, py);
 
-            Exclude(element^.Flags, GRID_ELEMENT_SHAPE);
-            Include(element^.Flags, GRID_ELEMENT_DIRTY);
-
-            element^.Shape := game.CurrentBlock;
+            walker(px, py, element);
          end;
       end;
    end;
@@ -238,39 +239,30 @@ begin
    game.Grid.Dirty := true;
 end;
 
-procedure afterMove();
-var
-   x,
-   y,
-   px,
-   py: loopint;
-
-   element: PGridElement;
-   shapeGrid: PShapeGrid;
-
+procedure beforeMoveShape({%H-}x, {%H-}y: loopint; element: PGridElement);
 begin
-   shapeGrid := game.GetShapeGrid();
+   Exclude(element^.Flags, GRID_ELEMENT_SHAPE);
+   Include(element^.Flags, GRID_ELEMENT_DIRTY);
 
-   for y := 0 to 3 do begin
-      for x := 0 to 3 do begin
-         if(shapeGrid^.GetValue(x, y) = 0) then
-            continue;
+   element^.Shape := game.CurrentBlock;
+end;
 
-         px := game.BlockPosition.x + x;
-         py := game.BlockPosition.y + y;
+procedure beforeMove();
+begin
+   grid.walkShape(@beforeMoveShape);
+end;
 
-         if(py < GRID_HEIGHT) then begin
-            element := game.Grid.GetPoint(px, py);
+procedure afterMoveShape({%H-}x, {%H-}y: loopint; element: PGridElement);
+begin
+   Include(element^.Flags, GRID_ELEMENT_SHAPE);
+   Include(element^.Flags, GRID_ELEMENT_DIRTY);
 
-            Include(element^.Flags, GRID_ELEMENT_SHAPE);
-            Include(element^.Flags, GRID_ELEMENT_DIRTY);
+   element^.Shape := game.CurrentBlock;
+end;
 
-            element^.Shape := game.CurrentBlock;
-         end;
-      end;
-   end;
-
-   game.Grid.Dirty := true;
+procedure afterMove();
+begin
+   grid.walkShape(@afterMoveShape);
 end;
 
 INITIALIZATION
