@@ -21,10 +21,13 @@ CONST
    BLOCK_START_POSITION_X = 4;
    BLOCK_START_POSITION_Y = 22;
 
+   MAX_SPEED = 9;
+
 TYPE
+   PShapeGrid = ^TShapeGrid;
    TShapeGrid = array[0..3, 0..3] of loopint;
 
-   PShareConfigurations = ^TShapeConfigurations;
+   PShapeConfigurations = ^TShapeConfigurations;
    TShapeConfigurations = array[0..3] of TShapeGrid;
 
    { TShapeConfigurationsHelper }
@@ -34,11 +37,23 @@ TYPE
    end;
 
    TShapes = record
-      Shapes: array[0..MAX_SHAPES - 1] of PShareConfigurations;
+      Shapes: array[0..MAX_SHAPES - 1] of PShapeConfigurations;
       Colors: array[0..MAX_SHAPES - 1] of TColor4ub;
    end;
 
 CONST
+   GameSpeeds: array[0..MAX_SPEED - 1] of single = (
+      1.0,
+      0.9,
+      0.8,
+      0.7,
+      0.6,
+      0.5,
+      0.4,
+      0.3,
+      0.2
+   );
+
    IShape: TShapeConfigurations = (
       (  (0, 0, 0, 0),
          (0, 0, 0, 0),
