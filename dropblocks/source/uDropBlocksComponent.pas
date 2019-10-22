@@ -59,11 +59,6 @@ end;
 
 procedure TDropBlocksComponent.UpdateKeys();
 begin
-   if appk.JustPressed(kcP) then
-      oxTime.TogglePause();
-
-   if appk.JustPressed(kcF2) then
-      game.New();
 end;
 
 function TDropBlocksComponent.GetDescriptor(): oxPComponentDescriptor;
