@@ -88,6 +88,7 @@ TYPE
       {get currently active shape}
       function GetShape(): PShapeConfigurations;
       function GetShapeGrid(): PShapeGrid;
+      function GetShapeGrid(rotation: loopint): PShapeGrid;
 
       procedure MoveShapeLeft();
       procedure MoveShapeRight();
@@ -219,6 +220,11 @@ begin
    Result := @Shapes.Shapes[CurrentBlock]^[CurrentRotation];
 end;
 
+function TGame.GetShapeGrid(rotation: loopint): PShapeGrid;
+begin
+   Result := @Shapes.Shapes[CurrentBlock]^[rotation];
+end;
+
 procedure TGame.MoveShapeLeft();
 begin
    if CanFitShape(BlockPosition.x - 1, BlockPosition.y, CurrentRotation) then
@@ -307,8 +313,42 @@ begin
 end;
 
 function TGame.CanFitShape(x, y, rotation: loopint): boolean;
+var
+   i,
+   j,
+   px,
+   py: loopint;
+   shapeGrid: PShapeGrid;
+   element: PGridElement;
+
 begin
    Result := true;
+   shapeGrid := GetShapeGrid(rotation);
+
+   for i := 0 to 3 do begin
+      for j := 0 to 3 do begin
+         py := y + i;
+         px := x + j;
+
+         {empty element, we do not check it}
+         if(shapeGrid^.GetValue(j, i) = 0) then
+            continue;
+
+         {we're going out of bounds, we cannot fit}
+         if(py < 0) or (px < 0) or (px >= GRID_WIDTH) then
+            exit(false);
+
+         {out of bounds on top, but this is allowed since the pieces come from top}
+         if(py >= GRID_HEIGHT) then
+            continue;
+
+         element := game.Grid.GetPoint(px, py);
+
+         {element blocks, cannot fit shape}
+         if(element^.IsSolid()) then
+            exit(false);
+      end;
+   end;
 end;
 
 procedure TGame.Update(dT: single);
