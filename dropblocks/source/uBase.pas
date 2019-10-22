@@ -30,6 +30,12 @@ TYPE
    PShapeConfigurations = ^TShapeConfigurations;
    TShapeConfigurations = array[0..3] of TShapeGrid;
 
+   { TShapeGridHelper }
+
+   TShapeGridHelper = type helper for TShapeGrid
+      function GetValue(x, y: loopint): loopint;
+   end;
+
    { TShapeConfigurationsHelper }
 
    TShapeConfigurationsHelper = type helper for TShapeConfigurations
@@ -210,6 +216,13 @@ VAR
    Shapes: TShapes;
 
 IMPLEMENTATION
+
+{ TShapeGridHelper }
+
+function TShapeGridHelper.GetValue(x, y: loopint): loopint;
+begin
+   Result := Self[3 - y][x];
+end;
 
 { TShapeConfigurationsHelper }
 
