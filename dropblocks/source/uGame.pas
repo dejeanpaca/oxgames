@@ -13,6 +13,7 @@ INTERFACE
 TYPE
    TGridFlag = (
       GRID_ELEMENT_SOLID,
+      GRID_ELEMENT_SHAPE,
       GRID_ELEMENT_DIRTY
    );
 
@@ -28,6 +29,8 @@ TYPE
       Entity: oxTEntity;
 
       function IsSolid(): boolean;
+      function IsShape(): boolean;
+      function IsEmpty(): boolean;
       function IsDirty(): boolean;
    end;
 
@@ -54,13 +57,25 @@ TYPE
    { TGame }
 
    TGame = record
-      OnNew: TProcedures;
+      OnNew,
+      {called before the current shape is moved/rotated}
+      OnBeforeMove,
+      {called after current shape is moved/rotated}
+      OnMove: TProcedures;
 
       Grid: TGrid;
       {index into the current shape}
-      CurrentBlock: loopint;
+      CurrentBlock,
+      {current rotation of the shape}
+      CurrentRotation: loopint;
       {current block position}
       BlockPosition: oxTPoint;
+
+      LastUpdate: single;
+
+      CurrentLevel: loopint;
+
+      function GetSpeed(): single;
 
       {get a random block}
       function RandomizeBlock(): loopint;
@@ -69,6 +84,14 @@ TYPE
 
       {get block empty vertical space for all of its configurations}
       function GetBlockVerticalOffset(): loopint;
+
+      {get currently active shape}
+      function GetShape(): PShapeConfigurations;
+      function GetShapeGrid(): PShapeGrid;
+
+      procedure MoveShapeDown();
+
+      procedure Update(dT: single);
 
       procedure New();
    end;
@@ -83,6 +106,16 @@ IMPLEMENTATION
 function TGridElement.IsSolid(): boolean;
 begin
    Result := GRID_ELEMENT_SOLID in Flags;
+end;
+
+function TGridElement.IsShape(): boolean;
+begin
+   Result := GRID_ELEMENT_SHAPE in Flags;
+end;
+
+function TGridElement.IsEmpty(): boolean;
+begin
+   Result := not ((GRID_ELEMENT_SOLID in Flags) or (GRID_ELEMENT_SHAPE in Flags));
 end;
 
 function TGridElement.IsDirty(): boolean;
@@ -138,6 +171,11 @@ end;
 
 { TGame }
 
+function TGame.GetSpeed(): single;
+begin
+   Result := GameSpeeds[CurrentLevel];
+end;
+
 function TGame.RandomizeBlock(): loopint;
 begin
    Result := Random(MAX_SHAPES);
@@ -145,10 +183,14 @@ end;
 
 procedure TGame.GetNextBlock();
 begin
+   OnBeforeMove.Call();
+
    CurrentBlock := RandomizeBlock();
 
    BlockPosition.x := BLOCK_START_POSITION_X;
    BlockPosition.y := BLOCK_START_POSITION_Y;
+
+   OnMove.Call();
 end;
 
 function TGame.GetBlockVerticalOffset(): loopint;
@@ -156,8 +198,41 @@ begin
    Result := Shapes.Shapes[CurrentBlock]^.GetBlockVerticalOffset();
 end;
 
+function TGame.GetShape(): PShapeConfigurations;
+begin
+   Result := Shapes.Shapes[CurrentBlock];
+end;
+
+function TGame.GetShapeGrid(): PShapeGrid;
+begin
+   Result := @Shapes.Shapes[CurrentBlock]^[CurrentRotation];
+end;
+
+procedure TGame.MoveShapeDown();
+begin
+   OnBeforeMove.Call();
+
+   if(BlockPosition.y > 0) then begin
+      dec(BlockPosition.y);
+   end;
+
+   OnMove.Call();
+end;
+
+procedure TGame.Update(dT: single);
+begin
+   LastUpdate := LastUpdate + dT;
+
+   if(LastUpdate > GetSpeed()) then begin
+      LastUpdate := LastUpdate - GetSpeed();
+
+      MoveShapeDown();
+   end;
+end;
+
 procedure TGame.New();
 begin
+   LastUpdate := 0;
    oxTime.Resume();
    game.Grid.New();
    GetNextBlock();
@@ -167,5 +242,7 @@ end;
 
 INITIALIZATION
    game.OnNew.Initialize(game.OnNew);
+   game.OnBeforeMove.Initialize(game.OnBeforeMove);
+   game.OnMove.Initialize(game.OnMove);
 
 END.

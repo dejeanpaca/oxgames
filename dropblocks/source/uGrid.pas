@@ -76,7 +76,7 @@ end;
 
 function getMaterial(const element: TGridElement): oxTMaterial;
 begin
-   if element.IsSolid() then
+   if (not element.IsEmpty()) then
       if(element.Shape = -1) then
          Result := blocks.Rock
       else
@@ -100,7 +100,7 @@ begin
             element := getElementMesh(x, y, mesh);
 
             if element^.IsDirty() then begin
-               if element^.IsSolid()  then begin
+               if not (element^.IsEmpty())  then begin
                   element^.Entity.SetEnabled(true);
 
                   if(mesh <> nil) then
@@ -203,11 +203,78 @@ begin
    oxScene.Add(gridEntity);
 end;
 
-procedure onNew();
+procedure beforeMove();
+var
+   x,
+   y,
+   px,
+   py: loopint;
+
+   element: PGridElement;
+   shapeGrid: PShapeGrid;
+
 begin
+   shapeGrid := game.GetShapeGrid();
+
+   for y := 0 to 3 do begin
+      for x := 0 to 3 do begin
+         if(shapeGrid^.GetValue(x, y) = 0) then
+            continue;
+
+         px := game.BlockPosition.x + x;
+         py := game.BlockPosition.y + y;
+
+         if(py < GRID_HEIGHT) then begin
+            element := game.Grid.GetPoint(px, py);
+
+            Exclude(element^.Flags, GRID_ELEMENT_SHAPE);
+            Include(element^.Flags, GRID_ELEMENT_DIRTY);
+
+            element^.Shape := game.CurrentBlock;
+         end;
+      end;
+   end;
+
+   game.Grid.Dirty := true;
+end;
+
+procedure afterMove();
+var
+   x,
+   y,
+   px,
+   py: loopint;
+
+   element: PGridElement;
+   shapeGrid: PShapeGrid;
+
+begin
+   shapeGrid := game.GetShapeGrid();
+
+   for y := 0 to 3 do begin
+      for x := 0 to 3 do begin
+         if(shapeGrid^.GetValue(x, y) = 0) then
+            continue;
+
+         px := game.BlockPosition.x + x;
+         py := game.BlockPosition.y + y;
+
+         if(py < GRID_HEIGHT) then begin
+            element := game.Grid.GetPoint(px, py);
+
+            Include(element^.Flags, GRID_ELEMENT_SHAPE);
+            Include(element^.Flags, GRID_ELEMENT_DIRTY);
+
+            element^.Shape := game.CurrentBlock;
+         end;
+      end;
+   end;
+
+   game.Grid.Dirty := true;
 end;
 
 INITIALIZATION
-   game.OnNew.Add(@onNew);
+   game.OnBeforeMove.Add(@beforeMove);
+   game.OnMove.Add(@afterMove);
 
 END.

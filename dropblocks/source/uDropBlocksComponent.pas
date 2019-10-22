@@ -21,10 +21,9 @@ TYPE
       procedure Start(); override;
       procedure Update(); override;
 
-      function GetDescriptor(): oxPComponentDescriptor; override;
+      procedure UpdateKeys();
 
-      private
-      lastUpdate: Single;
+      function GetDescriptor(): oxPComponentDescriptor; override;
    end;
 
    { TDropBlocksComponentGlobal }
@@ -47,10 +46,18 @@ VAR
 
 procedure TDropBlocksComponent.Start();
 begin
-   lastUpdate := 0;
 end;
 
 procedure TDropBlocksComponent.Update();
+begin
+   UpdateKeys();
+
+   if(not oxTime.Paused()) then begin
+      game.Update(oxTime.Flow);
+   end;
+end;
+
+procedure TDropBlocksComponent.UpdateKeys();
 begin
    if appk.JustPressed(kcP) then
       oxTime.TogglePause();
