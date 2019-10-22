@@ -230,7 +230,8 @@ begin
          if(py < GRID_HEIGHT) then begin
             element := game.Grid.GetPoint(px, py);
 
-            walker(px, py, element);
+            if(element <> nil) then
+               walker(px, py, element);
          end;
       end;
    end;
