@@ -59,6 +59,23 @@ end;
 
 procedure TDropBlocksComponent.UpdateKeys();
 begin
+   if appk.JustPressed(kcLEFT) then
+      game.MoveShapeLeft();
+
+   if appk.JustPressed(kcRIGHT) then
+      game.MoveShapeRight();
+
+   if appk.JustPressed(kcDOWN) then
+      game.MoveShapeDown();
+
+   if appk.JustPressed(kcUP) or appk.JustPressed(kcC) then
+      game.DropShape();
+
+   if appk.JustPressed(kcY) or appk.JustPressed(kcZ) then
+      game.RotateLeft();
+
+   if appk.JustPressed(kcX) then
+      game.RotateRight();
 end;
 
 function TDropBlocksComponent.GetDescriptor(): oxPComponentDescriptor;

@@ -89,7 +89,18 @@ TYPE
       function GetShape(): PShapeConfigurations;
       function GetShapeGrid(): PShapeGrid;
 
+      procedure MoveShapeLeft();
+      procedure MoveShapeRight();
+      procedure DropShape();
+      procedure RotateLeft();
+      procedure RotateRight();
       procedure MoveShapeDown();
+
+      procedure SetShapePosition(x, y: loopint);
+      procedure SetRotation(rotation: loopint);
+
+      {checks if a shape can fit at the position and rotation}
+      function CanFitShape(x, y, rotation: loopint): boolean;
 
       procedure Update(dT: single);
 
@@ -208,15 +219,96 @@ begin
    Result := @Shapes.Shapes[CurrentBlock]^[CurrentRotation];
 end;
 
+procedure TGame.MoveShapeLeft();
+begin
+   if CanFitShape(BlockPosition.x - 1, BlockPosition.y, CurrentRotation) then
+      SetShapePosition(BlockPosition.x - 1, BlockPosition.y);
+end;
+
+procedure TGame.MoveShapeRight();
+begin
+   if CanFitShape(BlockPosition.x + 1, BlockPosition.y, CurrentRotation) then
+      SetShapePosition(BlockPosition.x + 1, BlockPosition.y);
+end;
+
+procedure TGame.DropShape();
+var
+   y: loopint;
+
+begin
+   y := BlockPosition.y;
+
+   repeat
+     dec(y);
+
+   until (not CanFitShape(BlockPosition.x, y, CurrentRotation));
+
+   inc(y);
+
+   if(y <> BlockPosition.y) then
+      SetShapePosition(BlockPosition.x, y);
+end;
+
+procedure TGame.RotateLeft();
+var
+   rotation: loopint;
+
+begin
+   rotation := CurrentRotation;
+   dec(rotation);
+
+   if(rotation < 0) then
+      rotation := 3;
+
+   if CanFitShape(BlockPosition.x + 1, BlockPosition.y, rotation) then
+      SetRotation(rotation);
+end;
+
+procedure TGame.RotateRight();
+var
+   rotation: loopint;
+
+begin
+   rotation := CurrentRotation;
+   inc(rotation);
+
+   if(rotation > 3) then
+      rotation := 0;
+
+   if CanFitShape(BlockPosition.x + 1, BlockPosition.y, rotation) then
+      SetRotation(rotation);
+end;
+
 procedure TGame.MoveShapeDown();
+begin
+   if(BlockPosition.y > 0) then begin
+      if CanFitShape(BlockPosition.x, BlockPosition.y - 1, CurrentRotation) then
+         SetShapePosition(BlockPosition.x, BlockPosition.y - 1);
+   end;
+end;
+
+procedure TGame.SetShapePosition(x, y: loopint);
 begin
    OnBeforeMove.Call();
 
-   if(BlockPosition.y > 0) then begin
-      dec(BlockPosition.y);
-   end;
+   BlockPosition.x := x;
+   BlockPosition.y := y;
 
    OnMove.Call();
+end;
+
+procedure TGame.SetRotation(rotation: loopint);
+begin
+   OnBeforeMove.Call();
+
+   CurrentRotation := rotation;
+
+   OnMove.Call();
+end;
+
+function TGame.CanFitShape(x, y, rotation: loopint): boolean;
+begin
+   Result := true;
 end;
 
 procedure TGame.Update(dT: single);
