@@ -6,7 +6,7 @@ INTERFACE
    USES
       udvars, uLog, uColors,
       {ox}
-      uOX, oxuRunRoutines, oxuMaterial;
+      uOX, oxuRunRoutines, oxuMaterial, oxuTexture;
 
 TYPE
    TDropBlocks = record
@@ -21,7 +21,7 @@ VAR
 procedure dbInitialize();
 procedure dbDeinitialize();
 
-function CreateMaterial(const name: string; color: TColor4ub): oxTMaterial;
+function CreateMaterial(const name: string; color: TColor4ub; tex: oxTTexture = nil): oxTMaterial;
 
 IMPLEMENTATION
 
@@ -37,11 +37,14 @@ begin
    log.i('db > deinitialized');
 end;
 
-function CreateMaterial(const name: string; color: TColor4ub): oxTMaterial;
+function CreateMaterial(const name: string; color: TColor4ub; tex: oxTTexture): oxTMaterial;
 begin
    Result := oxMaterial.Make();
    Result.Name := name;
    Result.SetColor('color', color);
+
+   if(tex <> nil) then
+      Result.SetTexture('texture', tex);
 end;
 
 INITIALIZATION

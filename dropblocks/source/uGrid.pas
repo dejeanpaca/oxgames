@@ -77,7 +77,10 @@ end;
 function getMaterial(const element: TGridElement): oxTMaterial;
 begin
    if element.IsSolid() then
-      Result := blocks.Materials[element.Shape]
+      if(element.Shape = -1) then
+         Result := blocks.Rock
+      else
+         Result := blocks.Materials[element.Shape]
    else
       Result := blocks.DefaultMaterial;
 end;
