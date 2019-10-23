@@ -99,6 +99,8 @@ TYPE
       procedure MoveShapeDown();
 
       procedure LockShape();
+      {clear full lines}
+      procedure ClearLines();
 
       procedure SetShapePosition(x, y: loopint);
       procedure SetRotation(rotation: loopint);
@@ -332,7 +334,77 @@ begin
 
    grid.Dirty := true;
 
+   {check if any lines can be cleared}
+   ClearLines();
+
    GetNextBlock();
+end;
+
+procedure TGame.ClearLines();
+var
+   x,
+   y: loopint;
+   element,
+   prevElement: PGridElement;
+
+   full: boolean;
+   fStart,
+   fEnd,
+   fCount: loopint;
+
+begin
+   fStart := -1;
+   fEnd := -1;
+   fCount := 0;
+
+   for y := 0 to GRID_HEIGHT -1 do begin
+      full := true;
+
+      for x := 0 to GRID_WIDTH - 1 do begin
+          element := Grid.GetPoint(x, y);
+
+          if(not (GRID_ELEMENT_SOLID in element^.Flags)) then begin
+             full := false;
+             break;
+          end;
+      end;
+
+      if(full) then begin
+         if(fStart = -1) then
+            fStart := y;
+
+         if(fStart <> -1) then
+            fEnd := fStart;
+
+         inc(fCount);
+      end;
+   end;
+
+   if(fCount > 0) then begin
+      {clear lines}
+      for y := fStart to fEnd do begin
+         for x := 0 to GRID_WIDTH -1 do begin
+            element := Grid.GetPoint(x, y);
+
+            Exclude(element^.Flags, GRID_ELEMENT_SOLID);
+            Include(element^.Flags, GRID_ELEMENT_DIRTY);
+         end;
+      end;
+
+      {clear lines}
+      for y := fStart to GRID_HEIGHT - 1 - fCount do begin
+         for x := 0 to GRID_WIDTH -1 do begin
+            element := Grid.GetPoint(x, y);
+            prevElement := Grid.GetPoint(x, y + fCount);
+
+            element^.Flags := prevElement^.Flags;
+            element^.Shape := prevElement^.Shape;
+            Include(element^.Flags, GRID_ELEMENT_DIRTY);
+         end;
+      end;
+
+      Grid.Dirty := true;
+   end;
 end;
 
 procedure TGame.SetShapePosition(x, y: loopint);
