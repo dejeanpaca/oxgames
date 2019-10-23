@@ -224,8 +224,8 @@ begin
          if(shapeGrid^.GetValue(x, y) = 0) then
             continue;
 
-         px := game.BlockPosition.x + x;
-         py := game.BlockPosition.y + y;
+         px := game.ShapePosition.x + x;
+         py := game.ShapePosition.y + y;
 
          if(py < GRID_HEIGHT) then begin
             element := game.Grid.GetPoint(px, py);
@@ -244,7 +244,7 @@ begin
    Exclude(element^.Flags, GRID_ELEMENT_SHAPE);
    Include(element^.Flags, GRID_ELEMENT_DIRTY);
 
-   element^.Shape := game.CurrentBlock;
+   element^.Shape := game.CurrentShape;
 end;
 
 procedure beforeMove();
@@ -257,7 +257,7 @@ begin
    Include(element^.Flags, GRID_ELEMENT_SHAPE);
    Include(element^.Flags, GRID_ELEMENT_DIRTY);
 
-   element^.Shape := game.CurrentBlock;
+   element^.Shape := game.CurrentShape;
 end;
 
 procedure afterMove();
