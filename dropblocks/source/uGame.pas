@@ -273,7 +273,7 @@ begin
    if(rotation < 0) then
       rotation := 3;
 
-   if CanFitShape(ShapePosition.x + 1, ShapePosition.y, rotation) then
+   if CanFitShape(ShapePosition.x, ShapePosition.y, rotation) then
       SetRotation(rotation);
 end;
 
@@ -288,7 +288,7 @@ begin
    if(rotation > 3) then
       rotation := 0;
 
-   if CanFitShape(ShapePosition.x + 1, ShapePosition.y, rotation) then
+   if CanFitShape(ShapePosition.x, ShapePosition.y, rotation) then
       SetRotation(rotation);
 end;
 
