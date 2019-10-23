@@ -23,6 +23,8 @@ CONST
 
    MAX_SPEED = 9;
 
+   SHAPE_LOCK_TIME = 0.7;
+
 TYPE
    PShapeGrid = ^TShapeGrid;
    TShapeGrid = array[0..3, 0..3] of loopint;

@@ -71,7 +71,8 @@ TYPE
       {current block position}
       BlockPosition: oxTPoint;
 
-      LastUpdate: single;
+      LastUpdate,
+      ShapeLockTime: single;
 
       CurrentLevel: loopint;
 
@@ -96,6 +97,8 @@ TYPE
       procedure RotateLeft();
       procedure RotateRight();
       procedure MoveShapeDown();
+
+      procedure LockShape();
 
       procedure SetShapePosition(x, y: loopint);
       procedure SetRotation(rotation: loopint);
@@ -253,6 +256,8 @@ begin
 
    if(y <> BlockPosition.y) then
       SetShapePosition(BlockPosition.x, y);
+
+   LockShape();
 end;
 
 procedure TGame.RotateLeft();
@@ -287,10 +292,47 @@ end;
 
 procedure TGame.MoveShapeDown();
 begin
-   if(BlockPosition.y > 0) then begin
-      if CanFitShape(BlockPosition.x, BlockPosition.y - 1, CurrentRotation) then
-         SetShapePosition(BlockPosition.x, BlockPosition.y - 1);
+   if CanFitShape(BlockPosition.x, BlockPosition.y - 1, CurrentRotation) then
+      SetShapePosition(BlockPosition.x, BlockPosition.y - 1);
+end;
+
+procedure TGame.LockShape();
+var
+   x,
+   y,
+   px,
+   py: loopint;
+   shapeGrid: PShapeGrid;
+
+   element: PGridElement;
+
+begin
+   ShapeLockTime := 0;
+
+   shapeGrid := GetShapeGrid();
+
+   for y := 0 to 3 do begin
+      for x := 0 to 3 do begin
+         if(shapeGrid^.GetValue(x, y) = 0) then
+            continue;
+
+         px := BlockPosition.x + x;
+         py := BlockPosition.y + y;
+
+         element := Grid.GetPoint(px, py);
+
+         if(element <> nil) then begin
+            element^.Shape := CurrentBlock;
+
+            Include(element^.Flags, GRID_ELEMENT_SOLID);
+            Include(element^.Flags, GRID_ELEMENT_DIRTY);
+         end;
+      end;
    end;
+
+   grid.Dirty := true;
+
+   GetNextBlock();
 end;
 
 procedure TGame.SetShapePosition(x, y: loopint);
@@ -360,6 +402,16 @@ begin
 
       MoveShapeDown();
    end;
+
+   {check if we can lock the shape}
+   if(not CanFitShape(BlockPosition.x, BlockPosition.y - 1, CurrentRotation)) then begin
+      ShapeLockTime := ShapeLockTime + dT;
+
+      if(ShapeLockTime >= SHAPE_LOCK_TIME) then
+         LockShape();
+   end else
+      {reset shape lock time since we're not hitting anything}
+      ShapeLockTime := 0;
 end;
 
 procedure TGame.New();
