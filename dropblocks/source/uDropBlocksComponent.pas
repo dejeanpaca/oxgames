@@ -4,7 +4,7 @@ UNIT uDropBlocksComponent;
 INTERFACE
 
    USES
-      appuKeys,
+      uStd, appuKeys,
       {oX}
       oxuScene, oxuEntity, oxuTimer,
       oxuComponent, oxuComponentDescriptors,
@@ -12,11 +12,37 @@ INTERFACE
       {game}
       uGame, uDropBlocks;
 
+CONST
+   FIRST_KEY_TIMING = 0.350;
+   KEY_TIMING = 0.080;
+
 TYPE
+
+   { TKeyTimingInfo }
+
+   TKeyTimingInfo = record
+       Time,
+       FirstTimer: single;
+       FirstFired: boolean;
+
+       procedure Reset();
+   end;
+
    { TDropBlocksComponent }
 
    TDropBlocksComponent = class(oxTComponent)
       public
+         Keys: record
+             Timers: record
+                 {when was the key last pressed}
+                 Left,
+                 Right,
+                 RotateLeft,
+                 RotateRight,
+                 Down,
+                 FirstPressRotateDown: TKeyTimingInfo;
+             end;
+         end;
 
       procedure Start(); override;
       procedure Update(); override;
@@ -42,6 +68,15 @@ IMPLEMENTATION
 VAR
    DropBlocksEntity: oxTEntity;
 
+{ TKeyTimingInfo }
+
+procedure TKeyTimingInfo.Reset();
+begin
+   FirstTimer := 0;
+   Time := 0;
+   FirstFired := false;
+end;
+
 { TDropBlocksComponentGlobal }
 
 procedure TDropBlocksComponent.Start();
@@ -57,24 +92,56 @@ begin
    end;
 end;
 
+function UpdateKeyTimer(kc: TKeyCode; var timer: TKeyTimingInfo): boolean;
+begin
+   Result := false;
+
+   if(appk.JustPressed(kc)) then begin
+      timer.Reset();
+      exit(true);
+   end;
+
+   if(appk.IsPressed(kc)) then begin
+      timer.FirstTimer := timer.FirstTimer + oxTime.Flow;
+
+      if(timer.FirstTimer >= FIRST_KEY_TIMING) then begin
+         if(not timer.FirstFired) then begin
+            timer.FirstFired := true;
+            timer.Time := timer.FirstTimer - FIRST_KEY_TIMING;
+            exit(true);
+         end;
+
+         timer.Time := timer.Time + oxTime.Flow;
+
+         if(timer.Time >= KEY_TIMING) then begin
+            timer.Time := timer.Time - KEY_TIMING;
+            Result := true;
+         end;
+      end;
+   end;
+end;
+
 procedure TDropBlocksComponent.UpdateKeys();
 begin
-   if appk.JustPressed(kcLEFT) then
+   if(UpdateKeyTimer(kcLEFT, Keys.Timers.Left)) then
       game.MoveShapeLeft();
 
-   if appk.JustPressed(kcRIGHT) then
+   if(UpdateKeyTimer(kcRIGHT, Keys.Timers.Right)) then
       game.MoveShapeRight();
 
-   if appk.JustPressed(kcDOWN) then
+   if(UpdateKeyTimer(kcDOWN, Keys.Timers.Down)) then
       game.MoveShapeDown();
 
    if appk.JustPressed(kcUP) or appk.JustPressed(kcC) then
       game.DropShape();
 
-   if appk.JustPressed(kcY) or appk.JustPressed(kcZ) then
+   if(UpdateKeyTimer(kcY, Keys.Timers.RotateLeft)) then
       game.RotateLeft();
 
-   if appk.JustPressed(kcX) then
+   if(UpdateKeyTimer(kcZ, Keys.Timers.RotateLeft)) then
+      game.RotateLeft();
+
+   if(UpdateKeyTimer(kcX, Keys.Timers.RotateRight)) then
       game.RotateRight();
 end;
 
