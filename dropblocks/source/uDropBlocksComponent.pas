@@ -135,13 +135,13 @@ begin
    if appk.JustPressed(kcUP) or appk.JustPressed(kcC) then
       game.DropShape();
 
-   if(UpdateKeyTimer(kcY, Keys.Timers.RotateLeft)) then
+   if(appk.JustPressed(kcY)) then
       game.RotateLeft();
 
-   if(UpdateKeyTimer(kcZ, Keys.Timers.RotateLeft)) then
+   if(appk.JustPressed(kcZ)) then
       game.RotateLeft();
 
-   if(UpdateKeyTimer(kcX, Keys.Timers.RotateRight)) then
+   if(appk.JustPressed(kcX)) then
       game.RotateRight();
 end;
 
