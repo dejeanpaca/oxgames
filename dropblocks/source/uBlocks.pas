@@ -4,7 +4,7 @@ UNIT uBlocks;
 INTERFACE
 
    USES
-      uLog, uColors, uStd,
+      uLog, uColors, uStd, StringUtils,
       {ox}
       oxuPaths, oxuMaterial, oxuTexture, oxuTextureGenerate,
       oxuPrimitiveModelComponent,
@@ -37,7 +37,7 @@ begin
       log.w('Failed loading block texture');
 
    for i := 0 to MAX_SHAPES - 1 do begin
-     blocks.Materials[i] := CreateMaterial('background', Shapes.Colors[i], tex);
+     blocks.Materials[i] := CreateMaterial('shape_' + sf(i), Shapes.Colors[i], tex);
    end;
 
    blocks.Rock := CreateMaterial('default',  TColor4ub.Create(127, 127, 127, 255), tex);
