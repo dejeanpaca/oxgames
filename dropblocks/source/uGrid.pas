@@ -74,7 +74,7 @@ begin
    if(tex = nil) then
       log.w('Failed loading grid texture');
 
-   Materials.GridBackground := CreateMaterial('Background', TColor4ub.Create(32, 32, 32, 255), tex);
+   Materials.GridBackground := CreateMaterial('Background', TColor4ub.Create(64, 64, 64, 255), tex);
 end;
 
 function getMaterial(const element: TGridElement): oxTMaterial;
