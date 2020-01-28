@@ -14,7 +14,8 @@ TYPE
    TGridFlag = (
       GRID_ELEMENT_SOLID,
       GRID_ELEMENT_SHAPE,
-      GRID_ELEMENT_DIRTY
+      GRID_ELEMENT_DIRTY,
+      GRID_ELEMENT_PREVIEW
    );
 
    TGridFlags = set of TGridFlag;
@@ -32,6 +33,7 @@ TYPE
       function IsShape(): boolean;
       function IsEmpty(): boolean;
       function IsDirty(): boolean;
+      function IsPreview(): boolean;
    end;
 
    TGridArea = array[0..GRID_HEIGHT - 1, 0..GRID_WIDTH - 1] of TGridElement;
@@ -153,6 +155,11 @@ end;
 function TGridElement.IsDirty(): boolean;
 begin
    Result := GRID_ELEMENT_DIRTY in Flags;
+end;
+
+function TGridElement.IsPreview(): boolean;
+begin
+   Result := GRID_ELEMENT_PREVIEW in Flags;
 end;
 
 { TGrid }
