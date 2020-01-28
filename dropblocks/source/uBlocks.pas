@@ -12,12 +12,18 @@ INTERFACE
       uDropBlocks, uBase;
 
 TYPE
+
+   { TBlocks }
+
    TBlocks = record
       Materials: array[0..MAX_SHAPES - 1] of oxTMaterial;
+      LRAnimationMaterial: oxTMaterial;
       {material for inserted lines}
       Rock,
       {default block material}
       DefaultMaterial: oxTMaterial;
+
+      procedure AnimateLRMaterial(elapsed: single);
    end;
 
 VAR
@@ -41,7 +47,16 @@ begin
    end;
 
    blocks.Rock := CreateMaterial('default',  TColor4ub.Create(127, 127, 127, 255), tex);
-   blocks.DefaultMaterial := CreateMaterial('default',  cWhite4ub, tex);
+   blocks.DefaultMaterial := CreateMaterial('default', cWhite4ub, tex);
+
+   blocks.LRAnimationMaterial := CreateMaterial('lr_animation', cWhite4ub, tex);
+end;
+
+{ TBlocks }
+
+procedure TBlocks.AnimateLRMaterial(elapsed: single);
+begin
+   LRAnimationMaterial.SetColor('color', cWhite4ub.Lighten(elapsed));
 end;
 
 INITIALIZATION
