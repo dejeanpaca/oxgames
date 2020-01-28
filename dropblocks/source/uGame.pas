@@ -34,7 +34,6 @@ TYPE
       function IsDirty(): boolean;
    end;
 
-
    TGridArea = array[0..GRID_HEIGHT - 1, 0..GRID_WIDTH - 1] of TGridElement;
 
    { TGrid }
@@ -48,15 +47,20 @@ TYPE
       procedure New();
 
       procedure SetPoint(x, y: loopint; what: TGridFlags);
-      procedure MarkDirty(x, y: loopint);
-      procedure MarkSolid(x, y: loopint);
       function GetPoint(x, y: loopint): PGridElement;
       function ValidPoint(x, y: loopint): boolean;
    end;
 
+   TGameState = (
+      GAME_BLOCK_DROPPING,
+      GAME_LR
+   );
+
    { TGame }
 
    TGame = record
+      State: TGameState;
+
       OnNew,
       {called before the current shape is moved/rotated}
       OnBeforeMove,
@@ -75,6 +79,15 @@ TYPE
       ShapeLockTime: single;
 
       CurrentLevel: loopint;
+
+      LineRemoval: record
+         {start and end line}
+         s,
+         e: loopint;
+
+         {elapsed animation time}
+         Elapsed: single;
+      end;
 
       function GetSpeed(): single;
 
@@ -98,9 +111,11 @@ TYPE
       procedure RotateRight();
       procedure MoveShapeDown();
 
+      function FindShapeLowestPosition(): loopint;
+
       procedure LockShape();
       {clear full lines}
-      procedure ClearLines();
+      procedure CheckClearLines();
 
       procedure SetShapePosition(x, y: loopint);
       procedure SetRotation(rotation: loopint);
@@ -161,16 +176,6 @@ procedure TGrid.SetPoint(x, y: loopint; what: TGridFlags);
 begin
    Area[y][x].Flags := Area[y][x].Flags + what;
    Dirty := true;
-end;
-
-procedure TGrid.MarkDirty(x, y: loopint);
-begin
-   SetPoint(x, y, [GRID_ELEMENT_DIRTY]);
-end;
-
-procedure TGrid.MarkSolid(x, y: loopint);
-begin
-   SetPoint(x, y, [GRID_ELEMENT_SOLID]);
 end;
 
 function TGrid.GetPoint(x, y: loopint): PGridElement;
@@ -247,14 +252,7 @@ var
    y: loopint;
 
 begin
-   y := ShapePosition.y;
-
-   repeat
-     dec(y);
-
-   until (not CanFitShape(ShapePosition.x, y, CurrentRotation));
-
-   inc(y);
+   y := FindShapeLowestPosition();
 
    if(y <> ShapePosition.y) then
       SetShapePosition(ShapePosition.x, y);
@@ -298,6 +296,17 @@ begin
       SetShapePosition(ShapePosition.x, ShapePosition.y - 1);
 end;
 
+function TGame.FindShapeLowestPosition(): loopint;
+begin
+   Result := ShapePosition.y;
+
+   repeat
+     dec(Result);
+   until (not CanFitShape(ShapePosition.x, Result, CurrentRotation));
+
+   inc(Result);
+end;
+
 procedure TGame.LockShape();
 var
    x,
@@ -325,9 +334,8 @@ begin
 
          if(element <> nil) then begin
             element^.Shape := CurrentShape;
-
-            Include(element^.Flags, GRID_ELEMENT_SOLID);
-            Include(element^.Flags, GRID_ELEMENT_DIRTY);
+            element^.Flags := [GRID_ELEMENT_SOLID, GRID_ELEMENT_DIRTY];
+            element^.Entity.SetEnabled();
          end;
       end;
    end;
@@ -335,12 +343,12 @@ begin
    grid.Dirty := true;
 
    {check if any lines can be cleared}
-   ClearLines();
+   CheckClearLines();
 
    GetNextBlock();
 end;
 
-procedure TGame.ClearLines();
+procedure TGame.CheckClearLines();
 var
    x,
    y: loopint;
