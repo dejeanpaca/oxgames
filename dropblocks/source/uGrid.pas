@@ -37,6 +37,10 @@ TYPE
 
       procedure Initialize();
       procedure WalkShape(walker: TGridShapeWalker);
+      procedure WalkShape(atX, atY: loopint; walker: TGridShapeWalker);
+
+      function GetElementMesh(const el: TGridElement): oxTPrimitiveModelComponent;
+      function GetElementMesh(x, y: loopint; out mesh: oxTPrimitiveModelComponent): PGridElement;
    end;
 
 VAR
@@ -52,15 +56,6 @@ VAR
    Materials: record
       GridBackground: oxTMaterial;
    end;
-
-function getElementMesh(x, y: loopint; out mesh: oxTPrimitiveModelComponent): PGridElement;
-begin
-   mesh := nil;
-   Result := game.Grid.GetPoint(x, y);
-
-   if(Result <> nil) and (Result^.Entity <> nil) then
-      mesh := oxTPrimitiveModelComponent(Result^.Entity.GetComponent('oxTPrimitiveModelComponent'));
-end;
 
 { TGridComponent }
 
@@ -100,7 +95,7 @@ begin
    if(game.Grid.Dirty) then begin
       for x := 0 to GRID_WIDTH - 1 do begin
          for y := 0 to GRID_HEIGHT - 1 do begin
-            element := getElementMesh(x, y, mesh);
+            element := grid.GetElementMesh(x, y, mesh);
 
             if element^.IsDirty() then begin
                if not (element^.IsEmpty())  then begin
@@ -207,6 +202,11 @@ begin
 end;
 
 procedure TGridGlobal.WalkShape(walker: TGridShapeWalker);
+begin
+   grid.WalkShape(game.ShapePosition.x, game.ShapePosition.y, walker);
+end;
+
+procedure TGridGlobal.WalkShape(atX, atY: loopint; walker: TGridShapeWalker);
 var
    x,
    y,
@@ -224,8 +224,8 @@ begin
          if(shapeGrid^.GetValue(x, y) = 0) then
             continue;
 
-         px := game.ShapePosition.x + x;
-         py := game.ShapePosition.y + y;
+         px := atX + x;
+         py := atY + y;
 
          if(py < GRID_HEIGHT) then begin
             element := game.Grid.GetPoint(px, py);
@@ -238,6 +238,24 @@ begin
 
    game.Grid.Dirty := true;
 end;
+
+function TGridGlobal.GetElementMesh(const el: TGridElement): oxTPrimitiveModelComponent;
+begin
+   Result := nil;
+
+   if(el.Entity <> nil) then
+      Result := oxTPrimitiveModelComponent(el.Entity.GetComponent('oxTPrimitiveModelComponent'));
+end;
+
+function TGridGlobal.GetElementMesh(x, y: loopint; out mesh: oxTPrimitiveModelComponent): PGridElement;
+begin
+   mesh := nil;
+   Result := game.Grid.GetPoint(x, y);
+
+   if(Result <> nil) then
+      mesh := GetElementMesh(Result^);
+end;
+
 
 procedure beforeMoveShape({%H-}x, {%H-}y: loopint; element: PGridElement);
 begin
