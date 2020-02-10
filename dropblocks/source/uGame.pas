@@ -78,6 +78,7 @@ TYPE
       ShapePosition: oxTPoint;
 
       LastUpdate,
+      LineClearTime,
       ShapeLockTime: single;
 
       CurrentLevel: loopint;
@@ -118,6 +119,7 @@ TYPE
       procedure LockShape();
       {clear full lines}
       procedure CheckClearLines();
+      procedure ClearLines();
 
       procedure SetShapePosition(x, y: loopint);
       procedure SetRotation(rotation: loopint);
@@ -422,6 +424,12 @@ begin
    end;
 end;
 
+procedure TGame.ClearLines();
+begin
+   State := GAME_LR;
+   LineClearTime := 0.0;
+end;
+
 procedure TGame.SetShapePosition(x, y: loopint);
 begin
    OnBeforeMove.Call();
@@ -482,23 +490,27 @@ end;
 
 procedure TGame.Update(dT: single);
 begin
-   LastUpdate := LastUpdate + dT;
+   if(State = GAME_BLOCK_DROPPING) then begin
+      LastUpdate := LastUpdate + dT;
 
-   if(LastUpdate > GetSpeed()) then begin
-      LastUpdate := LastUpdate - GetSpeed();
+      if(LastUpdate > GetSpeed()) then begin
+         LastUpdate := LastUpdate - GetSpeed();
 
-      MoveShapeDown();
+         MoveShapeDown();
+      end;
+
+      {check if we can lock the shape}
+      if(not CanFitShape(ShapePosition.x, ShapePosition.y - 1, CurrentRotation)) then begin
+         ShapeLockTime := ShapeLockTime + dT;
+
+         if(ShapeLockTime >= SHAPE_LOCK_TIME) then
+            LockShape();
+      end else
+         {reset shape lock time since we're not hitting anything}
+         ShapeLockTime := 0;
+   end else if (State = GAME_LR) then begin
+      {line clear}
    end;
-
-   {check if we can lock the shape}
-   if(not CanFitShape(ShapePosition.x, ShapePosition.y - 1, CurrentRotation)) then begin
-      ShapeLockTime := ShapeLockTime + dT;
-
-      if(ShapeLockTime >= SHAPE_LOCK_TIME) then
-         LockShape();
-   end else
-      {reset shape lock time since we're not hitting anything}
-      ShapeLockTime := 0;
 end;
 
 procedure TGame.New();
