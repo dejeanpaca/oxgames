@@ -1,0 +1,8 @@
+# DVAR
+
+project.name = Chess
+project.short_name = chess
+project.identifier = chess
+project.organization = dbx7.games
+project.organization_short = dbx7.games
+project.line_endings = lf
