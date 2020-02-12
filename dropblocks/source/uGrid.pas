@@ -124,9 +124,7 @@ var
    j: loopint;
 
    gridSize: TGridElementsSize;
-
    element: PGridElement;
-
    camera: oxTCameraComponent;
 
 begin
