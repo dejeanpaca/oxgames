@@ -9,10 +9,10 @@ INTERFACE
       oxuPaths, oxuTexture, oxuTextureGenerate,
       oxuScene, oxuEntity,
       oxuComponent, oxuComponentDescriptors, oxuPrimitiveModelEntities,
-      oxuCameraComponent, oxuProjectionType,
+      oxuCameraComponent,
       oxuMaterial, oxumPrimitive, oxuPrimitiveModelComponent,
       {game}
-      uGame;
+      uGame, uShared;
 
 TYPE
    { TGridComponent }
@@ -171,16 +171,12 @@ end;
 procedure onNew();
 var
    i,
-   j,
-   gridSize: loopint;
+   j: loopint;
 
    element: PGridElement;
 
    camera: oxTCameraComponent;
-   projection: oxPProjection;
-   d,
-   halfGridW,
-   halfGridH: single;
+   gridSize: TGridElementsSize;
 
 begin
    if(gridEntity = nil) then
@@ -189,20 +185,8 @@ begin
    gridEntity.EmptyChildren();
 
    camera := oxTCameraComponent(oxScene.GetComponentInChildren('oxTCameraComponent'));
-   projection := camera.GetProjection();
-
-   if(projection^.p.GetWidth() <= projection^.p.GetHeight()) then begin
-      gridSize := game.Grid.Width;
-      d := projection^.p.GetWidth()
-   end else begin
-      gridSize := game.Grid.Height;
-      d := projection^.p.GetHeight();
-   end;
-
-   d := d / gridSize / 2;
-
-   halfGridW := d * game.Grid.Width - d;
-   halfGridH := d * game.Grid.Height - d;
+   TGridElementsSize.Initialize(gridSize);
+   gridSize.Get(camera, game.Grid.Width, game.Grid.Height);
 
    for i := 0 to game.Grid.Width - 1 do begin
       for j := 0 to game.Grid.Height - 1 do begin
@@ -211,8 +195,8 @@ begin
          element^.Entity := oxPrimitiveModelEntities.Plane();
 
          element^.Entity.Name := sf(i) + 'x' + sf(j);
-         element^.Entity.SetPosition(i * d * 2  - halfGridW , j * d * 2 - halfGridH, 0);
-         element^.Entity.SetScale(d, d, 1);
+         element^.Entity.SetPosition(i * gridSize.d * 2  - gridSize.halfW , j * gridSize.d * 2 - gridSize.halfH, 0);
+         element^.Entity.SetScale(gridSize.d, gridSize.d, 1);
 
          gridEntity.Add(element^.Entity);
       end;
@@ -221,7 +205,7 @@ begin
    gridBackground := oxPrimitiveModelEntities.Plane();
 
    gridBackground.SetPosition(0, 0, -0.5);
-   gridBackground.SetScale(GRID_WIDTH * d, GRID_HEIGHT * d, 0);
+   gridBackground.SetScale(GRID_WIDTH * gridSize.d, GRID_HEIGHT * gridSize.d, 0);
 
    backgroundComponent := oxTPrimitiveModelComponent(gridBackground.GetComponent('oxTPrimitiveModelComponent'));
 
