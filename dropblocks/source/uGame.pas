@@ -114,10 +114,10 @@ TYPE
 
       procedure MoveShapeLeft();
       procedure MoveShapeRight();
+      procedure MoveShapeDown();
       procedure DropShape();
       procedure RotateLeft();
       procedure RotateRight();
-      procedure MoveShapeDown();
 
       function FindShapeLowestPosition(): loopint;
 
@@ -274,6 +274,12 @@ begin
       SetShapePosition(ShapePosition.x + 1, ShapePosition.y);
 end;
 
+procedure TGame.MoveShapeDown();
+begin
+   if CanFitShape(ShapePosition.x, ShapePosition.y - 1, CurrentRotation) then
+      SetShapePosition(ShapePosition.x, ShapePosition.y - 1);
+end;
+
 procedure TGame.DropShape();
 var
    y: loopint;
@@ -288,39 +294,13 @@ begin
 end;
 
 procedure TGame.RotateLeft();
-var
-   rotation: loopint;
-
 begin
-   rotation := CurrentRotation;
-   dec(rotation);
-
-   if(rotation < 0) then
-      rotation := 3;
-
-   if CanFitShape(ShapePosition.x, ShapePosition.y, rotation) then
-      SetRotation(rotation);
+   SetRotation(CurrentRotation - 1);
 end;
 
 procedure TGame.RotateRight();
-var
-   rotation: loopint;
-
 begin
-   rotation := CurrentRotation;
-   inc(rotation);
-
-   if(rotation > 3) then
-      rotation := 0;
-
-   if CanFitShape(ShapePosition.x, ShapePosition.y, rotation) then
-      SetRotation(rotation);
-end;
-
-procedure TGame.MoveShapeDown();
-begin
-   if CanFitShape(ShapePosition.x, ShapePosition.y - 1, CurrentRotation) then
-      SetShapePosition(ShapePosition.x, ShapePosition.y - 1);
+   SetRotation(CurrentRotation + 1);
 end;
 
 function TGame.FindShapeLowestPosition(): loopint;
@@ -470,6 +450,15 @@ end;
 
 procedure TGame.SetRotation(rotation: loopint);
 begin
+   if(rotation < 0) then
+      rotation := 3;
+
+   if(rotation > 3) then
+      rotation := 0;
+
+   if (not CanFitShape(ShapePosition.x, ShapePosition.y, rotation)) then
+      exit;
+
    OnBeforeMove.Call();
 
    CurrentRotation := rotation;
