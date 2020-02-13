@@ -66,15 +66,6 @@ begin
       Result := oxMaterial.Default;
 end;
 
-{ TGridComponent }
-
-function CreateMaterial(const name: string; color: TColor4ub): oxTMaterial;
-begin
-   Result := oxMaterial.Make();
-   Result.Name := name;
-   Result.SetColor('color', color);
-end;
-
 procedure TGridComponent.Load();
 var
    tex: oxTTexture;
