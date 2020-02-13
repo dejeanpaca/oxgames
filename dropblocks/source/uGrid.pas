@@ -25,7 +25,6 @@ TYPE
       public
 
       procedure Load(); override;
-      procedure Update(); override;
 
       function GetDescriptor(): oxPComponentDescriptor; override;
    end;
@@ -38,9 +37,6 @@ TYPE
       procedure Initialize();
       procedure WalkShape(walker: TGridShapeWalker);
       procedure WalkShape(atX, atY: loopint; walker: TGridShapeWalker);
-
-      function GetElementMesh(const el: TGridElement): oxTPrimitiveModelComponent;
-      function GetElementMesh(x, y: loopint; out mesh: oxTPrimitiveModelComponent): PGridElement;
    end;
 
 VAR
@@ -70,47 +66,6 @@ begin
       log.w('Failed loading grid texture');
 
    Materials.GridBackground := CreateMaterial('Background', TColor4ub.Create(64, 64, 64, 255), tex);
-end;
-
-function getMaterial(const element: TGridElement): oxTMaterial;
-begin
-   if (not element.IsEmpty()) then
-      if(element.Shape = -1) then
-         Result := blocks.Rock
-      else
-         Result := blocks.Materials[element.Shape]
-   else
-      Result := blocks.DefaultMaterial;
-end;
-
-procedure TGridComponent.Update();
-var
-   x,
-   y: loopint;
-
-   mesh: oxTPrimitiveModelComponent;
-   element: PGridElement;
-
-begin
-   if(game.Grid.Dirty) then begin
-      for x := 0 to GRID_WIDTH - 1 do begin
-         for y := 0 to GRID_HEIGHT - 1 do begin
-            element := grid.GetElementMesh(x, y, mesh);
-
-            if element^.IsDirty() then begin
-               if not (element^.IsEmpty())  then begin
-                  element^.Entity.SetEnabled(true);
-
-                  if(mesh <> nil) then
-                     mesh.Model.SetMaterial(getMaterial(element^));
-               end else
-                  element^.Entity.SetEnabled(false);
-            end;
-         end;
-      end;
-
-      game.Grid.Dirty := false;
-   end;
 end;
 
 function TGridComponent.GetDescriptor(): oxPComponentDescriptor;
@@ -143,16 +98,17 @@ begin
          element := game.Grid.GetPoint(i, j);
 
          element^.Entity := oxPrimitiveModelEntities.Plane();
+         element^.Mesh := oxTPrimitiveModelComponent(element^.Entity.GetComponent('oxTPrimitiveModelComponent'));
 
          element^.Entity.Name := sf(i) + 'x' + sf(j);
          element^.Entity.SetPosition(i * gridSize.d * 2  - gridSize.halfW , j * gridSize.d * 2 - gridSize.halfH, 0);
          element^.Entity.SetScale(gridSize.d, gridSize.d, 1);
 
+         ClearMaterial(element^);
+
          gridEntity.Add(element^.Entity);
       end;
    end;
-
-   game.Grid.Dirty := true;
 
    gridBackground := oxPrimitiveModelEntities.Plane();
 
@@ -219,33 +175,15 @@ begin
          end;
       end;
    end;
-
-   game.Grid.Dirty := true;
 end;
-
-function TGridGlobal.GetElementMesh(const el: TGridElement): oxTPrimitiveModelComponent;
-begin
-   Result := nil;
-
-   if(el.Entity <> nil) then
-      Result := oxTPrimitiveModelComponent(el.Entity.GetComponent('oxTPrimitiveModelComponent'));
-end;
-
-function TGridGlobal.GetElementMesh(x, y: loopint; out mesh: oxTPrimitiveModelComponent): PGridElement;
-begin
-   mesh := nil;
-   Result := game.Grid.GetPoint(x, y);
-
-   if(Result <> nil) then
-      mesh := GetElementMesh(Result^);
-end;
-
 
 procedure beforeMoveShape({%H-}x, {%H-}y: loopint; element: PGridElement);
 begin
-   Exclude(element^.Flags, GRID_ELEMENT_SHAPE);
-   Include(element^.Flags, GRID_ELEMENT_DIRTY);
+   if(not element^.IsShape()) then
+      exit;
 
+   Exclude(element^.Flags, GRID_ELEMENT_SHAPE);
+   ClearMaterial(element^);
    element^.Shape := game.CurrentShape;
 end;
 
@@ -257,7 +195,7 @@ end;
 procedure afterMoveShape({%H-}x, {%H-}y: loopint; element: PGridElement);
 begin
    Include(element^.Flags, GRID_ELEMENT_SHAPE);
-   Include(element^.Flags, GRID_ELEMENT_DIRTY);
+   SetMaterial(element^, blocks.Materials[game.CurrentShape]);
 
    element^.Shape := game.CurrentShape;
 end;
@@ -267,8 +205,19 @@ begin
    grid.walkShape(@afterMoveShape);
 end;
 
+procedure lockShape({%H-}x, {%H-}y: loopint; element: PGridElement);
+begin
+   SetMaterial(element^, blocks.Materials[element^.Shape]);
+end;
+
+procedure onLock();
+begin
+   grid.WalkShape(@lockShape);
+end;
+
 INITIALIZATION
    game.OnBeforeMove.Add(@beforeMove);
    game.OnMove.Add(@afterMove);
+   game.OnLock.Add(@onLock);
 
 END.

@@ -6,7 +6,7 @@ INTERFACE
    USES
       uStd, StringUtils, uColors,
       {ox}
-      oxuMaterial, oxuPrimitiveModelComponent,
+      oxuMaterial,
       {game}
       uBase, uGame, uDropBlocks, uGrid, uBlocks;
 
@@ -14,6 +14,7 @@ IMPLEMENTATION
 
 VAR
    PreviewMaterials: array[0..MAX_SHAPES - 1] of oxTMaterial;
+   previousX: loopint;
    previousY: loopint = GRID_HEIGHT;
 
 procedure init();
@@ -31,19 +32,10 @@ begin
 end;
 
 procedure unmarkPreview({%H-}x, {%H-}y: loopint; element: PGridElement);
-var
-   mesh: oxTPrimitiveModelComponent;
-
 begin
-   if(not element^.IsPreview()) then
-      exit;
-
-   mesh := grid.GetElementMesh(element^);
-
-   if(mesh <> nil) then begin
-      element^.Flags := [GRID_ELEMENT_DIRTY];
-      element^.Entity.SetEnabled(false);
-      mesh.Model.SetMaterial(nil);
+   if(element^.IsPreview()) then begin
+      Exclude(element^.Flags, GRID_ELEMENT_PREVIEW);
+      ClearMaterial(element^);
    end;
 end;
 
@@ -52,27 +44,17 @@ begin
    if(previousY >= GRID_HEIGHT) then
       exit;
 
-   grid.WalkShape(game.ShapePosition.x, previousY, @unmarkPreview);
+   grid.WalkShape(previousX, previousY, @unmarkPreview);
 end;
 
 procedure markPreview({%H-}x, {%H-}y: loopint; element: PGridElement);
-var
-   mesh: oxTPrimitiveModelComponent;
-
 begin
-   if(element^.IsSolid()) then
+   if(element^.IsPreview() or element^.IsShape()) then
       exit;
 
-   mesh := grid.GetElementMesh(element^);
+   element^.Flags := [GRID_ELEMENT_PREVIEW];
 
-   if(mesh <> nil) then begin
-      if(element^.IsPreview()) then
-         exit;
-
-      element^.Flags := [GRID_ELEMENT_PREVIEW];
-      element^.Entity.SetEnabled(true);
-      mesh.Model.SetMaterial(PreviewMaterials[game.CurrentShape]);
-   end;
+   SetMaterial(element^, PreviewMaterials[game.CurrentShape]);
 end;
 
 procedure onMove();
@@ -86,9 +68,10 @@ begin
    if(y = game.ShapePosition.y) then
       exit;
 
-   grid.WalkShape(game.ShapePosition.x, y, @markPreview);
-
+   previousX := game.ShapePosition.x;
    previousY := y;
+
+   grid.WalkShape(previousX, y, @markPreview);
 end;
 
 procedure onNew();

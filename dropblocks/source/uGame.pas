@@ -7,6 +7,7 @@ INTERFACE
       uStd, uLog,
       {ox}
       oxuTypes, oxuTimer, oxuEntity,
+      oxuPrimitiveModelComponent, oxuMaterial,
       {nase}
       uBase;
 
@@ -14,7 +15,6 @@ TYPE
    TGridFlag = (
       GRID_ELEMENT_SOLID,
       GRID_ELEMENT_SHAPE,
-      GRID_ELEMENT_DIRTY,
       GRID_ELEMENT_PREVIEW
    );
 
@@ -28,11 +28,11 @@ TYPE
       Flags: TGridFlags;
       Shape: loopint;
       Entity: oxTEntity;
+      Mesh: oxTPrimitiveModelComponent;
 
       function IsSolid(): boolean;
       function IsShape(): boolean;
       function IsEmpty(): boolean;
-      function IsDirty(): boolean;
       function IsPreview(): boolean;
    end;
 
@@ -42,9 +42,6 @@ TYPE
 
    TGrid = record
       Area: TGridArea;
-
-      {is the grid dirty}
-      Dirty: boolean;
 
       procedure New();
 
@@ -67,7 +64,8 @@ TYPE
       {called before the current shape is moved/rotated}
       OnBeforeMove,
       {called after current shape is moved/rotated}
-      OnMove: TProcedures;
+      OnMove,
+      OnLock: TProcedures;
 
       Grid: TGrid;
       {index into the current shape}
@@ -90,6 +88,12 @@ TYPE
 
          {elapsed animation time}
          Elapsed: single;
+      end;
+
+      LineClear: record
+         fStart,
+         fEnd,
+         fCount: loopint;
       end;
 
       function GetSpeed(): single;
@@ -135,7 +139,27 @@ TYPE
 VAR
    game: TGame;
 
+procedure SetMaterial(var element: TGridElement; material: oxTMaterial = nil);
+procedure ClearMaterial(var element: TGridElement);
+
 IMPLEMENTATION
+
+procedure SetMaterial(var element: TGridElement; material: oxTMaterial = nil);
+begin
+   if(element.Mesh <> nil) then begin
+      if(material <> nil) then begin
+         element.Mesh.Model.SetMaterial(material);
+         element.Entity.SetEnabled(true);
+      end else
+         element.Entity.SetEnabled(false);
+   end;
+end;
+
+procedure ClearMaterial(var element: TGridElement);
+begin
+   SetMaterial(element);
+end;
+
 
 { TGridElement }
 
@@ -154,11 +178,6 @@ begin
    Result := not ((GRID_ELEMENT_SOLID in Flags) or (GRID_ELEMENT_SHAPE in Flags));
 end;
 
-function TGridElement.IsDirty(): boolean;
-begin
-   Result := GRID_ELEMENT_DIRTY in Flags;
-end;
-
 function TGridElement.IsPreview(): boolean;
 begin
    Result := GRID_ELEMENT_PREVIEW in Flags;
@@ -167,24 +186,12 @@ end;
 { TGrid }
 
 procedure TGrid.New();
-var
-   i,
-   j: loopint;
-
 begin
-   for i := 0 to GRID_HEIGHT - 1 do begin
-      for j := 0 to GRID_WIDTH - 1 do begin
-         Area[i][j].Flags := [GRID_ELEMENT_DIRTY];
-      end;
-   end;
-
-   Dirty := true;
 end;
 
 procedure TGrid.SetPoint(x, y: loopint; what: TGridFlags);
 begin
    Area[y][x].Flags := Area[y][x].Flags + what;
-   Dirty := true;
 end;
 
 function TGrid.GetPoint(x, y: loopint): PGridElement;
@@ -342,14 +349,14 @@ begin
          element := Grid.GetPoint(px, py);
 
          if(element <> nil) then begin
+            element^.Flags := [GRID_ELEMENT_SOLID];
             element^.Shape := CurrentShape;
-            element^.Flags := [GRID_ELEMENT_SOLID, GRID_ELEMENT_DIRTY];
             element^.Entity.SetEnabled();
          end;
       end;
    end;
 
-   grid.Dirty := true;
+   OnLock.Call();
 
    {check if any lines can be cleared}
    CheckClearLines();
@@ -360,19 +367,17 @@ end;
 procedure TGame.CheckClearLines();
 var
    x,
-   y: loopint;
+   y,
+   prevY: loopint;
    element,
    prevElement: PGridElement;
 
    full: boolean;
-   fStart,
-   fEnd,
-   fCount: loopint;
 
 begin
-   fStart := -1;
-   fEnd := -1;
-   fCount := 0;
+   LineClear.fStart := -1;
+   LineClear.fEnd := -1;
+   LineClear.fCount := 0;
 
    for y := 0 to GRID_HEIGHT -1 do begin
       full := true;
@@ -387,40 +392,52 @@ begin
       end;
 
       if(full) then begin
-         if(fStart = -1) then
-            fStart := y;
+         if(LineClear.fStart = -1) then
+            LineClear.fStart := y;
 
-         if(fStart <> -1) then
-            fEnd := fStart;
+         if(LineClear.fStart <> -1) then
+            LineClear.fEnd := LineClear.fStart;
 
-         inc(fCount);
+         inc(LineClear.fCount);
       end;
    end;
 
-   if(fCount > 0) then begin
+   if(LineClear.fCount > 0) then begin
       {clear lines}
-      for y := fStart to fEnd do begin
+      for y := LineClear.fStart to LineClear.fEnd do begin
          for x := 0 to GRID_WIDTH -1 do begin
             element := Grid.GetPoint(x, y);
 
             Exclude(element^.Flags, GRID_ELEMENT_SOLID);
-            Include(element^.Flags, GRID_ELEMENT_DIRTY);
          end;
       end;
 
       {clear lines}
-      for y := fStart to GRID_HEIGHT - 1 - fCount do begin
+      for y := LineClear.fStart to GRID_HEIGHT - 1 - LineClear.fCount do begin
          for x := 0 to GRID_WIDTH -1 do begin
             element := Grid.GetPoint(x, y);
-            prevElement := Grid.GetPoint(x, y + fCount);
+            prevY := y + LineClear.fCount;
 
-            element^.Flags := prevElement^.Flags;
-            element^.Shape := prevElement^.Shape;
-            Include(element^.Flags, GRID_ELEMENT_DIRTY);
+            if(prevY < GRID_HEIGHT) then
+               prevElement := Grid.GetPoint(x, prevY)
+            else
+               prevElement := nil;
+
+            if(prevElement <> nil) then begin
+               element^.Flags := prevElement^.Flags;
+               element^.Shape := prevElement^.Shape;
+
+               if(prevElement^.Entity.Enabled) then
+                  SetMaterial(element^, prevElement^.Mesh.Model.Material)
+               else
+                  ClearMaterial(element^);
+            end else begin
+               ClearMaterial(element^);
+               element^.Flags := [];
+               element^.Shape := -1;
+            end;
          end;
       end;
-
-      Grid.Dirty := true;
    end;
 end;
 
@@ -527,5 +544,6 @@ INITIALIZATION
    game.OnNew.Initialize(game.OnNew);
    game.OnBeforeMove.Initialize(game.OnBeforeMove);
    game.OnMove.Initialize(game.OnMove);
+   game.OnLock.Initialize(game.OnLock);
 
 END.
