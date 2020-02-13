@@ -7,7 +7,7 @@ INTERFACE
       oxuScene, oxuSceneLoader, oxuProjectionType, oxuProjection,
       oxuCameraComponent, oxuCameraEntity,
       {game}
-      uSnek, uGrid, uGame, uSnakeComponent;
+      uGrid, uGame, uSnakeComponent;
 
 IMPLEMENTATION
 
