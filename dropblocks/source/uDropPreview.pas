@@ -70,14 +70,8 @@ begin
    previousY := y;
 end;
 
-procedure onNew();
-begin
-   previousY := GRID_HEIGHT;
-end;
-
 INITIALIZATION
    DropBlocks.OnInitScene.Add('drop_preview', @init);
-   game.OnNew.Add(@onNew);
    game.OnBeforeMove.Add(@beforeMove);
    game.OnMove.Add(@onMove);
 
