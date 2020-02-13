@@ -4,8 +4,10 @@ UNIT uShared;
 INTERFACE
 
    USES
-      uStd, uLog,
-      oxuCameraComponent, oxuCamera, oxuProjectionType;
+      uStd, uLog, uColors,
+      {ox}
+      oxuCameraComponent, oxuCamera, oxuProjectionType,
+      oxuTexture, oxuMaterial;
 
 TYPE
 
@@ -23,7 +25,19 @@ TYPE
       procedure Get(var camera: oxTCameraComponent; width, height: loopint);
    end;
 
+function CreateMaterial(const name: string; color: TColor4ub; tex: oxTTexture = nil): oxTMaterial;
+
 IMPLEMENTATION
+
+function CreateMaterial(const name: string; color: TColor4ub; tex: oxTTexture): oxTMaterial;
+begin
+   Result := oxMaterial.Make();
+   Result.Name := name;
+   Result.SetColor('color', color);
+
+   if(tex <> nil) then
+      Result.SetTexture('texture', tex);
+end;
 
 { TGridElementsSize }
 
