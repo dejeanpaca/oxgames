@@ -9,7 +9,7 @@ INTERFACE
       oxuPaths, oxuMaterial, oxuTexture, oxuTextureGenerate,
       oxuPrimitiveModelComponent,
       {game}
-      uDropBlocks, uBase, uShared;
+      uMain, uBase, uShared;
 
 TYPE
 
@@ -60,6 +60,6 @@ begin
 end;
 
 INITIALIZATION
-   DropBlocks.OnInitScene.Add('dropblocks.blocks', @init);
+   main.OnInitScene.Add('dropblocks.blocks', @init);
 
 END.

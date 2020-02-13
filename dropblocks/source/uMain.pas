@@ -1,5 +1,5 @@
 {$INCLUDE oxdefines.inc}
-UNIT uDropBlocks;
+UNIT uMain;
 
 INTERFACE
 
@@ -9,34 +9,31 @@ INTERFACE
       uOX, oxuRunRoutines, oxuMaterial, oxuTexture;
 
 TYPE
-   TDropBlocks = record
+   TMain = record
       dv: TDVarGroup;
       Init,
       OnInitScene: oxTRunRoutines;
    end;
 
 VAR
-   DropBlocks: TDropBlocks;
-
-procedure dbInitialize();
-procedure dbDeinitialize();
+   main: TMain;
 
 IMPLEMENTATION
 
-procedure dbInitialize();
+procedure initialize();
 begin
-   DropBlocks.Init.iCall();
+   main.Init.iCall();
    log.i('DropBlocks > initialized');
 end;
 
-procedure dbDeinitialize();
+procedure deinitialize();
 begin
-   DropBlocks.Init.dCall();
+   main.Init.dCall();
    log.i('db > deinitialized');
 end;
 
 INITIALIZATION
-   dvar.Add('dropblocks', DropBlocks.dv);
-   ox.OnInitialize.Add('dropblocks.initialize', @dbInitialize, @dbDeinitialize)
+   dvar.Add('dropblocks', main.dv);
+   ox.OnInitialize.Add('dropblocks.initialize', @initialize, @deinitialize)
 
 END.

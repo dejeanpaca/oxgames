@@ -13,7 +13,7 @@ INTERFACE
       oxuCameraComponent,
       oxumPrimitive, oxuPrimitiveModelComponent, oxuPrimitiveModelEntities,
       {game}
-      uBase, uGame, uDropBlocks, uBlocks, uShared;
+      uBase, uGame, uMain, uBlocks, uShared;
 
 TYPE
    { TGridComponent }

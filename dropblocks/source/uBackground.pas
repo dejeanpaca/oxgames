@@ -10,7 +10,7 @@ INTERFACE
       oxuProjection, oxuProjectionType,
       oxuScene, oxuEntity, oxuPrimitiveModelComponent, oxuPrimitiveModelEntities,
       {game}
-      uDropBlocks, uShared;
+      uMain, uShared;
 
 IMPLEMENTATION
 
@@ -46,6 +46,6 @@ begin
 end;
 
 INITIALIZATION
-   DropBlocks.OnInitScene.Add('dropblocks.background', @init);
+   main.OnInitScene.Add('dropblocks.background', @init);
 
 END.

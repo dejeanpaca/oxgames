@@ -8,7 +8,7 @@ INTERFACE
       {ox}
       oxuMaterial,
       {game}
-      uShared, uBase, uGame, uDropBlocks, uGrid, uBlocks;
+      uShared, uBase, uGame, uMain, uGrid, uBlocks;
 
 IMPLEMENTATION
 
@@ -71,7 +71,7 @@ begin
 end;
 
 INITIALIZATION
-   DropBlocks.OnInitScene.Add('drop_preview', @init);
+   main.OnInitScene.Add('drop_preview', @init);
    game.OnBeforeMove.Add(@beforeMove);
    game.OnMove.Add(@onMove);
 

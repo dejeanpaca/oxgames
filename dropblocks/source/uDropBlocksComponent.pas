@@ -10,7 +10,7 @@ INTERFACE
       oxuComponent, oxuComponentDescriptors,
       oxuMaterial,
       {game}
-      uGame, uDropBlocks;
+      uGame, uMain;
 
 CONST
    FIRST_KEY_TIMING = 0.350;
@@ -169,6 +169,6 @@ begin
 end;
 
 INITIALIZATION
-   DropBlocks.OnInitScene.Add('dropblocks.component', @init);
+   main.OnInitScene.Add('dropblocks.component', @init);
 
 END.
