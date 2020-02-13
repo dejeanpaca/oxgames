@@ -16,9 +16,6 @@ INTERFACE
       uBase, uGame, uDropBlocks, uBlocks, uShared;
 
 TYPE
-   {method which goes through current shape points in the grid}
-   TGridShapeWalker = procedure(x, y: loopint; element: PGridElement);
-
    { TGridComponent }
 
    TGridComponent = class(oxTComponent)
@@ -35,8 +32,6 @@ TYPE
       Descriptor: oxTComponentDescriptor;
 
       procedure Initialize();
-      procedure WalkShape(walker: TGridShapeWalker);
-      procedure WalkShape(atX, atY: loopint; walker: TGridShapeWalker);
    end;
 
 VAR
@@ -104,8 +99,6 @@ begin
          element^.Entity.SetPosition(i * gridSize.d * 2  - gridSize.halfW , j * gridSize.d * 2 - gridSize.halfH, 0);
          element^.Entity.SetScale(gridSize.d, gridSize.d, 1);
 
-         ClearMaterial(element^);
-
          gridEntity.Add(element^.Entity);
       end;
    end;
@@ -141,42 +134,6 @@ begin
    oxScene.Add(gridEntity);
 end;
 
-procedure TGridGlobal.WalkShape(walker: TGridShapeWalker);
-begin
-   grid.WalkShape(game.ShapePosition.x, game.ShapePosition.y, walker);
-end;
-
-procedure TGridGlobal.WalkShape(atX, atY: loopint; walker: TGridShapeWalker);
-var
-   x,
-   y,
-   px,
-   py: loopint;
-
-   element: PGridElement;
-   shapeGrid: PShapeGrid;
-
-begin
-   shapeGrid := game.GetShapeGrid();
-
-   for y := 0 to 3 do begin
-      for x := 0 to 3 do begin
-         if(shapeGrid^.GetValue(x, y) = 0) then
-            continue;
-
-         px := atX + x;
-         py := atY + y;
-
-         if(py < GRID_HEIGHT) then begin
-            element := game.Grid.GetPoint(px, py);
-
-            if(element <> nil) then
-               walker(px, py, element);
-         end;
-      end;
-   end;
-end;
-
 procedure beforeMoveShape({%H-}x, {%H-}y: loopint; element: PGridElement);
 begin
    if(not element^.IsShape()) then
@@ -189,7 +146,7 @@ end;
 
 procedure beforeMove();
 begin
-   grid.walkShape(@beforeMoveShape);
+   game.WalkShape(@beforeMoveShape);
 end;
 
 procedure afterMoveShape({%H-}x, {%H-}y: loopint; element: PGridElement);
@@ -202,7 +159,7 @@ end;
 
 procedure afterMove();
 begin
-   grid.walkShape(@afterMoveShape);
+   game.WalkShape(@afterMoveShape);
 end;
 
 procedure lockShape({%H-}x, {%H-}y: loopint; element: PGridElement);
@@ -212,7 +169,7 @@ end;
 
 procedure onLock();
 begin
-   grid.WalkShape(@lockShape);
+   game.WalkShape(@lockShape);
 end;
 
 INITIALIZATION

@@ -14,8 +14,7 @@ INTERFACE
 TYPE
    TGridFlag = (
       GRID_ELEMENT_SOLID,
-      GRID_ELEMENT_SHAPE,
-      GRID_ELEMENT_PREVIEW
+      GRID_ELEMENT_SHAPE
    );
 
    TGridFlags = set of TGridFlag;
@@ -33,7 +32,6 @@ TYPE
       function IsSolid(): boolean;
       function IsShape(): boolean;
       function IsEmpty(): boolean;
-      function IsPreview(): boolean;
    end;
 
    TGridArea = array[0..GRID_HEIGHT - 1, 0..GRID_WIDTH - 1] of TGridElement;
@@ -49,6 +47,9 @@ TYPE
       function GetPoint(x, y: loopint): PGridElement;
       function ValidPoint(x, y: loopint): boolean;
    end;
+
+   {method which goes through current shape points in the grid}
+   TGridShapeWalker = procedure(x, y: loopint; element: PGridElement);
 
    TGameState = (
       GAME_BLOCK_DROPPING,
@@ -134,6 +135,9 @@ TYPE
       procedure Update(dT: single);
 
       procedure New();
+
+      procedure WalkShape(walker: TGridShapeWalker);
+      procedure WalkShape(atX, atY: loopint; walker: TGridShapeWalker);
    end;
 
 VAR
@@ -178,15 +182,22 @@ begin
    Result := not ((GRID_ELEMENT_SOLID in Flags) or (GRID_ELEMENT_SHAPE in Flags));
 end;
 
-function TGridElement.IsPreview(): boolean;
-begin
-   Result := GRID_ELEMENT_PREVIEW in Flags;
-end;
-
 { TGrid }
 
 procedure TGrid.New();
+var
+   i,
+   j: loopint;
+
 begin
+   for i := 0 to GRID_WIDTH - 1 do begin
+      for j := 0 to GRID_HEIGHT - 1 do begin
+         Area[j][i].Flags := [];
+         Area[j][i].Shape := -1;
+
+         ClearMaterial(Area[j][i]);
+      end;
+   end;
 end;
 
 procedure TGrid.SetPoint(x, y: loopint; what: TGridFlags);
@@ -481,12 +492,12 @@ begin
 
    for i := 0 to 3 do begin
       for j := 0 to 3 do begin
-         py := y + i;
-         px := x + j;
-
          {empty element, we do not check it}
          if(shapeGrid^.GetValue(j, i) = 0) then
             continue;
+
+         py := y + i;
+         px := x + j;
 
          {we're going out of bounds, we cannot fit}
          if(py < 0) or (px < 0) or (px >= GRID_WIDTH) then
@@ -538,6 +549,42 @@ begin
    GetNextBlock();
 
    OnNew.Call();
+end;
+
+procedure TGame.WalkShape(walker: TGridShapeWalker);
+begin
+   WalkShape(game.ShapePosition.x, game.ShapePosition.y, walker);
+end;
+
+procedure TGame.WalkShape(atX, atY: loopint; walker: TGridShapeWalker);
+var
+   x,
+   y,
+   px,
+   py: loopint;
+
+   element: PGridElement;
+   shapeGrid: PShapeGrid;
+
+begin
+   shapeGrid := game.GetShapeGrid();
+
+   for y := 0 to 3 do begin
+      for x := 0 to 3 do begin
+         if(shapeGrid^.GetValue(x, y) = 0) then
+            continue;
+
+         px := atX + x;
+         py := atY + y;
+
+         if(py < GRID_HEIGHT) then begin
+            element := game.Grid.GetPoint(px, py);
+
+            if(element <> nil) then
+               walker(px, py, element);
+         end;
+      end;
+   end;
 end;
 
 INITIALIZATION

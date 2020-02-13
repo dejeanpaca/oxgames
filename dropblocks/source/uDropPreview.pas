@@ -14,8 +14,8 @@ IMPLEMENTATION
 
 VAR
    PreviewMaterials: array[0..MAX_SHAPES - 1] of oxTMaterial;
-   previousX: loopint;
-   previousY: loopint = GRID_HEIGHT;
+   previousX,
+   previousY: loopint;
 
 procedure init();
 var
@@ -33,10 +33,8 @@ end;
 
 procedure unmarkPreview({%H-}x, {%H-}y: loopint; element: PGridElement);
 begin
-   if(element^.IsPreview()) then begin
-      Exclude(element^.Flags, GRID_ELEMENT_PREVIEW);
+   if(not element^.IsSolid()) then
       ClearMaterial(element^);
-   end;
 end;
 
 procedure beforeMove();
@@ -44,15 +42,13 @@ begin
    if(previousY >= GRID_HEIGHT) then
       exit;
 
-   grid.WalkShape(previousX, previousY, @unmarkPreview);
+   game.WalkShape(previousX, previousY, @unmarkPreview);
 end;
 
 procedure markPreview({%H-}x, {%H-}y: loopint; element: PGridElement);
 begin
-   if(element^.IsPreview() or element^.IsShape()) then
+   if(element^.IsShape()) then
       exit;
-
-   element^.Flags := [GRID_ELEMENT_PREVIEW];
 
    SetMaterial(element^, PreviewMaterials[game.CurrentShape]);
 end;
@@ -68,10 +64,10 @@ begin
    if(y = game.ShapePosition.y) then
       exit;
 
+   game.WalkShape(game.ShapePosition.x, y, @markPreview);
+
    previousX := game.ShapePosition.x;
    previousY := y;
-
-   grid.WalkShape(previousX, y, @markPreview);
 end;
 
 procedure onNew();
