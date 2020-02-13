@@ -21,8 +21,6 @@ VAR
 procedure dbInitialize();
 procedure dbDeinitialize();
 
-function CreateMaterial(const name: string; color: TColor4ub; tex: oxTTexture = nil): oxTMaterial;
-
 IMPLEMENTATION
 
 procedure dbInitialize();
@@ -35,16 +33,6 @@ procedure dbDeinitialize();
 begin
    DropBlocks.Init.dCall();
    log.i('db > deinitialized');
-end;
-
-function CreateMaterial(const name: string; color: TColor4ub; tex: oxTTexture): oxTMaterial;
-begin
-   Result := oxMaterial.Make();
-   Result.Name := name;
-   Result.SetColor('color', color);
-
-   if(tex <> nil) then
-      Result.SetTexture('texture', tex);
 end;
 
 INITIALIZATION

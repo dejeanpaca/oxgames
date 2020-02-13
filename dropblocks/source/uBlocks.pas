@@ -9,7 +9,7 @@ INTERFACE
       oxuPaths, oxuMaterial, oxuTexture, oxuTextureGenerate,
       oxuPrimitiveModelComponent,
       {game}
-      uDropBlocks, uBase;
+      uDropBlocks, uBase, uShared;
 
 TYPE
 

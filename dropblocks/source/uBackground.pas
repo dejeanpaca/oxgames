@@ -10,7 +10,7 @@ INTERFACE
       oxuProjection, oxuProjectionType,
       oxuScene, oxuEntity, oxuPrimitiveModelComponent, oxuPrimitiveModelEntities,
       {game}
-      uDropBlocks;
+      uDropBlocks, uShared;
 
 IMPLEMENTATION
 

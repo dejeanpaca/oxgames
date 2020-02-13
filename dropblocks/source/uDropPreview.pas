@@ -8,7 +8,7 @@ INTERFACE
       {ox}
       oxuMaterial,
       {game}
-      uBase, uGame, uDropBlocks, uGrid, uBlocks;
+      uShared, uBase, uGame, uDropBlocks, uGrid, uBlocks;
 
 IMPLEMENTATION
 
