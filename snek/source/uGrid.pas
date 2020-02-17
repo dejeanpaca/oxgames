@@ -21,7 +21,6 @@ TYPE
       public
 
       procedure Load(); override;
-      procedure Update(); override;
 
       function GetDescriptor(): oxPComponentDescriptor; override;
    end;
@@ -52,20 +51,6 @@ VAR
       Snake: oxTMaterial;
    end;
 
-function GetMaterial(x, y: loopint): oxTMaterial;
-begin
-   Result := nil;
-
-   if(not game.Grid.GetPoint(x, y)^.IsNibble()) then begin
-      if(game.Grid.GetPoint(x, y)^.IsSolid()) then
-         Result := Materials.Solid;
-   end else
-      Result := Materials.Nibble;
-
-   if(Result = nil) then
-      Result := oxMaterial.Default;
-end;
-
 procedure TGridComponent.Load();
 var
    tex: oxTTexture;
@@ -82,61 +67,6 @@ begin
    Materials.Solid := CreateMaterial('Solid', cWhite4ub);
    Materials.Nibble := CreateMaterial('Nibble', TColor4ub.Create(255, 255, 0, 255));
    Materials.Snake := CreateMaterial('Solid', cBlue4ub);
-end;
-
-function getElementMesh(x, y: loopint; out mesh: oxTPrimitiveModelComponent): PGridElement;
-begin
-   mesh := nil;
-   Result := game.Grid.GetPoint(x, y);
-
-   if(Result <> nil) and (Result^.Entity <> nil) then
-      mesh := oxTPrimitiveModelComponent(Result^.Entity.GetComponent('oxTPrimitiveModelComponent'));
-end;
-
-procedure TGridComponent.Update();
-var
-   x,
-   y: loopint;
-
-   mesh: oxTPrimitiveModelComponent;
-   element: PGridElement;
-
-begin
-   if(game.Grid.Dirty) then begin
-      for x := 0 to game.Grid.Width - 1 do begin
-         for y := 0 to game.Grid.Height - 1 do begin
-            element := getElementMesh(x, y, mesh);
-
-            if element^.IsDirty() then begin
-               if(element^.IsEmpty()) then
-                  element^.Entity.SetEnabled(false)
-               else begin
-                  element^.Entity.SetEnabled(true);
-
-                  if(mesh <> nil) then
-                     mesh.Model.SetMaterial(GetMaterial(x, y));
-               end;
-            end;
-         end;
-      end;
-
-      game.Grid.Dirty := false;
-   end;
-
-   if(game.Snake.Dirty) then begin
-      for x := 0 to game.Snake.Length - 1 do begin
-         element := getElementMesh(game.Snake.Body[x].x, game.Snake.Body[x].y, mesh);
-
-         if(element <> nil) then begin
-            element^.Entity.SetEnabled(true);
-
-            if(mesh <> nil) then
-               mesh.Model.SetMaterial(Materials.Snake);
-         end;
-      end;
-
-      game.Snake.Dirty := false;
-   end;
 end;
 
 function TGridComponent.GetDescriptor(): oxPComponentDescriptor;
@@ -189,6 +119,15 @@ begin
          element^.Entity.SetPosition(i * gridSize.d * 2  - gridSize.halfW , j * gridSize.d * 2 - gridSize.halfH, 0);
          element^.Entity.SetScale(gridSize.d, gridSize.d, 1);
 
+         element^.Mesh := oxTPrimitiveModelComponent(element^.Entity.GetComponent('oxTPrimitiveModelComponent'));
+
+         if(element^.IsSolid()) then
+            SetMaterial(element^, Materials.Solid)
+         else if(element^.IsNibble()) then
+            SetMaterial(element^, Materials.Nibble)
+         else
+            ClearMaterial(element^);
+
          gridEntity.Add(element^.Entity);
       end;
    end;
@@ -206,7 +145,52 @@ begin
    gridEntity.Add(gridBackground);
 end;
 
+procedure onBeforeMove();
+var
+   i: loopint;
+   x, y: loopint;
+   point: PGridElement;
+
+begin
+   for i := 0 to game.Snake.Length -1 do begin
+      x := game.Snake.Body[i].x;
+      y := game.Snake.Body[i].y;
+
+      point := game.Grid.GetPoint(x, y);
+      ClearMaterial(point^);
+   end;
+end;
+
+procedure onAfterMove();
+var
+   i: loopint;
+   x, y: loopint;
+   point: PGridElement;
+
+begin
+   for i := 0 to game.Snake.Length -1 do begin
+      x := game.Snake.Body[i].x;
+      y := game.Snake.Body[i].y;
+
+      point := game.Grid.GetPoint(x, y);
+      SetMaterial(point^, Materials.Snake);
+   end;
+end;
+
+procedure createNibble();
+var
+  point: PGridElement;
+
+begin
+   point := game.Grid.GetPoint(game.LastNibble.x, game.LastNibble.y);
+
+   SetMaterial(point^, Materials.Nibble);
+end;
+
 INITIALIZATION
    game.OnNew.Add(@onNew);
+   game.OnCreateNibble.Add(@createNibble);
+   game.OnBeforeMove.Add(@onBeforeMove);
+   game.OnAfterMove.Add(@onAfterMove);
 
 END.
