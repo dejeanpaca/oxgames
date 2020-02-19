@@ -5,7 +5,8 @@ INTERFACE
 
    USES
       uStd, uLog, oxuTimer,
-      oxuEntity;
+      {ox}
+      oxuEntity, oxuPrimitiveModelComponent, oxuMaterial;
 
 CONST
    GRID_WIDTH = 75;
@@ -16,8 +17,6 @@ CONST
 
    GRID_ELEMENT_SOLID   = $01;
    GRID_ELEMENT_NIBBLE  = $02;
-   {is this element dirty and needs to have it's materials updated}
-   GRID_ELEMENT_DIRTY  = $04;
 
 TYPE
    PGridElement = ^TGridElement;
@@ -35,10 +34,10 @@ TYPE
    TGridElement = record
       Properties: TBitSet;
       Entity: oxTEntity;
+      Mesh: oxTPrimitiveModelComponent;
 
       function IsNibble(): boolean;
       function IsSolid(): boolean;
-      function IsDirty(): boolean;
       function IsEmpty(): boolean;
    end;
 
@@ -55,15 +54,11 @@ TYPE
       {grid area}
       Area: TGridArea;
 
-      {mark the grid as dirty (if we moved a snake, or added a nibble or something else)}
-      Dirty: boolean;
-
       procedure Create(w, h: loopint);
       procedure CreateWalls();
 
       procedure SetPoint(x, y: loopint; what: TBitSet);
       procedure MarkNibble(x, y: loopint);
-      procedure MarkDirty(x, y: loopint);
       procedure MarkSolid(x, y: loopint);
       function GetPoint(x, y: loopint): PGridElement;
       function ValidPoint(x, y: loopint): boolean;
@@ -90,8 +85,6 @@ TYPE
 
       {is the snake still alive}
       Alive: boolean;
-      {snake body is dirty and we have to readjust the rendering}
-      Dirty: boolean;
 
       {what direction the snake is currently going in}
       CurrentDirection,
@@ -127,7 +120,16 @@ TYPE
 
       OnNew,
       OnCollision,
-      OnNibbleEaten: TProcedures;
+      OnNibbleEaten,
+      OnCreateNibble,
+      OnBeforeMove,
+      OnAfterMove: TProcedures;
+
+      {where the last nibble was generated or eaten}
+      LastNibble: record
+         x,
+         y: loopint;
+      end;
 
       procedure New();
 
@@ -138,7 +140,26 @@ TYPE
 VAR
    game: TGame;
 
+procedure SetMaterial(element: TGridElement; material: oxTMaterial);
+procedure ClearMaterial(element: TGridElement);
+
 IMPLEMENTATION
+
+procedure SetMaterial(element: TGridElement; material: oxTMaterial);
+begin
+   if(element.Mesh <> nil) then begin
+      if(material <> nil) then begin
+         element.Mesh.Model.SetMaterial(material);
+         element.Entity.SetEnabled(true);
+      end else
+         element.Entity.SetEnabled(false);
+   end;
+end;
+
+procedure ClearMaterial(element: TGridElement);
+begin
+   SetMaterial(element, nil);
+end;
 
 { TSnakePart }
 
@@ -167,8 +188,6 @@ begin
    Length := 3;
    CurrentDirection := SNAKE_DIRECTION_RIGHT;
    NextDirection := SNAKE_DIRECTION_RIGHT;
-
-   Dirty := true;
 end;
 
 procedure TSnake.Move();
@@ -182,6 +201,8 @@ var
 begin
    if(not Alive) then
       exit;
+
+   game.OnBeforeMove.Call();
 
    mX := 0;
    mY := 0;
@@ -205,9 +226,6 @@ begin
       end;
    end;
 
-   game.Grid.MarkDirty(Body[0].x, Body[0].y);
-   game.Grid.MarkDirty(Body[head].x, Body[head].y);
-
    inc(Body[Length - 1].x, mX);
    inc(Body[Length - 1].y, my);
 
@@ -227,7 +245,7 @@ begin
    if(pHead^.y >= game.Grid.Height) then
       pHead^.y := 0;
 
-   game.Snake.Dirty := true;
+   game.OnAfterMove.Call();
 
    {checks new position}
 
@@ -312,11 +330,6 @@ begin
    Result := Properties.IsSet(GRID_ELEMENT_SOLID);
 end;
 
-function TGridElement.IsDirty(): boolean;
-begin
-   Result := Properties.IsSet(GRID_ELEMENT_DIRTY);
-end;
-
 function TGridElement.IsEmpty(): boolean;
 begin
    Result := not (Properties.IsSet(GRID_ELEMENT_SOLID) or Properties.IsSet(GRID_ELEMENT_NIBBLE));
@@ -362,6 +375,11 @@ begin
 
       Grid.MarkNibble(x, y);
 
+      game.LastNibble.x := x;
+      game.LastNibble.y := y;
+
+      game.OnCreateNibble.Call();
+
       Inc(NibbleCount);
    end;
 end;
@@ -379,6 +397,9 @@ begin
 
       {grow snake}
       Snake.Grow();
+
+      LastNibble.x := x;
+      LastNibble.y := y;
 
       OnNibbleEaten.Call();
    end;
@@ -398,11 +419,9 @@ begin
 
    for y := 0 to h - 1 do begin
       for x := 0 to w - 1 do begin
-         Area[y][x].Properties.Prop(GRID_ELEMENT_DIRTY);
+         Area[y][x].Properties := 0;
       end;
    end;
-
-   Dirty := true;
 end;
 
 procedure TGrid.CreateWalls();
@@ -424,17 +443,11 @@ end;
 procedure TGrid.SetPoint(x, y: loopint; what: TBitSet);
 begin
    Area[y][x].Properties.Prop(what);
-   Dirty := true;
 end;
 
 procedure TGrid.MarkNibble(x, y: loopint);
 begin
    SetPoint(x, y, GRID_ELEMENT_NIBBLE);
-end;
-
-procedure TGrid.MarkDirty(x, y: loopint);
-begin
-   SetPoint(x, y, GRID_ELEMENT_DIRTY);
 end;
 
 procedure TGrid.MarkSolid(x, y: loopint);
@@ -461,9 +474,13 @@ begin
 end;
 
 INITIALIZATION
-   game.OnNew.Initialize(game.OnNew);
-   game.OnCollision.Initialize(game.OnCollision);
-   game.OnNibbleEaten.Initialize(game.OnNibbleEaten);
+   TProcedures.Initialize(game.OnNew);
+   TProcedures.Initialize(game.OnCollision);
+   TProcedures.Initialize(game.OnNibbleEaten);
+   TProcedures.Initialize(game.OnCreateNibble);
+
+   TProcedures.Initialize(game.OnBeforeMove);
+   TProcedures.Initialize(game.OnAfterMove);
 
    game.OnNibbleEaten.Add(@nibbleEaten);
 

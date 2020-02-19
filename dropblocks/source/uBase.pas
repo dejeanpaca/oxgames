@@ -24,6 +24,7 @@ CONST
    MAX_SPEED = 9;
 
    SHAPE_LOCK_TIME = 1.0;
+   LINE_CLEAR_ANIMATION_TIME = 1.0;
 
 TYPE
    PShapeGrid = ^TShapeGrid;

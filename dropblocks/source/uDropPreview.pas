@@ -25,9 +25,9 @@ var
 begin
    for i := 0 to MAX_SHAPES - 1 do begin
       color := Shapes.Colors[i];
-      color[3] := 191;
+      color[3] := 91;
 
-      PreviewMaterials[i] := CreateMaterial('preview_' + sf(i), color, nil);
+      PreviewMaterials[i] := CreateMaterial('preview_' + sf(i), color, blocks.BlockTexture);
    end;
 end;
 

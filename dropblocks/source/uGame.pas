@@ -66,7 +66,9 @@ TYPE
       OnBeforeMove,
       {called after current shape is moved/rotated}
       OnMove,
-      OnLock: TProcedures;
+      OnLock,
+      OnStateChange,
+      OnUpdate: TProcedures;
 
       Grid: TGrid;
       {index into the current shape}
@@ -77,7 +79,6 @@ TYPE
       ShapePosition: oxTPoint;
 
       LastUpdate,
-      LineClearTime,
       ShapeLockTime: single;
 
       CurrentLevel: loopint;
@@ -89,12 +90,6 @@ TYPE
 
          {elapsed animation time}
          Elapsed: single;
-      end;
-
-      LineClear: record
-         fStart,
-         fEnd,
-         fCount: loopint;
       end;
 
       function GetSpeed(): single;
@@ -122,15 +117,14 @@ TYPE
       function FindShapeLowestPosition(): loopint;
 
       procedure LockShape();
-      {clear full lines}
-      procedure CheckClearLines();
-      procedure ClearLines();
 
       procedure SetShapePosition(x, y: loopint);
       procedure SetRotation(rotation: loopint);
 
       {checks if a shape can fit at the position and rotation}
       function CanFitShape(x, y, rotation: loopint): boolean;
+      {checks if the specified line is full}
+      function IsLineFull(y: loopint): boolean;
 
       procedure Update(dT: single);
 
@@ -138,6 +132,8 @@ TYPE
 
       procedure WalkShape(walker: TGridShapeWalker);
       procedure WalkShape(atX, atY: loopint; walker: TGridShapeWalker);
+
+      procedure SetState(newState: TGameState);
    end;
 
 VAR
@@ -348,94 +344,6 @@ begin
    end;
 
    OnLock.Call();
-
-   {check if any lines can be cleared}
-   CheckClearLines();
-
-   GetNextBlock();
-end;
-
-procedure TGame.CheckClearLines();
-var
-   x,
-   y,
-   prevY: loopint;
-   element,
-   prevElement: PGridElement;
-
-   full: boolean;
-
-begin
-   LineClear.fStart := -1;
-   LineClear.fEnd := -1;
-   LineClear.fCount := 0;
-
-   for y := 0 to GRID_HEIGHT -1 do begin
-      full := true;
-
-      for x := 0 to GRID_WIDTH - 1 do begin
-          element := Grid.GetPoint(x, y);
-
-          if(not (GRID_ELEMENT_SOLID in element^.Flags)) then begin
-             full := false;
-             break;
-          end;
-      end;
-
-      if(full) then begin
-         if(LineClear.fStart = -1) then
-            LineClear.fStart := y;
-
-         if(LineClear.fStart <> -1) then
-            LineClear.fEnd := LineClear.fStart;
-
-         inc(LineClear.fCount);
-      end;
-   end;
-
-   if(LineClear.fCount > 0) then begin
-      {clear lines}
-      for y := LineClear.fStart to LineClear.fEnd do begin
-         for x := 0 to GRID_WIDTH -1 do begin
-            element := Grid.GetPoint(x, y);
-
-            Exclude(element^.Flags, GRID_ELEMENT_SOLID);
-         end;
-      end;
-
-      {clear lines}
-      for y := LineClear.fStart to GRID_HEIGHT - 1 - LineClear.fCount do begin
-         for x := 0 to GRID_WIDTH -1 do begin
-            element := Grid.GetPoint(x, y);
-            prevY := y + LineClear.fCount;
-
-            if(prevY < GRID_HEIGHT) then
-               prevElement := Grid.GetPoint(x, prevY)
-            else
-               prevElement := nil;
-
-            if(prevElement <> nil) then begin
-               element^.Flags := prevElement^.Flags;
-               element^.Shape := prevElement^.Shape;
-
-               if(prevElement^.Entity.Enabled) then
-                  SetMaterial(element^, prevElement^.Mesh.Model.Material)
-               else
-                  ClearMaterial(element^);
-            end else begin
-               ClearMaterial(element^);
-               element^.Flags := [];
-               element^.Shape := -1;
-            end;
-         end;
-      end;
-   end;
-end;
-
-procedure TGame.ClearLines();
-begin
-   State := GAME_LR;
-   LineClearTime := 0.0;
 end;
 
 procedure TGame.SetShapePosition(x, y: loopint);
@@ -505,11 +413,24 @@ begin
    end;
 end;
 
+function TGame.IsLineFull(y: loopint): boolean;
+var
+   x: loopint;
+
+begin
+   Result := true;
+
+   for x := 0 to GRID_WIDTH - 1 do begin
+       if(not Grid.GetPoint(x, y)^.IsSolid()) then
+          exit(false);
+   end;
+end;
+
 procedure TGame.Update(dT: single);
 begin
-   if(State = GAME_BLOCK_DROPPING) then begin
-      LastUpdate := LastUpdate + dT;
+   LastUpdate := LastUpdate + dT;
 
+   if(State = GAME_BLOCK_DROPPING) then begin
       if(LastUpdate > GetSpeed()) then begin
          LastUpdate := LastUpdate - GetSpeed();
 
@@ -525,9 +446,9 @@ begin
       end else
          {reset shape lock time since we're not hitting anything}
          ShapeLockTime := 0;
-   end else if (State = GAME_LR) then begin
-      {line clear}
    end;
+
+   OnUpdate.Call();
 end;
 
 procedure TGame.New();
@@ -576,10 +497,19 @@ begin
    end;
 end;
 
+procedure TGame.SetState(newState: TGameState);
+begin
+   State := newState;
+   LastUpdate := 0.0;
+   OnStateChange.Call();
+end;
+
 INITIALIZATION
-   game.OnNew.Initialize(game.OnNew);
-   game.OnBeforeMove.Initialize(game.OnBeforeMove);
-   game.OnMove.Initialize(game.OnMove);
-   game.OnLock.Initialize(game.OnLock);
+   TProcedures.Initialize(game.OnNew);
+   TProcedures.Initialize(game.OnBeforeMove);
+   TProcedures.Initialize(game.OnMove);
+   TProcedures.Initialize(game.OnLock);
+   TProcedures.Initialize(game.OnStateChange);
+   TProcedures.Initialize(game.OnUpdate);
 
 END.
