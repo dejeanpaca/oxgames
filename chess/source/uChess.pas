@@ -8,7 +8,7 @@ INTERFACE
 
 TYPE
    TPieceType = (
-      PIECE_NONE
+      PIECE_NONE,
       PIECE_PAWN,
       PIECE_KNIGHT,
       PIECE_BISHOP,
@@ -42,8 +42,8 @@ TYPE
    end;
 
    TMove = record
-      From: TPiecePosition;
-      To: TPiecePosition;
+      From,
+      Target: TPiecePosition;
       Piece: TPieceType;
       Action: TMoveAction;
    end;
@@ -68,9 +68,14 @@ IMPLEMENTATION
 
 { TChess }
 
-function GetMoves(x, y: loopint): TMovesList;
+function TChess.GetMoves(x, y: loopint): TMovesList;
 begin
    TMovesList.Initialize(Result);
+end;
+
+function TChess.GetAllMoves(player: TPlayer): TMovesList;
+begin
+
 end;
 
 END.
