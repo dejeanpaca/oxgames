@@ -9,7 +9,9 @@ INTERFACE
       oxuWindow, oxuwndAbout,
       {ui}
       uiWidgets,
-      wdguMenubar, uiuContextMenu;
+      wdguMenubar, uiuContextMenu,
+      {game}
+      uAbout;
 
 VAR
    menubar: wdgTMenubar;
