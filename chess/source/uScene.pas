@@ -4,8 +4,11 @@ UNIT uScene;
 INTERFACE
 
    USES
-      oxuScene, oxuSceneLoader, oxuProjectionType, oxuProjection,
+      uColors,
+      {ox}
+      oxuProjectionType, oxuProjection,
       oxuCameraComponent, oxuCameraEntity,
+      oxuScene, oxuSceneLoader, oxuWorld,
       {game}
       uBoard, uGame, uChessComponent;
 
@@ -18,6 +21,7 @@ var
 
 begin
    oxScene.Empty();
+   oxScene.World.ClearColor.Assign(64, 64, 64, 255);
 
    camera := oxCameraEntity.CreateInScene();
 
