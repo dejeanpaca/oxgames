@@ -6,7 +6,7 @@ INTERFACE
    USES
       uMain,
       {ox}
-      oxuTypes, oxuWindow,
+      oxuTypes, oxuWindow, oxuSceneRender,
       {ui}
       uiWidgets, uiuWindow, uiuTypes,
       wdguSceneRender,
@@ -29,6 +29,9 @@ begin
    {move}
    SceneView.Move(oxPoint(0, menubar.BelowOf()));
    SceneView.Resize(oxWindow.Current.Dimensions.w, menubar.BelowOf() + 1);
+
+   {render via scene view, not window renderer}
+   oxSceneRender.RenderAutomatically := false;
 end;
 
 procedure deinitialize();
