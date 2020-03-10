@@ -75,7 +75,7 @@ end;
 
 function TChess.GetAllMoves(player: TPlayer): TMovesList;
 begin
-
+   TMovesList.Initialize(Result);
 end;
 
 END.
