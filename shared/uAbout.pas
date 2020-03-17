@@ -14,6 +14,8 @@ procedure initialize();
 begin
    oxwndAbout.ResetLinks();
 
+   oxwndAbout.Description := 'Some simple games for the oX engine';
+
    oxwndAbout.AddLink('=> Github', 'https://github.com/dejeanpaca/oxgames');
 end;
 
