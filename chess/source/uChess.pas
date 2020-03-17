@@ -61,6 +61,19 @@ TYPE
       function GetAllMoves(player: TPlayer): TMovesList;
    end;
 
+CONST
+   PIECE_TYPE_MAX = loopint(PIECE_KING);
+
+   PIECE_NAMES: array[0..PIECE_TYPE_MAX] of StdString = (
+      'none',
+      'pawn',
+      'knight',
+      'bishop',
+      'rook',
+      'queen',
+      'king'
+   );
+
 VAR
    chess: TChess;
 
