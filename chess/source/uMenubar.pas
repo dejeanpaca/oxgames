@@ -4,14 +4,14 @@ UNIT uMenubar;
 INTERFACE
 
    USES
-      uMain, appuActionEvents,
+      appuActionEvents,
       {ox}
       oxuWindow, oxuwndAbout,
       {ui}
       uiWidgets,
       wdguMenubar, uiuContextMenu,
       {game}
-      uAbout;
+      uMain, uAbout;
 
 VAR
    menubar: wdgTMenubar;
