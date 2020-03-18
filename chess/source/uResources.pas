@@ -4,11 +4,12 @@ UNIT uResources;
 INTERFACE
 
    USES
-      uStd,
+      uStd, uColors,
       {ox}
-      oxuModel, oxuModelFile, oxuPaths,
+      oxuPaths,
+      oxuModel, oxuModelFile, oxuMaterial,
       {game}
-      uChess, uMain;
+      uChess, uMain, uShared;
 
 TYPE
    TPieceModel = record
@@ -16,8 +17,18 @@ TYPE
       White: oxTModel;
    end;
 
+   { TResources }
+
    TResources = record
       Models: array[0..PIECE_TYPE_MAX] of TPieceModel;
+
+      Materials: record
+         Board,
+         WhiteTile,
+         BlackTile: oxTMaterial;
+      end;
+
+      procedure Initialize();
    end;
 
 VAR
@@ -25,26 +36,37 @@ VAR
 
 IMPLEMENTATION
 
-procedure initialize();
+{ TResources }
+
+procedure TResources.Initialize();
 var
    i: loopint;
    pieceName: StdString;
 
 begin
    {piece type none has no model}
-   resources.Models[0].Black := nil;
-   resources.Models[1].White := nil;
+   Models[0].Black := nil;
+   Models[1].White := nil;
 
    {load models for all piece types}
    for i := 1 to PIECE_TYPE_MAX do begin
       pieceName := PIECE_NAMES[i];
 
-      resources.Models[i].Black :=
+      Models[i].Black :=
          oxfModel.Read(oxPaths.Find('models' + DirectorySeparator + 'black' + DirectorySeparator + pieceName + '.obj'));
 
-      resources.Models[i].White :=
+      Models[i].White :=
          oxfModel.Read(oxPaths.Find('models' + DirectorySeparator + 'white' + DirectorySeparator + pieceName + '.obj'));
    end;
+
+   Materials.Board := CreateMaterial('black_tile', TColor4ub.Create(127, 127, 127, 255));
+   Materials.BlackTile := CreateMaterial('black_tile', cBlack4ub);
+   Materials.WhiteTile := CreateMaterial('white_tile', cWhite4ub);
+end;
+
+procedure initialize();
+begin
+   resources.Initialize();
 end;
 
 procedure deinitialize();

@@ -12,7 +12,7 @@ INTERFACE
       oxuCameraComponent,
       oxuMaterial, oxumPrimitive, oxuPrimitiveModelComponent,
       {game}
-      uGame, uShared;
+      uGame;
 
 TYPE
    { TBoardComponent }
@@ -41,14 +41,6 @@ IMPLEMENTATION
 
 VAR
    boardEntity: oxTEntity;
-
-   Materials: record
-      Board,
-      WhiteTile,
-      BlackTile,
-      WhitePiece,
-      BlackPiece: oxTMaterial;
-   end;
 
 procedure TBoardComponent.Load();
 begin
