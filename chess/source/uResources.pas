@@ -21,6 +21,7 @@ TYPE
 
    TResources = record
       Models: array[0..PIECE_TYPE_MAX] of TPieceModel;
+      Board: oxTModel;
 
       Materials: record
          Board,
@@ -47,6 +48,9 @@ begin
    {piece type none has no model}
    Models[0].Black := nil;
    Models[1].White := nil;
+
+   Board :=
+      oxfModel.Read(oxPaths.Find('models' + DirectorySeparator + 'board' + DirectorySeparator + 'board.obj'));
 
    {load models for all piece types}
    for i := 1 to PIECE_TYPE_MAX do begin
