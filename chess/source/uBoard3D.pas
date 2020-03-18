@@ -3,8 +3,12 @@ UNIT uBoard3D;
 
 INTERFACE
 
-TYPE
+   USES
+      oxuProjectionType, oxuProjection,
+      oxuCameraComponent,
+      uScene;
 
+TYPE
    { TBoard3D }
 
    TBoard3D = record
@@ -19,8 +23,12 @@ IMPLEMENTATION
 { TBoard3D }
 
 procedure TBoard3D.Activate();
-begin
+var
+   projection: oxPProjection;
 
+begin
+   projection := scene.Camera.GetProjection();
+   projection^.DefaultPerspective();
 end;
 
 END.

@@ -4,37 +4,41 @@ UNIT uScene;
 INTERFACE
 
    USES
-      uColors,
+      uStd, uColors,
       {ox}
       oxuProjectionType, oxuProjection,
       oxuCameraComponent, oxuCameraEntity,
       oxuScene, oxuSceneLoader, oxuWorld,
       {game}
-      uBoard, uGame, uChessComponent;
+      uGame;
+
+TYPE
+   TScene = record
+      OnInitialize: TProcedures;
+      Camera: oxTCameraComponent;
+   end;
+
+VAR
+   scene: TScene;
 
 IMPLEMENTATION
 
 procedure init();
 var
    projection: oxPProjection;
-   camera: oxTCameraComponent;
 
 begin
    oxScene.Empty();
    oxScene.World.ClearColor.Assign(64, 64, 64, 255);
 
-   camera := oxCameraEntity.CreateInScene();
-
-   projection := camera.GetProjection();
-   projection^.DefaultOrtho();
-
-   board.Initialize();
-   chessComponent.Initialize();
+   scene.Camera := oxCameraEntity.CreateInScene();
+   scene.OnInitialize.Call();
 
    game.New();
 end;
 
 INITIALIZATION
    oxSceneLoader.OnLoaded.Add(@init);
+   TProcedures.Initialize(scene.OnInitialize);
 
 END.

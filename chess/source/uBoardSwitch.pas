@@ -8,8 +8,10 @@ INTERFACE
       appuEvents, appuActionEvents,
       {games}
       uMain,
+      uBoard,
       uBoard2D,
-      uBoard3D;
+      uBoard3D,
+      uScene;
 
 VAR
    ACTION_SWITCH_2D,
@@ -28,15 +30,17 @@ end;
 procedure switch2d();
 begin
    main.Board3D := false;
+   board.Entity.Empty();
 end;
 
 procedure switch3d();
 begin
    main.Board3D := true;
+   board.Entity.Empty();
 end;
 
 INITIALIZATION
-   main.Init.Add('board.switch', @initialize);
+   scene.OnInitialize.Add(@initialize);
 
    ACTION_SWITCH_2D := appActionEvents.SetCallback(@switch2d);
    ACTION_SWITCH_3D := appActionEvents.SetCallback(@switch3d);

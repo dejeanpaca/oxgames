@@ -10,7 +10,7 @@ INTERFACE
       oxuComponent, oxuComponentDescriptors,
       oxuMaterial,
       {game}
-      uGame;
+      uGame, uScene;
 
 TYPE
    { TChessComponent }
@@ -33,6 +33,7 @@ TYPE
 
    TChessComponentGlobal = record
       Descriptor: oxTComponentDescriptor;
+      Entity: oxTEntity;
 
       procedure Initialize();
    end;
@@ -41,9 +42,6 @@ VAR
    chessComponent: TChessComponentGlobal;
 
 IMPLEMENTATION
-
-VAR
-   chessEntity: oxTEntity;
 
 { TChessComponentGlobal }
 
@@ -90,10 +88,18 @@ begin
    chessComponent.Descriptor.Create('chess', TChessComponent);
    chessComponent.Descriptor.Name := 'Chess';
 
-   chessEntity := oxEntity.New('Chess');
-   chessEntity.Add(TChessComponent.Create());
+   Entity := oxEntity.New('Chess');
+   Entity.Add(TChessComponent.Create());
 
-   oxScene.Add(chessEntity);
+   oxScene.Add(Entity);
 end;
+
+procedure initialize();
+begin
+   chessComponent.Initialize();
+end;
+
+INITIALIZATION
+   scene.OnInitialize.Add(@initialize);
 
 END.

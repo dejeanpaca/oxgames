@@ -12,7 +12,7 @@ INTERFACE
       oxuCameraComponent,
       oxuMaterial, oxumPrimitive, oxuPrimitiveModelComponent,
       {game}
-      uGame;
+      uGame, uScene;
 
 TYPE
    { TBoardComponent }
@@ -68,5 +68,13 @@ begin
 
    oxScene.Add(Entity);
 end;
+
+procedure initialize();
+begin
+   board.Initialize();
+end;
+
+INITIALIZATION
+   scene.OnInitialize.Add(@initialize);
 
 END.

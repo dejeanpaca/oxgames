@@ -3,8 +3,12 @@ UNIT uBoard2D;
 
 INTERFACE
 
-TYPE
+   USES
+      oxuProjectionType, oxuProjection,
+      oxuCameraComponent,
+      uScene;
 
+TYPE
    { TBoard2D }
 
    TBoard2D = record
@@ -19,8 +23,12 @@ IMPLEMENTATION
 { TBoard2D }
 
 procedure TBoard2D.Activate();
-begin
+var
+   projection: oxPProjection;
 
+begin
+   projection := scene.Camera.GetProjection();
+   projection^.DefaultOrtho();
 end;
 
 END.
