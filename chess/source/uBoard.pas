@@ -30,6 +30,7 @@ TYPE
 
    TBoardGlobal = record
       Descriptor: oxTComponentDescriptor;
+      Entity: oxTEntity;
 
       procedure Initialize();
    end;
@@ -38,9 +39,6 @@ VAR
    board: TBoardGlobal;
 
 IMPLEMENTATION
-
-VAR
-   boardEntity: oxTEntity;
 
 procedure TBoardComponent.Load();
 begin
@@ -63,12 +61,12 @@ begin
    board.Descriptor.Create('board', TBoardComponent);
    board.Descriptor.Name := 'Board';
 
-   boardEntity := oxEntity.New('Board');
-   boardEntity.Add(TBoardComponent.Create());
+   Entity := oxEntity.New('Board');
+   Entity.Add(TBoardComponent.Create());
 
-   boardEntity.LoadComponentsInChildren();
+   Entity.LoadComponentsInChildren();
 
-   oxScene.Add(boardEntity);
+   oxScene.Add(Entity);
 end;
 
 END.
