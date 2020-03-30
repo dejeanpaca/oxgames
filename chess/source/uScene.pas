@@ -24,12 +24,9 @@ VAR
 IMPLEMENTATION
 
 procedure init();
-var
-   projection: oxPProjection;
-
 begin
    oxScene.Empty();
-   oxScene.World.ClearColor.Assign(64, 64, 64, 255);
+   oxScene.World.ClearColor.Assign(0.075, 0.1, 0.125, 1.0);
 
    scene.Camera := oxCameraEntity.CreateInScene();
    scene.OnInitialize.Call();
