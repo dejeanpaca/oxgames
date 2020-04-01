@@ -1,5 +1,5 @@
 {$INCLUDE oxdefines.inc}
-UNIT uBoard;
+UNIT uGameComponent;
 
 INTERFACE
 
@@ -15,9 +15,9 @@ INTERFACE
       uGame, uScene;
 
 TYPE
-   { TBoardComponent }
+   { TGameComponent }
 
-   TBoardComponent = class(oxTComponent)
+   TGameComponent = class(oxTComponent)
       public
 
       procedure Load(); override;
@@ -26,9 +26,9 @@ TYPE
       function GetDescriptor(): oxPComponentDescriptor; override;
    end;
 
-   { TBoardGlobal }
+   { TGameComponentGlobal }
 
-   TBoardGlobal = record
+   TGameComponentGlobal = record
       Descriptor: oxTComponentDescriptor;
       Entity: oxTEntity;
 
@@ -36,33 +36,33 @@ TYPE
    end;
 
 VAR
-   board: TBoardGlobal;
+   gameComponent: TGameComponentGlobal;
 
 IMPLEMENTATION
 
-procedure TBoardComponent.Load();
+procedure TGameComponent.Load();
 begin
    {TODO: Load materials}
 end;
 
-procedure TBoardComponent.Update();
+procedure TGameComponent.Update();
 begin
 end;
 
-function TBoardComponent.GetDescriptor(): oxPComponentDescriptor;
+function TGameComponent.GetDescriptor(): oxPComponentDescriptor;
 begin
-   Result := @board.Descriptor;
+   Result := @gameComponent.Descriptor;
 end;
 
-{ TBoardGlobal }
+{ TGameComponentGlobal }
 
-procedure TBoardGlobal.Initialize();
+procedure TGameComponentGlobal.Initialize();
 begin
-   board.Descriptor.Create('board', TBoardComponent);
-   board.Descriptor.Name := 'Board';
+   gameComponent.Descriptor.Create('game', TGameComponent);
+   gameComponent.Descriptor.Name := 'Game';
 
-   Entity := oxEntity.New('Board');
-   Entity.Add(TBoardComponent.Create());
+   Entity := oxEntity.New('Game');
+   Entity.Add(TGameComponent.Create());
 
    Entity.LoadComponentsInChildren();
 
@@ -71,7 +71,7 @@ end;
 
 procedure initialize();
 begin
-   board.Initialize();
+   gameComponent.Initialize();
 end;
 
 INITIALIZATION

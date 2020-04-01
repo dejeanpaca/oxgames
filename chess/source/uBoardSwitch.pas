@@ -8,7 +8,7 @@ INTERFACE
       appuEvents, appuActionEvents,
       {games}
       uMain,
-      uBoard,
+      uGameComponent,
       uBoard2D,
       uBoard3D,
       uScene;
@@ -30,13 +30,13 @@ end;
 procedure switch2d();
 begin
    main.Board3D := false;
-   board.Entity.Empty();
+   gameComponent.Entity.Empty();
 end;
 
 procedure switch3d();
 begin
    main.Board3D := true;
-   board.Entity.Empty();
+   gameComponent.Entity.Empty();
 end;
 
 INITIALIZATION
