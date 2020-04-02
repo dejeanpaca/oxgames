@@ -30,6 +30,7 @@ TYPE
       end;
 
       procedure Initialize();
+      function GetModel(piece: TPieceType; player: TPlayer): oxTModel;
    end;
 
 VAR
@@ -66,6 +67,14 @@ begin
    Materials.Board := CreateMaterial('black_tile', TColor4ub.Create(127, 127, 127, 255));
    Materials.BlackTile := CreateMaterial('black_tile', cBlack4ub);
    Materials.WhiteTile := CreateMaterial('white_tile', cWhite4ub);
+end;
+
+function TResources.GetModel(piece: TPieceType; player: TPlayer): oxTModel;
+begin
+   if(player = PLAYER_BLACK) then
+      Result := Models[loopint(piece)].Black
+   else
+      Result := Models[loopint(piece)].White;
 end;
 
 procedure initialize();
