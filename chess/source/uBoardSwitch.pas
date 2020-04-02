@@ -4,6 +4,7 @@ UNIT uBoardSwitch;
 INTERFACE
 
    USES
+      uLog,
       {app}
       appuEvents, appuActionEvents,
       {games}
@@ -21,10 +22,13 @@ IMPLEMENTATION
 
 procedure initialize();
 begin
-   if(main.Board3D) then
-      board3d.Activate()
-   else
+   if(main.Board3D) then begin
+      log.v('Switching board to 3d');
+      board3d.Activate();
+   end else begin
+      log.v('Switching board to 2d');
       board2d.Activate();
+   end;
 end;
 
 procedure switch2d();
