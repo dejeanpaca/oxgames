@@ -4,7 +4,7 @@ UNIT uBoard3D;
 INTERFACE
 
    USES
-      uStd, uLog,
+      uStd, uLog, vmVector,
       {ox}
       oxuProjectionType, oxuProjection,
       oxuCameraComponent, oxuModelComponent,
@@ -16,6 +16,9 @@ TYPE
    { TBoard3D }
 
    TBoard3D = record
+      {size of the squares on the board}
+      SquareSize: single;
+
       Board,
       White,
       Black: oxTEntity;
@@ -27,6 +30,8 @@ TYPE
          White: array[0..15] of oxTEntity;
       end;
 
+      {position a piece on the board}
+      procedure PositionPiece(entity: oxTEntity; x, y: loopint);
       procedure Activate();
    end;
 
@@ -70,6 +75,8 @@ begin
    if(component.Model <> useModel) then
       component.Model := useModel;
 
+   board3d.PositionPiece(reference, x, y);
+
    where.Add(board3d.Reference[y][x]);
 end;
 
@@ -88,6 +95,15 @@ end;
 
 { TBoard3D }
 
+procedure TBoard3D.PositionPiece(entity: oxTEntity; x, y: loopint);
+var
+   ofs: Single;
+
+begin
+   ofs := SquareSize / 2 - 4 * SquareSize;
+   entity.SetPosition(x * SquareSize + ofs,  0.0, -y * SquareSize - ofs);
+end;
+
 procedure TBoard3D.Activate();
 var
    projection: oxPProjection;
@@ -95,7 +111,10 @@ var
 
 begin
    projection := scene.Camera.GetProjection();
-   projection^.DefaultPerspective();
+   projection^.Perspective(75, 0.1, 100);
+
+   scene.Camera.Camera.vPos.Assign(0.0, 8, 10);
+   scene.Camera.Camera.PitchYaw(-45, 270);
 
    {setup board}
    Board := oxTModelComponent.GetEntity(boardModel);
@@ -114,5 +133,8 @@ begin
    gameComponent.Entity.Add(Black);
    gameComponent.Entity.Add(White);
 end;
+
+INITIALIZATION
+   board3d.SquareSize := 2.0;
 
 END.
