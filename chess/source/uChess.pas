@@ -82,6 +82,16 @@ CONST
       'King'
    );
 
+   PIECE_IDS: array[0..PIECE_TYPE_MAX] of StdString = (
+      'none',
+      'pawn',
+      'knight',
+      'bishop',
+      'rook',
+      'queen',
+      'king'
+   );
+
    PIECE_PLACEMENT: array[0..7] of TPieceType = (
       PIECE_ROOK,
       PIECE_KNIGHT,
