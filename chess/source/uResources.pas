@@ -38,6 +38,18 @@ VAR
 
 IMPLEMENTATION
 
+CONST
+   MODEL_SCALE = 4.0;
+
+function getPieceModel(const name: string): oxTModel;
+
+begin
+   Result := oxfModel.Read(oxPaths.Find('models' + DirectorySeparator + 'black' + DirectorySeparator + name + '.obj'));
+
+   if(Result <> nil) then
+      Result.Scale(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE);
+end;
+
 { TResources }
 
 procedure TResources.Initialize();
@@ -57,11 +69,9 @@ begin
    for i := 1 to PIECE_TYPE_MAX do begin
       pieceName := PIECE_IDS[i];
 
-      Models[i].Black :=
-         oxfModel.Read(oxPaths.Find('models' + DirectorySeparator + 'black' + DirectorySeparator + pieceName + '.obj'));
+      Models[i].Black := getPieceModel(pieceName);
 
-      Models[i].White :=
-         oxfModel.Read(oxPaths.Find('models' + DirectorySeparator + 'white' + DirectorySeparator + pieceName + '.obj'));
+      Models[i].White := getPieceModel(pieceName);
    end;
 
    Materials.Board := CreateMaterial('black_tile', TColor4ub.Create(127, 127, 127, 255));
