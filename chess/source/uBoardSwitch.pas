@@ -20,27 +20,30 @@ VAR
 
 IMPLEMENTATION
 
-procedure initialize();
-begin
-   if(main.Board3D) then begin
-      log.v('Switching board to 3d');
-      board3d.Activate();
-   end else begin
-      log.v('Switching board to 2d');
-      board2d.Activate();
-   end;
-end;
-
 procedure switch2d();
 begin
+   log.v('Switching board to 2d');
    main.Board3D := false;
    gameComponent.Entity.Empty();
+   board2d.Empty();
+   board2d.Activate();
 end;
 
 procedure switch3d();
 begin
+   log.v('Switching board to 3d');
    main.Board3D := true;
    gameComponent.Entity.Empty();
+   board3d.Empty();
+   board3d.Activate();
+end;
+
+procedure initialize();
+begin
+   if(main.Board3D) then
+      switch3d()
+   else
+      switch2d();
 end;
 
 INITIALIZATION

@@ -32,6 +32,9 @@ TYPE
 
       {position a piece on the board}
       procedure PositionPiece(entity: oxTEntity; x, y: loopint);
+      {we've cleared the entities}
+      procedure Empty();
+      {activate this board}
       procedure Activate();
    end;
 
@@ -71,7 +74,11 @@ begin
       component := oxTModelComponent(reference.GetComponent('oxTModelComponent'));
    end;
 
+   if(component = nil) then
+      writeln(reference.Name);
+
    reference.Name := PIECE_NAMES[loopint(chess.Board[y][x].Piece)];
+
    if(component.Model <> useModel) then
       component.Model := useModel;
 
@@ -102,6 +109,18 @@ var
 begin
    ofs := SquareSize / 2 - 4 * SquareSize;
    entity.SetPosition(x * SquareSize + ofs,  0.0, -y * SquareSize - ofs);
+end;
+
+procedure TBoard3D.Empty();
+var
+   i, j: loopint;
+
+begin
+   for i := 0 to 7 do begin
+      for j := 0 to 7 do begin
+         Reference[i][j] := Nil;
+      end;
+   end;
 end;
 
 procedure TBoard3D.Activate();

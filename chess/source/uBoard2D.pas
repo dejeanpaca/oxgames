@@ -12,6 +12,7 @@ TYPE
    { TBoard2D }
 
    TBoard2D = record
+      procedure Empty();
       procedure Activate();
    end;
 
@@ -21,6 +22,11 @@ VAR
 IMPLEMENTATION
 
 { TBoard2D }
+
+procedure TBoard2D.Empty();
+begin
+
+end;
 
 procedure TBoard2D.Activate();
 var
