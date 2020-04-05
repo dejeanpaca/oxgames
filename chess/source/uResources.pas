@@ -55,7 +55,7 @@ begin
 
    {load models for all piece types}
    for i := 1 to PIECE_TYPE_MAX do begin
-      pieceName := PIECE_NAMES[i];
+      pieceName := PIECE_IDS[i];
 
       Models[i].Black :=
          oxfModel.Read(oxPaths.Find('models' + DirectorySeparator + 'black' + DirectorySeparator + pieceName + '.obj'));
