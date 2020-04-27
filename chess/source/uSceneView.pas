@@ -6,12 +6,12 @@ INTERFACE
    USES
       uMain,
       {ox}
-      oxuTypes, oxuWindow, oxuSceneRender,
+      oxuTypes, oxuWindow, oxuSceneRender, oxuScene,
       {ui}
       uiWidgets, uiuWindow, uiuTypes,
       wdguSceneRender,
       {game}
-      uMenubar;
+      uMenubar, uScene;
 
 VAR
    SceneView: wdgTSceneRender;
@@ -22,13 +22,12 @@ procedure initialize();
 begin
    {don't render any kind of background, since we draw over}
    oxWindow.Current.SetBackgroundType(uiwBACKGROUND_NONE);
-   uiWidget.SetTarget(oxWindow.Current);
-
    SceneView := wdgSceneRender.Add();
+   SceneView.SetCaption('Game');
 
    {move}
-   SceneView.Move(oxPoint(0, menubar.BelowOf()));
-   SceneView.Resize(oxWindow.Current.Dimensions.w, menubar.BelowOf() + 1);
+   SceneView.Move(oxPoint(0, menubar.BelowOf(0)));
+   SceneView.Resize(oxWindow.Current.Dimensions.w, menubar.BelowOf(0) + 1);
 
    {render via scene view, not window renderer}
    oxSceneRender.RenderAutomatically := false;
@@ -39,7 +38,13 @@ begin
 
 end;
 
+procedure sceneInitialize();
+begin
+   SceneView.Scene := oxScene;
+end;
+
 INITIALIZATION
-   main.Init.Add('menubar', @initialize, @deinitialize)
+   main.Init.Add('menubar', @initialize, @deinitialize);
+   scene.OnInitialize.Add(@sceneInitialize);
 
 END.

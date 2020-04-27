@@ -6,7 +6,7 @@ INTERFACE
    USES
       uStd, uColors,
       {ox}
-      oxuProjectionType, oxuProjection,
+      oxuProjection,
       oxuCameraComponent, oxuCameraEntity,
       oxuScene, oxuSceneLoader, oxuWorld,
       {game}

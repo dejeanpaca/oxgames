@@ -24,7 +24,6 @@ var
    menu: uiTContextMenu;
 
 begin
-   uiWidget.SetTarget(oxWindow.Current);
    menubar := wdgMenubar.Add(oxWindow.Current);
 
    menu := menubar.Add('Game');
