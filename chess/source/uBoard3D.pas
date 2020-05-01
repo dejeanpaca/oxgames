@@ -129,7 +129,7 @@ var
    boardModel: oxTModelComponent;
 
 begin
-   projection := scene.Camera.GetProjection();
+   projection := @scene.Camera.Projection;
    projection^.Perspective(75, 0.1, 100);
 
    scene.Camera.Camera.vPos.Assign(0.0, 8, 10);

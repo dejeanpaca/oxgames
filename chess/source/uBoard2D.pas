@@ -76,7 +76,7 @@ var
    projection: oxPProjection;
 
 begin
-   projection := scene.Camera.GetProjection();
+   projection := @scene.Camera.Projection;
    projection^.DefaultOrtho();
 
    BuildBoard();

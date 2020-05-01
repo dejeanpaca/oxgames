@@ -51,7 +51,7 @@ var
    projection: oxPProjection;
 
 begin
-   projection := camera.GetProjection();
+   projection := @camera.Projection;;
 
    if(projection^.p.GetWidth() <= projection^.p.GetHeight()) then begin
      size := width;
