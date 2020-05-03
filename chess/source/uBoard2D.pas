@@ -11,7 +11,7 @@ INTERFACE
       oxuMaterial,
       oxuPrimitiveModelComponent,
       {game}
-      uChess, uScene, uShared, uResources, uGameComponent;
+      uChess, uScene, uShared, uResources, uGameComponent, uBoard;
 
 CONST
    BOARD_RATIO = 0.9;
@@ -20,21 +20,14 @@ CONST
 TYPE
    { TBoard2D }
 
-   TBoard2D = record
+   TBoard2D = object(TBoard)
       GridSize: TGridElementsSize;
-
-      Board,
-      White,
-      Black: oxTEntity;
-
-      Reference: array[0..7, 0..7] of oxTEntity;
 
       {position a piece on the board}
       procedure PositionPiece(entity: oxTEntity; x, y: loopint);
 
-      procedure Empty();
       procedure BuildBoard();
-      procedure Activate();
+      procedure Activate(); virtual;
    end;
 
 VAR
@@ -107,18 +100,6 @@ begin
    entity.SetScale(GridSize.d * PIECE_RATIO, GridSize.d * PIECE_RATIO, 1.0);
 end;
 
-procedure TBoard2D.Empty();
-var
-   i, j: loopint;
-
-begin
-   for i := 0 to 7 do begin
-      for j := 0 to 7 do begin
-         Reference[i][j] := Nil;
-      end;
-   end;
-end;
-
 function createBoard(): oxTEntity;
 var
    entity: oxTEntity;
@@ -187,5 +168,8 @@ begin
 
    BuildBoard();
 end;
+
+INITIALIZATION
+   board2d.Create();
 
 END.

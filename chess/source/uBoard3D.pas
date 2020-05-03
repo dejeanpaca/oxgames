@@ -10,32 +10,19 @@ INTERFACE
       oxuCameraComponent, oxuModelComponent,
       oxuEntity, oxuModel,
       {game}
-      uChess, uScene, uGameComponent, uResources;
+      uChess, uScene, uGameComponent, uResources, uBoard;
 
 TYPE
    { TBoard3D }
 
-   TBoard3D = record
+   TBoard3D = object(TBoard)
       {size of the squares on the board}
       SquareSize: single;
 
-      Board,
-      White,
-      Black: oxTEntity;
-
-      Reference: array[0..7, 0..7] of oxTEntity;
-
-      Pieces: record
-         Black,
-         White: array[0..15] of oxTEntity;
-      end;
-
       {position a piece on the board}
       procedure PositionPiece(entity: oxTEntity; x, y: loopint);
-      {we've cleared the entities}
-      procedure Empty();
       {activate this board}
-      procedure Activate();
+      procedure Activate(); virtual;
    end;
 
 VAR
@@ -108,17 +95,6 @@ begin
    entity.SetPosition(x * SquareSize + ofs,  0.0, -y * SquareSize - ofs);
 end;
 
-procedure TBoard3D.Empty();
-var
-   i, j: loopint;
-
-begin
-   for i := 0 to 7 do begin
-      for j := 0 to 7 do begin
-         Reference[i][j] := Nil;
-      end;
-   end;
-end;
 
 procedure TBoard3D.Activate();
 var
@@ -151,6 +127,7 @@ begin
 end;
 
 INITIALIZATION
+   board3d.Create();
    board3d.SquareSize := 2.0;
 
 END.

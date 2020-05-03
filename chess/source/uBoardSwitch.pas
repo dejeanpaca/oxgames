@@ -9,7 +9,9 @@ INTERFACE
       appuEvents, appuActionEvents,
       {games}
       uMain,
+      uGame,
       uGameComponent,
+      uBoard,
       uBoard2D,
       uBoard3D,
       uScene;
@@ -24,18 +26,16 @@ procedure switch2d();
 begin
    log.v('Switching board to 2d');
    main.Board3D := false;
-   gameComponent.Entity.Empty();
-   board2d.Empty();
-   board2d.Activate();
+   CurrentBoard := @board2d;
+   CurrentBoard^.SwitchTo();
 end;
 
 procedure switch3d();
 begin
    log.v('Switching board to 3d');
    main.Board3D := true;
-   gameComponent.Entity.Empty();
-   board3d.Empty();
-   board3d.Activate();
+   CurrentBoard := @board3d;
+   CurrentBoard^.SwitchTo();
 end;
 
 procedure initialize();
