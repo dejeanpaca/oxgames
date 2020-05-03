@@ -23,6 +23,7 @@ TYPE
       class procedure Initialize(out t: TGridElementsSize); static;
       {get grid elements size for the set width and height}
       procedure Get(var camera: oxTCameraComponent; width, height: loopint);
+      procedure Mul(by: single);
    end;
 
 function CreateMaterial(const name: string; color: TColor4ub; tex: oxTTexture = nil): oxTMaterial;
@@ -65,6 +66,13 @@ begin
 
    halfW := d * width - d;
    halfH := d * height - d;
+end;
+
+procedure TGridElementsSize.Mul(by: single);
+begin
+   d := d * by;
+   halfW := halfW * by;
+   halfH := halfH * by;
 end;
 
 END.
