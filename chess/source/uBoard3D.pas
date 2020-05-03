@@ -53,19 +53,19 @@ var
 begin
    useModel := resources.GetModel(chess.Board[y][x].Piece, player);
 
-   // we have no piece here, so remove the entity
+   {we have no piece here, so remove the entity}
    if(useModel = nil) then begin
-     if(board3d.Reference[y][x] <> nil) then
-        oxEntity.Remove(board3d.Reference[y][x]);
+      if(board3d.Reference[y][x] <> nil) then
+         oxEntity.Remove(board3d.Reference[y][x]);
 
-     exit;
+      exit;
    end;
 
-   // existing piece does not match the player
+   {existing piece does not match the player}
    if(chess.Board[y][x].Player <> player) then
       exit;
 
-   // create a piece entity
+   {create a piece entity}
    if(board3d.Reference[y][x] = nil) then begin
       reference := oxTModelComponent.GetEntity(component);
       board3d.Reference[y][x] := reference;
@@ -73,9 +73,6 @@ begin
       reference := board3d.Reference[y][x];
       component := oxTModelComponent(reference.GetComponent('oxTModelComponent'));
    end;
-
-   if(component = nil) then
-      writeln(reference.Name);
 
    reference.Name := PIECE_NAMES[loopint(chess.Board[y][x].Piece)];
 
