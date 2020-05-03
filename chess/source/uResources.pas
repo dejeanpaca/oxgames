@@ -8,7 +8,7 @@ INTERFACE
       {ox}
       oxuResourcePool, oxuPaths, oxuTexture,
       oxuModel, oxuModelFile, oxuMaterial,
-      oxuGlyph,
+      oxuGlyphs,
       {game}
       uChess, uMain, uShared;
 
@@ -31,6 +31,13 @@ TYPE
 
    TPieceIcon = oxTTexture;
 
+   { TPiece2DMaterial }
+
+   TPiece2DMaterial = record
+      Black,
+      White: oxTMaterial;
+   end;
+
    { TResources }
 
    TResources = record
@@ -39,15 +46,17 @@ TYPE
       Board: oxTModel;
 
       Materials: record
-         Board,
+         Background,
          WhiteTile,
          BlackTile: oxTMaterial;
+         Pieces2D: array[0..PIECE_TYPE_MAX] of TPiece2DMaterial;
       end;
 
       procedure Initialize();
       procedure Deinitialize();
 
       function GetModel(piece: TPieceType; player: TPlayer): oxTModel;
+      function GetPieceMaterial2D(piece: TPieceType; player: TPlayer): oxTMaterial;
    end;
 
 VAR
@@ -58,7 +67,7 @@ IMPLEMENTATION
 CONST
    MODEL_SCALE = 4.0;
 
-function getPieceModel(const base, name: StdString): oxTModel;
+function loadPieceModel(const base, name: StdString): oxTModel;
 
 begin
    Result := oxfModel.Read(oxPaths.Find('models' + DirectorySeparator + base + DirectorySeparator + name + '.obj'));
@@ -76,9 +85,6 @@ var
 
 begin
    {piece type none has no model}
-   Models[0].Black := nil;
-   Models[1].White := nil;
-
    Board :=
       oxfModel.Read(oxPaths.Find('models' + DirectorySeparator + 'board' + DirectorySeparator + 'board.obj'));
 
@@ -86,20 +92,28 @@ begin
    for i := 1 to PIECE_TYPE_MAX do begin
       pieceName := PIECE_IDS[i];
 
-      Models[i].Black := getPieceModel('black', pieceName);
-      Models[i].White := getPieceModel('white', pieceName);
+      Models[i].Black := loadPieceModel('black', pieceName);
+      Models[i].White := loadPieceModel('white', pieceName);
    end;
 
    {board materials}
 
-   Materials.Board := CreateMaterial('black_tile', TColor4ub.Create(127, 127, 127, 255));
-   Materials.BlackTile := CreateMaterial('black_tile', cBlack4ub);
-   Materials.WhiteTile := CreateMaterial('white_tile', cWhite4ub);
+   Materials.Background := CreateMaterial('board_background', TColor4ub.Create(32, 64, 64, 255));
+   Materials.BlackTile := CreateMaterial('black_tile', TColor4ub.Create(96, 96, 96, 255));
+   Materials.WhiteTile := CreateMaterial('white_tile', TColor4ub.Create(191, 191, 192, 255));
 
    {2d icons}
-   Icons[0] := nil;
    for i := 1 to PIECE_TYPE_MAX do begin
       Icons[i] := oxGlyphs.Load(PIECE_2D_ICONS[i], 64);
+   end;
+
+   {create 2d materials}
+   for i := 1 to PIECE_TYPE_MAX do begin
+      Materials.Pieces2D[i].Black := CreateMaterial(PIECE_IDS[i] + '_black',
+         TColor4ub.Create(0, 0, 0, 255), Icons[i]);
+
+      Materials.Pieces2D[i].White := CreateMaterial(PIECE_IDS[i] + '_white',
+         TColor4ub.Create(255, 255, 255, 255), Icons[i]);
    end;
 end;
 
@@ -121,6 +135,15 @@ begin
       Result := Models[loopint(piece)].Black
    else
       Result := Models[loopint(piece)].White;
+end;
+
+function TResources.GetPieceMaterial2D(piece: TPieceType; player: TPlayer): oxTMaterial;
+begin
+   if(player = PLAYER_BLACK) then
+      Result := Materials.Pieces2D[loopint(piece)].Black
+   else begin
+      Result := Materials.Pieces2D[loopint(piece)].White
+   end;
 end;
 
 procedure initialize();
