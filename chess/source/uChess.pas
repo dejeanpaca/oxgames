@@ -46,14 +46,25 @@ TYPE
       y: loopint;
    end;
 
+   { TMove }
+
    TMove = record
       From,
       Target: TPiecePosition;
       Piece: TPieceType;
+      Player: TPlayer;
       Action: TMoveAction;
+
+      class procedure Initialize(out m: TMove); static;
    end;
 
+   PMovesList = ^TMovesList;
    TMovesList = specialize TSimpleList<TMove>;
+
+   TMovesBuilderContext = record
+      x, y: loopint;
+      Moves: PMovesList;
+   end;
 
    { TChess }
 
@@ -61,10 +72,18 @@ TYPE
       Board: TBoard;
       StartingPlayer: TPlayer;
 
+      procedure AddMove(toX, toY: loopint; var context: TMovesBuilderContext);
+      {get allowed moves for the piece on the given coordinates}
+      procedure GetPawnMoves(x, y: loopint; var context: TMovesBuilderContext);
       {get allowed moves for the piece on the given coordinates}
       function GetMoves(x, y: loopint): TMovesList;
       {get all allowed moves for the entire board for a player}
       function GetAllMoves(player: TPlayer): TMovesList;
+
+      {is the given position occupied on the board}
+      function Occupied(x, y: loopint): boolean;
+      {is the given position valid on the board}
+      function Valid(x, y: loopint): boolean;
 
       procedure ResetBoard();
    end;
@@ -108,6 +127,13 @@ VAR
 
 IMPLEMENTATION
 
+{ TMove }
+
+class procedure TMove.Initialize(out m: TMove);
+begin
+   ZeroOut(m, SizeOf(m));
+end;
+
 { TPiece }
 
 procedure TPiece.Place(usePiece: TPieceType; usePlayer: TPlayer);
@@ -124,14 +150,113 @@ end;
 
 { TChess }
 
+procedure TChess.AddMove(toX, toY: loopint; var context: TMovesBuilderContext);
+var
+   pieceType: TPieceType;
+   move: TMove;
+
+begin
+   {can't move outside the chess board}
+   if(not Valid(toX, toY)) then
+      exit;
+
+   pieceType := Board[context.y, context.x].Piece;
+
+   TMove.Initialize(move);
+
+   if(not Occupied(toX, toY)) then
+      move.Action := ACTION_MOVE
+   else
+      move.Action := ACTION_EAT;
+
+   move.Piece := pieceType;
+   move.Player := Board[context.y, context.x].Player;
+   move.From.x := context.x;
+   move.From.y := context.y;
+   move.Target.x := toX;
+   move.Target.y := toY;
+
+   context.Moves^.Add(move);
+end;
+
+procedure TChess.GetPawnMoves(x, y: loopint; var context: TMovesBuilderContext);
+begin
+   if(Board[y, x].Player = PLAYER_BLACK) then begin
+      if(not Occupied(x, y - 1)) then
+         AddMove(x, y - 1, context);
+
+      if(Occupied(x + 1, y - 1)) then
+         AddMove(x + 1, y - 1, context);
+
+      if(Occupied(x - 1, y - 1)) then
+         AddMove(x - 1, y - 1, context);
+   end else begin
+      if(not Occupied(x, y + 1)) then
+         AddMove(x, y + 1, context);
+
+      if(not Occupied(x + 1, y + 1)) then
+         AddMove(x + 1, y + 1, context);
+
+      if(not Occupied(x - 1, y + 1)) then
+         AddMove(x - 1, y + 1, context);
+   end;
+end;
+
 function TChess.GetMoves(x, y: loopint): TMovesList;
+var
+   pieceType: TPieceType;
+   context: TMovesBuilderContext;
+
 begin
    TMovesList.Initialize(Result);
+   context.x := x;
+   context.y := y;
+   context.Moves := @Result;
+
+   pieceType := Board[y, x].Piece;
+
+   if(pieceType = PIECE_PAWN) then
+      GetPawnMoves(x, y, context);
 end;
 
 function TChess.GetAllMoves(player: TPlayer): TMovesList;
+var
+   x, y, i: loopint;
+   moves: TMovesList;
+
 begin
    TMovesList.Initialize(Result);
+
+   for y := 0 to 7 do begin
+      for x := 0 to 7 do begin
+         if(Board[y, x].Player = player) then begin
+            {get moves for a specific piece}
+            moves := GetMoves(x, y);
+
+            {copy piece moves to all moves list, if any}
+            if(moves.n > 0) then begin
+               for i := 0 to moves.n - 1 do begin
+                  Result.Add(moves.List[i]);
+               end;
+            end;
+
+            moves.Dispose();
+         end;
+      end;
+   end;
+end;
+
+function TChess.Occupied(x, y: loopint): boolean;
+begin
+   Result := false;
+
+   if(Valid(x, y)) then
+      Result := Board[y, x].Piece <> PIECE_NONE;
+end;
+
+function TChess.Valid(x, y: loopint): boolean;
+begin
+   Result := (x >= 0) and (x < 8) and (y >= 0) and (y < 8);
 end;
 
 procedure TChess.ResetBoard();
