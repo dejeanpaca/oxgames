@@ -4,7 +4,9 @@ UNIT uGame;
 INTERFACE
 
    USES
-      uStd;
+      uStd,
+      {game}
+      uChess;
 
 TYPE
 
@@ -25,7 +27,8 @@ IMPLEMENTATION
 
 procedure TGameGlobal.New();
 begin
-
+   chess.CurrentPlayer := chess.StartingPlayer;
+   chess.ResetBoard();
 end;
 
 INITIALIZATION

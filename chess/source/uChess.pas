@@ -70,7 +70,8 @@ TYPE
 
    TChess = record
       Board: TBoard;
-      StartingPlayer: TPlayer;
+      StartingPlayer,
+      CurrentPlayer: TPlayer;
 
       procedure AddMove(toX, toY: loopint; var context: TMovesBuilderContext);
       {get allowed moves for the piece on the given coordinates}

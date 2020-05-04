@@ -8,7 +8,7 @@ INTERFACE
       {ox}
       oxuEntity,
       {game}
-      uGameComponent;
+      uGame, uGameComponent;
 
 TYPE
    PBoard = ^TBoard;
@@ -31,6 +31,7 @@ TYPE
 
       procedure Empty(); virtual;
       procedure Activate(); virtual;
+      procedure Reset(); virtual;
 
       procedure SwitchTo();
    end;
@@ -57,11 +58,24 @@ begin
 
 end;
 
-procedure TBoard.SwitchTo();
+procedure TBoard.Reset();
 begin
-   gameComponent.Entity.Empty();
    Empty();
    Activate();
 end;
+
+procedure TBoard.SwitchTo();
+begin
+   gameComponent.Entity.Empty();
+   Reset();
+end;
+
+procedure onNew();
+begin
+   CurrentBoard^.Reset();
+end;
+
+INITIALIZATION
+   game.OnNew.Add(@onNew);
 
 END.
