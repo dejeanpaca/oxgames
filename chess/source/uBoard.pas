@@ -4,8 +4,11 @@ UNIT uBoard;
 INTERFACE
 
    USES
-      uGameComponent,
-      oxuEntity;
+      uStd,
+      {ox}
+      oxuEntity,
+      {game}
+      uGameComponent;
 
 TYPE
    PBoard = ^TBoard;
@@ -46,7 +49,7 @@ end;
 
 procedure TBoard.Empty();
 begin
-
+  ZeroOut(Reference, SizeOf(Reference));
 end;
 
 procedure TBoard.Activate();
@@ -56,9 +59,9 @@ end;
 
 procedure TBoard.SwitchTo();
 begin
-  gameComponent.Entity.Empty();
-  Empty();
-  Activate();
+   gameComponent.Entity.Empty();
+   Empty();
+   Activate();
 end;
 
 END.
