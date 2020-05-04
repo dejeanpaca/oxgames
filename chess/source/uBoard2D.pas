@@ -165,6 +165,7 @@ end;
 procedure TBoard2D.Activate();
 begin
    scene.Camera.Projection.DefaultOrtho();
+   scene.Camera.Camera.Initialize();
 
    BuildBoard();
 end;
