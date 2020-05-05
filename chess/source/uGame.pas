@@ -5,6 +5,8 @@ INTERFACE
 
    USES
       uStd,
+      {ox}
+      oxuTypes,
       {game}
       uChess;
 
@@ -14,6 +16,8 @@ TYPE
 
    TGameGlobal = record
       OnNew: TProcedures;
+
+      SelectedTile: oxTPoint;
 
       procedure New();
    end;
