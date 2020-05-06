@@ -73,6 +73,11 @@ TYPE
       StartingPlayer,
       CurrentPlayer: TPlayer;
 
+      procedure New();
+
+      {switch the current player to opposing}
+      procedure TogglePlayer();
+
       procedure AddMove(toX, toY: loopint; var context: TMovesBuilderContext);
       {get allowed moves for the piece on the given coordinates}
       procedure GetPawnMoves(x, y: loopint; var context: TMovesBuilderContext);
@@ -150,6 +155,20 @@ begin
 end;
 
 { TChess }
+
+procedure TChess.New();
+begin
+   CurrentPlayer := StartingPlayer;
+   ResetBoard();
+end;
+
+procedure TChess.TogglePlayer();
+begin
+   if(CurrentPlayer = PLAYER_BLACK) then
+      CurrentPlayer := PLAYER_WHITE
+   else
+      CurrentPlayer := PLAYER_BLACK;
+end;
 
 procedure TChess.AddMove(toX, toY: loopint; var context: TMovesBuilderContext);
 var
@@ -297,6 +316,7 @@ end;
 
 INITIALIZATION
    chess.StartingPlayer := PLAYER_WHITE;
+   chess.CurrentPlayer := chess.StartingPlayer;
    chess.ResetBoard();
 
 END.

@@ -11,6 +11,10 @@ INTERFACE
       uChess;
 
 TYPE
+   TPlayerControlType = (
+      PLAYER_CONTROL_INPUT,
+      PLAYER_CONTROL_AI
+   );
 
    { TGameGlobal }
 
@@ -20,11 +24,17 @@ TYPE
       OnUnselectedTile: TProcedures;
 
       SelectedTile: oxTPoint;
+      PlayerControl: array[0..1] of TPlayerControlType;
 
       procedure New();
 
       {select a tile to play}
       procedure SelectTile(x, y: loopint);
+
+      {is the given player controllable by input}
+      function IsInputControllable(player: TPlayer): boolean;
+      {control type for the current player}
+      function PlayerControlType(): TPlayerControlType;
    end;
 
 VAR
@@ -36,8 +46,7 @@ IMPLEMENTATION
 
 procedure TGameGlobal.New();
 begin
-   chess.CurrentPlayer := chess.StartingPlayer;
-   chess.ResetBoard();
+   chess.New();
 
    {unselect tile}
    SelectedTile.x := -1;
@@ -57,11 +66,20 @@ procedure TGameGlobal.SelectTile(x, y: loopint);
   end;
 
 begin
+   {exit if input can't control the current player}
+   if(not game.IsInputControllable(chess.CurrentPlayer)) then
+      exit;
+
    {if a tile is already selected, play a move}
    if(SelectedTile.x >= 0) then begin
       unselect();
 
-      {TODO: Play a move, if possible}
+      {no move possible if selected own piece again}
+      if(chess.Board[y, x].Player <> chess.CurrentPlayer) then begin
+         {TODO: Play a move, if possible}
+         chess.TogglePlayer();
+      end;
+
       exit;
    end;
 
@@ -69,17 +87,32 @@ begin
    if(SelectedTile.x = x) and (SelectedTile.y = y) then begin
       unselect();
    end else begin
-      {unselect given tile}
-      SelectedTile.x := x;
-      SelectedTile.y := y;
+      {select given tile, if it has a piece controlled by the current player}
+      if(chess.Board[y, x].Player = chess.CurrentPlayer) and (chess.Board[y, x].Piece <> PIECE_NONE) then begin
+        SelectedTile.x := x;
+        SelectedTile.y := y;
 
-      OnSelectedTile.Call();
+        OnSelectedTile.Call();
+      end;
    end;
+end;
+
+function TGameGlobal.IsInputControllable(player: TPlayer): boolean;
+begin
+   Result := PlayerControl[loopint(player)] = PLAYER_CONTROL_INPUT;
+end;
+
+function TGameGlobal.PlayerControlType(): TPlayerControlType;
+begin
+  Result := PlayerControl[loopint(chess.CurrentPlayer)];
 end;
 
 INITIALIZATION
    TProcedures.Initialize(game.OnNew);
    TProcedures.Initialize(game.OnSelectedTile);
    TProcedures.Initialize(game.OnUnselectedTile);
+
+   game.PlayerControl[loopint(PLAYER_BLACK)] := PLAYER_CONTROL_INPUT;
+   game.PlayerControl[loopint(PLAYER_WHITE)] := PLAYER_CONTROL_INPUT;
 
 END.

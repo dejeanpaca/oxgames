@@ -12,7 +12,7 @@ INTERFACE
       oxuCameraComponent,
       oxuMaterial, oxumPrimitive, oxuPrimitiveModelComponent,
       {game}
-      uScene;
+      uScene, uChess, uGame;
 
 TYPE
    { TGameComponent }
@@ -20,7 +20,6 @@ TYPE
    TGameComponent = class(oxTComponent)
       public
 
-      procedure Load(); override;
       procedure Update(); override;
 
       function GetDescriptor(): oxPComponentDescriptor; override;
@@ -40,13 +39,11 @@ VAR
 
 IMPLEMENTATION
 
-procedure TGameComponent.Load();
-begin
-   {TODO: Load materials}
-end;
-
 procedure TGameComponent.Update();
 begin
+   if(game.PlayerControlType() = PLAYER_CONTROL_AI) then begin
+      {TODO: Implement AI control}
+   end;
 end;
 
 function TGameComponent.GetDescriptor(): oxPComponentDescriptor;
