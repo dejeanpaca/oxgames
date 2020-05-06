@@ -66,6 +66,9 @@ var
 begin
    p := @uScene.scene.Camera.Projection;
 
+   if(not e.IsReleased()) then
+      exit;
+
    if(not main.Board3D) then begin
       p^.Unproject(x, y, Camera.Matrix, world);
 
@@ -74,9 +77,8 @@ begin
       tile.y := trunc((world[1] - (BOARD_2D_SIZE / 2)) / BOARD_2D_TILE_SIZE) + 7;
 
       {make sure the tile is not out of bounds}
-      if(chess.Valid(tile.x, tile.y)) then begin
+      if(chess.Valid(tile.x, tile.y)) then
          game.SelectTile(tile.y, tile.x);
-      end;
    end;
 end;
 
