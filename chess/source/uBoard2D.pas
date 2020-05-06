@@ -138,10 +138,10 @@ begin
          entity := oxTPrimitiveModelComponent.GetEntity(component);
          component.Plane();
 
-         entity.Name := sf(i) + 'x' + sf(j);
+         entity.Name := sf(j) + 'x' + sf(i);
 
-         entity.SetPosition(i * board2d.GridSize.d * 2 - board2d.GridSize.halfW,
-            j * board2d.GridSize.d * 2 - board2d.GridSize.halfH, 0);
+         entity.SetPosition(j * board2d.GridSize.d * 2 - board2d.GridSize.halfW,
+            i * board2d.GridSize.d * 2 - board2d.GridSize.halfH, 0);
 
          entity.SetScale(board2d.GridSize.d, board2d.GridSize.d, 1);
 
