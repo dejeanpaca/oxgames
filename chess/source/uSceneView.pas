@@ -4,16 +4,17 @@ UNIT uSceneView;
 INTERFACE
 
    USES
-      uMain, vmVector,
+      vmVector,
       {app}
       appuMouse, appuMouseEvents,
       {ox}
-      oxuTypes, oxuWindow, oxuSceneRender, oxuScene, oxuViewport,
+      oxuTypes, oxuWindow, oxuSceneRender, oxuScene,
+      oxuProjectionType, oxuProjection,
       {ui}
       uiWidgets, uiuWindow, uiuTypes,
       wdguSceneRender,
       {game}
-      uMenubar, uScene;
+      uMain, uChess, uMenubar, uScene, uBoard2D, uGame;
 
 TYPE
 
@@ -58,10 +59,25 @@ end;
 
 procedure wdgTChessSceneRender.Point(var e: appTMouseEvent; x, y: longint);
 var
-   n: TVector2f;
+   p: oxPProjection;
+   world: TVector2f;
+   tile: oxTPoint;
 
 begin
-   Viewport.GetNormalizedPointerCoordinates(x, y, n);
+   p := @uScene.scene.Camera.Projection;
+
+   if(not main.Board3D) then begin
+      p^.Unproject(x, y, Camera.Matrix, world);
+
+      {convert projection coordinates into tile coordinates}
+      tile.x := trunc((world[0] - (BOARD_2D_SIZE / 2)) / BOARD_2D_TILE_SIZE) + 7;
+      tile.y := trunc((world[1] - (BOARD_2D_SIZE / 2)) / BOARD_2D_TILE_SIZE) + 7;
+
+      {make sure the tile is not out of bounds}
+      if(chess.Valid(tile.x, tile.y)) then begin
+         game.SelectTile(tile.y, tile.x);
+      end;
+   end;
 end;
 
 INITIALIZATION
