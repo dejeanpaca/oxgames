@@ -28,6 +28,9 @@ TYPE
 
       procedure New();
 
+      {play a move from a piece to a target position}
+      function PlayMove(const from, target: oxTPoint): boolean;
+
       {select a tile to play}
       procedure SelectTile(const tile: oxTPoint);
 
@@ -55,15 +58,38 @@ begin
    OnNew.Call();
 end;
 
+function TGameGlobal.PlayMove(const from, target: oxTPoint): boolean;
+var
+   i: loopint;
+   moves: TMovesList;
+
+begin
+   Result := false;
+
+   {get all possible moves for given piece}
+   moves := chess.GetMoves(from.x, from.y);
+
+   if(moves.n > 0) then begin
+      for i := 0 to moves.n - 1 do begin
+         if(moves.List[i].Target = target) then begin
+            {TODO: Actually move the piece if can move}
+            exit(true);
+         end;
+      end;
+   end;
+end;
+
 procedure TGameGlobal.SelectTile(const tile: oxTPoint);
+var
+   previousTile: oxTPoint;
 
-  procedure unselect();
-  begin
-     OnUnselectedTile.Call();
+   procedure unselect();
+   begin
+      OnUnselectedTile.Call();
 
-     SelectedTile.x := -1;
-     SelectedTile.y := -1;
-  end;
+      SelectedTile.x := -1;
+      SelectedTile.y := -1;
+   end;
 
 begin
    {exit if input can't control the current player}
@@ -72,13 +98,16 @@ begin
 
    {if a tile is already selected, play a move}
    if(SelectedTile.x >= 0) then begin
+      previousTile := SelectedTile;
       unselect();
 
       {no move possible if selected own piece again}
       if(chess.Board[tile.y, tile.x].Player <> chess.CurrentPlayer) or
          (chess.Board[tile.y, tile.x].Piece = PIECE_NONE) then begin
-         {TODO: Play a move, if possible}
-         chess.TogglePlayer();
+         if(PlayMove(previousTile, tile)) then begin
+            {done with this player}
+            chess.TogglePlayer();
+         end;
       end;
 
       exit;
