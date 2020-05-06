@@ -47,13 +47,27 @@ begin
 end;
 
 procedure TGameGlobal.SelectTile(x, y: loopint);
+
+  procedure unselect();
+  begin
+     OnUnselectedTile.Call();
+
+     SelectedTile.x := -1;
+     SelectedTile.y := -1;
+  end;
+
 begin
+   {if a tile is already selected, play a move}
+   if(SelectedTile.x >= 0) then begin
+      unselect();
+
+      {TODO: Play a move, if possible}
+      exit;
+   end;
+
    {if given tile was already selected, unselect it}
    if(SelectedTile.x = x) and (SelectedTile.y = y) then begin
-      OnUnselectedTile.Call();
-
-      SelectedTile.x := -1;
-      SelectedTile.y := -1;
+      unselect();
    end else begin
       {unselect given tile}
       SelectedTile.x := x;
