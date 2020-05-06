@@ -75,7 +75,7 @@ begin
       unselect();
 
       {no move possible if selected own piece again}
-      if(chess.Board[y, x].Player <> chess.CurrentPlayer) then begin
+      if(chess.Board[y, x].Player <> chess.CurrentPlayer) or (chess.Board[y, x].Piece = PIECE_NONE) then begin
          {TODO: Play a move, if possible}
          chess.TogglePlayer();
       end;
