@@ -107,8 +107,8 @@ begin
    Materials.Background := CreateMaterial('board_background', TColor4ub.Create(32, 64, 64, 255));
    Materials.BlackTile := CreateMaterial('black_tile', TColor4ub.Create(115, 115, 115, 255));
    Materials.WhiteTile := CreateMaterial('white_tile', TColor4ub.Create(175, 175, 175, 255));
-   Materials.Selected.BlackTile := CreateMaterial('black_tile_selected', TColor4ub.Create(115, 115, 255, 255));
-   Materials.Selected.WhiteTile := CreateMaterial('white_tile_selected', TColor4ub.Create(175, 175, 255, 255));
+   Materials.Selected.BlackTile := CreateMaterial('black_tile_selected', TColor4ub.Create(96, 96, 255, 255));
+   Materials.Selected.WhiteTile := CreateMaterial('white_tile_selected', TColor4ub.Create(115, 115, 255, 255));
 
    {2d icons}
    for i := 1 to PIECE_TYPE_MAX do begin
