@@ -14,8 +14,12 @@ INTERFACE
       uChess, uScene, uShared, uResources, uGameComponent, uBoard;
 
 CONST
-   BOARD_RATIO = 0.9;
-   PIECE_RATIO = 0.8;
+   BOARD_2D_RATIO = 0.9;
+   PIECE_2D_RATIO = 0.8;
+
+   BOARD_2D_PROJECTION_SIZE = 10;
+   BOARD_2D_SIZE = BOARD_2D_PROJECTION_SIZE * BOARD_2D_RATIO;
+   BOARD_2D_TILE_SIZE = BOARD_2D_SIZE / 8;
 
 TYPE
    { TBoard2D }
@@ -97,7 +101,7 @@ begin
    y := 7 - y;
 
    entity.SetPosition(x * GridSize.d * 2 - GridSize.HalfW, -y * GridSize.d * 2 + GridSize.halfH, 0.5);
-   entity.SetScale(GridSize.d * PIECE_RATIO, GridSize.d * PIECE_RATIO, 1.0);
+   entity.SetScale(GridSize.d * PIECE_2D_RATIO, GridSize.d * PIECE_2D_RATIO, 1.0);
 end;
 
 function createBoard(): oxTEntity;
@@ -145,7 +149,7 @@ procedure TBoard2D.BuildBoard();
 begin
    TGridElementsSize.Initialize(gridSize);
    GridSize.Get(scene.Camera, 8, 8);
-   GridSize.Mul(BOARD_RATIO);
+   GridSize.Mul(BOARD_2D_RATIO);
 
    {setup board}
    Board := createBoard();
@@ -164,8 +168,9 @@ end;
 
 procedure TBoard2D.Activate();
 begin
-   scene.Camera.Projection.DefaultOrtho();
+   scene.Camera.Projection.Ortho(10, -1.0, 1.0);
    scene.Camera.Camera.Initialize();
+   scene.Camera.Camera.Reset();
 
    BuildBoard();
 end;
