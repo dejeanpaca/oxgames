@@ -11,7 +11,7 @@ INTERFACE
       oxuMaterial,
       oxuPrimitiveModelComponent,
       {game}
-      uChess, uScene, uShared, uResources, uGameComponent, uBoard;
+      uChess, uGame, uScene, uShared, uResources, uGameComponent, uBoard;
 
 CONST
    BOARD_2D_RATIO = 0.9;
@@ -27,9 +27,12 @@ TYPE
    TBoard2D = object(TBoard)
       GridSize: TGridElementsSize;
 
+      TileReference: array[0..7, 0..7] of oxTEntity;
+
       {position a piece on the board}
       procedure PositionPiece(entity: oxTEntity; x, y: loopint);
 
+      procedure Empty(); virtual;
       procedure BuildBoard();
       procedure Activate(); virtual;
    end;
@@ -104,6 +107,13 @@ begin
    entity.SetScale(GridSize.d * PIECE_2D_RATIO, GridSize.d * PIECE_2D_RATIO, 1.0);
 end;
 
+procedure TBoard2D.Empty();
+begin
+   inherited;
+
+   ZeroOut(TileReference, SizeOf(TileReference));
+end;
+
 function createBoard(): oxTEntity;
 var
    entity: oxTEntity;
@@ -140,6 +150,7 @@ begin
          else
             component.Model.SetMaterial(resources.Materials.WhiteTile);
 
+         board2d.TileReference[i, j] := entity;
          Result.Add(entity);
       end;
    end;
@@ -175,7 +186,39 @@ begin
    BuildBoard();
 end;
 
+procedure selectedTile();
+var
+   tile: oxTEntity;
+   component: oxTPrimitiveModelComponent;
+
+begin
+   tile := board2d.TileReference[game.SelectedTile.y, game.SelectedTile.x];
+   component := oxTPrimitiveModelComponent(tile.GetComponent('oxTPrimitiveModelComponent'));
+
+   if(component.Model.Material = resources.Materials.BlackTile) then
+      component.Model.SetMaterial(resources.Materials.Selected.BlackTile)
+   else
+      component.Model.SetMaterial(resources.Materials.Selected.WhiteTile);
+end;
+
+procedure unselectedTile();
+var
+   tile: oxTEntity;
+   component: oxTPrimitiveModelComponent;
+
+begin
+   tile := board2d.TileReference[game.SelectedTile.y, game.SelectedTile.x];
+   component := oxTPrimitiveModelComponent(tile.GetComponent('oxTPrimitiveModelComponent'));
+
+   if(component.Model.Material = resources.Materials.Selected.BlackTile) then
+      component.Model.SetMaterial(resources.Materials.BlackTile)
+   else
+      component.Model.SetMaterial(resources.Materials.WhiteTile);
+end;
+
 INITIALIZATION
    board2d.Create();
+   game.OnSelectedTile.Add(@selectedTile);
+   game.OnUnselectedTile.Add(@unselectedTile);
 
 END.
