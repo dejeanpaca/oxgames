@@ -43,7 +43,7 @@ begin
    SelectedTile.x := -1;
    SelectedTile.y := -1;
 
-   OnSelectedTile.Call();
+   OnNew.Call();
 end;
 
 procedure TGameGlobal.SelectTile(x, y: loopint);
