@@ -130,10 +130,18 @@ var
    i: loopint;
 
 begin
+   oxResource.Destroy(resources.Materials.Background);
+   oxResource.Destroy(resources.Materials.BlackTile);
+   oxResource.Destroy(resources.Materials.WhiteTile);
+   oxResource.Destroy(resources.Materials.Selected.BlackTile);
+   oxResource.Destroy(resources.Materials.Selected.WhiteTile);
+
    for i := 1 to PIECE_TYPE_MAX do begin
       oxResource.Destroy(Models[i].Black);
       oxResource.Destroy(Models[i].White);
       oxResource.Destroy(resources.Icons[i]);
+      oxResource.Destroy(resources.Materials.Pieces2D[i].Black);
+      oxResource.Destroy(resources.Materials.Pieces2D[i].White);
    end;
 end;
 
