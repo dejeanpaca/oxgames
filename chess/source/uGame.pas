@@ -29,7 +29,7 @@ TYPE
       procedure New();
 
       {select a tile to play}
-      procedure SelectTile(x, y: loopint);
+      procedure SelectTile(const tile: oxTPoint);
 
       {is the given player controllable by input}
       function IsInputControllable(player: TPlayer): boolean;
@@ -55,7 +55,7 @@ begin
    OnNew.Call();
 end;
 
-procedure TGameGlobal.SelectTile(x, y: loopint);
+procedure TGameGlobal.SelectTile(const tile: oxTPoint);
 
   procedure unselect();
   begin
@@ -75,7 +75,8 @@ begin
       unselect();
 
       {no move possible if selected own piece again}
-      if(chess.Board[y, x].Player <> chess.CurrentPlayer) or (chess.Board[y, x].Piece = PIECE_NONE) then begin
+      if(chess.Board[tile.y, tile.x].Player <> chess.CurrentPlayer) or
+         (chess.Board[tile.y, tile.x].Piece = PIECE_NONE) then begin
          {TODO: Play a move, if possible}
          chess.TogglePlayer();
       end;
@@ -84,15 +85,15 @@ begin
    end;
 
    {if given tile was already selected, unselect it}
-   if(SelectedTile.x = x) and (SelectedTile.y = y) then begin
+   if(SelectedTile = tile) then begin
       unselect();
    end else begin
       {select given tile, if it has a piece controlled by the current player}
-      if(chess.Board[y, x].Player = chess.CurrentPlayer) and (chess.Board[y, x].Piece <> PIECE_NONE) then begin
-        SelectedTile.x := x;
-        SelectedTile.y := y;
+      if(chess.Board[tile.y, tile.x].Player = chess.CurrentPlayer) and
+         (chess.Board[tile.y, tile.x].Piece <> PIECE_NONE) then begin
+         SelectedTile := tile;
 
-        OnSelectedTile.Call();
+         OnSelectedTile.Call();
       end;
    end;
 end;

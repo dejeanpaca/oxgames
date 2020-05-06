@@ -78,7 +78,7 @@ begin
 
       {make sure the tile is not out of bounds}
       if(chess.Valid(tile.x, tile.y)) then
-         game.SelectTile(tile.x, tile.y);
+         game.SelectTile(tile);
    end;
 end;
 

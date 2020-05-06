@@ -4,7 +4,8 @@ UNIT uChess;
 INTERFACE
 
    USES
-      uStd;
+      uStd,
+      oxuTypes;
 
 TYPE
    TPieceType = (
@@ -41,10 +42,7 @@ TYPE
 
    TBoard = array[0..7, 0..7] of TPiece;
 
-   TPiecePosition = record
-      x,
-      y: loopint;
-   end;
+   TPiecePosition = oxTPoint;
 
    { TMove }
 
@@ -229,6 +227,7 @@ var
 
 begin
    TMovesList.Initialize(Result);
+
    context.x := x;
    context.y := y;
    context.Moves := @Result;
