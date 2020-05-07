@@ -44,20 +44,22 @@ TYPE
 
    TPiecePosition = oxTPoint;
 
-   { TMove }
+   { TChessMove }
 
-   TMove = record
+   TChessMove = record
       From,
       Target: TPiecePosition;
       Piece: TPieceType;
       Player: TPlayer;
       Action: TMoveAction;
 
-      class procedure Initialize(out m: TMove); static;
+      {TODO: Store target piece and player for descriptive purposes}
+
+      class procedure Initialize(out m: TChessMove); static;
    end;
 
    PMovesList = ^TMovesList;
-   TMovesList = specialize TSimpleList<TMove>;
+   TMovesList = specialize TSimpleList<TChessMove>;
 
    TMovesBuilderContext = record
       x, y: loopint;
@@ -88,6 +90,11 @@ TYPE
       function Occupied(x, y: loopint): boolean;
       {is the given position valid on the board}
       function Valid(x, y: loopint): boolean;
+
+      {checks if a move is possible}
+      function MovePossible(const from, target: oxTPoint; out move: TChessMove): boolean;
+      {plays a move from to}
+      function PlayMove(const move: TChessMove): boolean;
 
       procedure ResetBoard();
    end;
@@ -131,9 +138,9 @@ VAR
 
 IMPLEMENTATION
 
-{ TMove }
+{ TChessMove }
 
-class procedure TMove.Initialize(out m: TMove);
+class procedure TChessMove.Initialize(out m: TChessMove);
 begin
    ZeroOut(m, SizeOf(m));
 end;
@@ -171,7 +178,7 @@ end;
 procedure TChess.AddMove(toX, toY: loopint; var context: TMovesBuilderContext);
 var
    pieceType: TPieceType;
-   move: TMove;
+   move: TChessMove;
 
 begin
    {can't move outside the chess board}
@@ -180,7 +187,7 @@ begin
 
    pieceType := Board[context.y, context.x].Piece;
 
-   TMove.Initialize(move);
+   TChessMove.Initialize(move);
 
    if(not Occupied(toX, toY)) then
       move.Action := ACTION_MOVE
@@ -276,6 +283,61 @@ end;
 function TChess.Valid(x, y: loopint): boolean;
 begin
    Result := (x >= 0) and (x < 8) and (y >= 0) and (y < 8);
+end;
+
+function TChess.MovePossible(const from, target: oxTPoint; out move: TChessMove): boolean;
+var
+   i: loopint;
+   moves: TMovesList;
+
+begin
+   Result := false;
+
+   {get all possible moves for given piece}
+   moves := GetMoves(from.x, from.y);
+
+   if(moves.n > 0) then begin
+      for i := 0 to moves.n - 1 do begin
+         if(moves.List[i].Target = target) then begin
+            move := moves.List[i];
+            exit(true);
+         end;
+      end;
+   end;
+end;
+
+function TChess.PlayMove(const move: TChessMove): boolean;
+var
+   source,
+   target: TPiece;
+
+begin
+   source := Board[move.From.y, move.From.y];
+   target := Board[move.Target.y, move.Target.y];
+
+   { do some sanity checks }
+
+   if(move.Action = ACTION_EAT) then begin
+      {can't eat your own pieces}
+      if(source.Player = target.Player) then
+         exit(false);
+
+      {can't eat non-existent piece}
+      if(target.Piece = PIECE_NONE) then
+         exit(false);
+   end;
+
+   { perform move }
+
+   {clear existing piece}
+   Board[move.From.y, move.From.x].Piece := PIECE_NONE;
+
+   { TODO: Store eaten pieces }
+
+   {move to target location}
+   Board[move.From.y, move.From.x] := source;
+
+   Result := true;
 end;
 
 procedure TChess.ResetBoard();

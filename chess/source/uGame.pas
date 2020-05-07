@@ -21,18 +21,19 @@ TYPE
    TGameGlobal = record
       OnNew,
       OnSelectedTile,
-      OnUnselectedTile: TProcedures;
+      OnUnselectedTile,
+      OnMovePlayed: TProcedures;
 
       SelectedTile: oxTPoint;
       PlayerControl: array[0..1] of TPlayerControlType;
+      LastMove: TChessMove;
 
       procedure New();
 
-      {play a move from a piece to a target position}
-      function PlayMove(const from, target: oxTPoint): boolean;
-
       {select a tile to play}
       procedure SelectTile(const tile: oxTPoint);
+      {play a move}
+      procedure PlayMove(const move: TChessMove);
 
       {is the given player controllable by input}
       function IsInputControllable(player: TPlayer): boolean;
@@ -58,29 +59,9 @@ begin
    OnNew.Call();
 end;
 
-function TGameGlobal.PlayMove(const from, target: oxTPoint): boolean;
-var
-   i: loopint;
-   moves: TMovesList;
-
-begin
-   Result := false;
-
-   {get all possible moves for given piece}
-   moves := chess.GetMoves(from.x, from.y);
-
-   if(moves.n > 0) then begin
-      for i := 0 to moves.n - 1 do begin
-         if(moves.List[i].Target = target) then begin
-            {TODO: Actually move the piece if can move}
-            exit(true);
-         end;
-      end;
-   end;
-end;
-
 procedure TGameGlobal.SelectTile(const tile: oxTPoint);
 var
+   move: TChessMove;
    previousTile: oxTPoint;
 
    procedure unselect();
@@ -104,9 +85,8 @@ begin
       {no move possible if selected own piece again}
       if(chess.Board[tile.y, tile.x].Player <> chess.CurrentPlayer) or
          (chess.Board[tile.y, tile.x].Piece = PIECE_NONE) then begin
-         if(PlayMove(previousTile, tile)) then begin
-            {done with this player}
-            chess.TogglePlayer();
+         if chess.MovePossible(previousTile, tile, move) then begin
+            PlayMove(move);
          end;
       end;
 
@@ -125,6 +105,17 @@ begin
          OnSelectedTile.Call();
       end;
    end;
+end;
+
+procedure TGameGlobal.PlayMove(const move: TChessMove);
+begin
+  chess.PlayMove(move);
+
+  {done with this player}
+  chess.TogglePlayer();
+
+  LastMove := move;
+  OnMovePlayed.Call();
 end;
 
 function TGameGlobal.IsInputControllable(player: TPlayer): boolean;
