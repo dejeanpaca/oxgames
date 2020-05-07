@@ -4,7 +4,7 @@ UNIT uChess;
 INTERFACE
 
    USES
-      uStd,
+      uStd, uLog, StringUtils,
       oxuTypes;
 
 TYPE
@@ -53,9 +53,10 @@ TYPE
       Target: TPiece;
       Action: TMoveAction;
 
-      {TODO: Store target piece and player for descriptive purposes}
-
       class procedure Initialize(out m: TChessMove); static;
+
+      {get a description of this move}
+      function GetDescription(): StdString;
    end;
 
    PMovesList = ^TMovesList;
@@ -97,9 +98,16 @@ TYPE
       function PlayMove(const move: TChessMove): boolean;
 
       procedure ResetBoard();
+
+      class function GetBoardPosition(const p: oxTPoint): StdString; static;
    end;
 
 CONST
+   PLAYER_IDS: array[0..1] of StdString = (
+      'black',
+      'white'
+   );
+
    PIECE_TYPE_MAX = loopint(PIECE_KING);
 
    PIECE_NAMES: array[0..PIECE_TYPE_MAX] of StdString = (
@@ -143,6 +151,25 @@ IMPLEMENTATION
 class procedure TChessMove.Initialize(out m: TChessMove);
 begin
    ZeroOut(m, SizeOf(m));
+end;
+
+function TChessMove.GetDescription(): StdString;
+var
+   sourcePlayer,
+   targetPlayer: StdString;
+
+begin
+   Result := '';
+
+   sourcePlayer := PLAYER_IDS[loopint(Source.Player)];
+   targetPlayer := PLAYER_IDS[loopint(Target.Player)];
+
+   if(Action = ACTION_MOVE) then begin
+      Result := sourcePlayer + ' ' + PIECE_IDS[loopint(Source.Piece)] + ' from ' + chess.GetBoardPosition(pFrom) +
+         ' moves to ' + chess.GetBoardPosition(pTo);
+   end else
+      Result := sourcePlayer + ' ' + PIECE_IDS[loopint(Source.Piece)] + ' from ' + chess.GetBoardPosition(pFrom) +
+         ' eats ' + targetPlayer + ' ' + PIECE_IDS[loopint(Target.Piece)] + ' at ' + chess.GetBoardPosition(pTo);
 end;
 
 { TPiece }
@@ -340,6 +367,8 @@ begin
    {move to target location}
    Board[move.pFrom.y, move.pFrom.x] := source;
 
+   log.i(move.GetDescription());
+
    Result := true;
 end;
 
@@ -378,9 +407,18 @@ begin
    end;
 end;
 
+class function TChess.GetBoardPosition(const p: oxTPoint): StdString;
+const
+   horizontal: array[0..7] of char = ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H');
+
+begin
+   Result := horizontal[p.x] + 'x' + sf(p.y + 1);
+end;
+
 INITIALIZATION
    chess.StartingPlayer := PLAYER_WHITE;
    chess.CurrentPlayer := chess.StartingPlayer;
    chess.ResetBoard();
 
 END.
+
