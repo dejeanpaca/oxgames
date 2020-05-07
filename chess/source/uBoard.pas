@@ -22,11 +22,6 @@ TYPE
 
       Reference: array[0..7, 0..7] of oxTEntity;
 
-      Pieces: record
-         Black,
-         White: array[0..15] of oxTEntity;
-      end;
-
       constructor Create();
 
       procedure Empty(); virtual;
@@ -50,7 +45,7 @@ end;
 
 procedure TBoard.Empty();
 begin
-  ZeroOut(Reference, SizeOf(Reference));
+   ZeroOut(Reference, SizeOf(Reference));
 end;
 
 procedure TBoard.Activate();
@@ -60,13 +55,13 @@ end;
 
 procedure TBoard.Reset();
 begin
+   gameComponent.Entity.Empty();
    Empty();
    Activate();
 end;
 
 procedure TBoard.SwitchTo();
 begin
-   gameComponent.Entity.Empty();
    Reset();
 end;
 

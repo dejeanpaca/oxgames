@@ -53,13 +53,8 @@ begin
       exit;
 
    {create a piece entity}
-   if(board3d.Reference[y][x] = nil) then begin
-      reference := oxTModelComponent.GetEntity(component);
-      board3d.Reference[y][x] := reference;
-   end else begin
-      reference := board3d.Reference[y][x];
-      component := oxTModelComponent(reference.GetComponent('oxTModelComponent'));
-   end;
+   reference := oxTModelComponent.GetEntity(component);
+   board3d.Reference[y][x] := reference;
 
    reference.Name := PIECE_NAMES[loopint(chess.Board[y][x].Piece)];
 

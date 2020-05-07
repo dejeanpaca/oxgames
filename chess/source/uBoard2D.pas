@@ -65,14 +65,9 @@ begin
       exit;
 
    {create a piece entity}
-   if(board2d.Reference[y][x] = nil) then begin
-      reference := oxTPrimitiveModelComponent.GetEntity(component);
-      component.Plane();
-      board2d.Reference[y][x] := reference;
-   end else begin
-      reference := board2d.Reference[y][x];
-      component := oxTPrimitiveModelComponent(reference.GetComponent('oxTPrimitiveModelComponent'));
-   end;
+   reference := oxTPrimitiveModelComponent.GetEntity(component);
+   component.Plane();
+   board2d.Reference[y][x] := reference;
 
    reference.Name := PIECE_NAMES[loopint(chess.Board[y][x].Piece)];
 
