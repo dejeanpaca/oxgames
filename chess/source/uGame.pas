@@ -4,7 +4,7 @@ UNIT uGame;
 INTERFACE
 
    USES
-      uStd,
+      uStd, uLog,
       {ox}
       oxuTypes,
       {game}
@@ -108,7 +108,10 @@ end;
 
 procedure TGameGlobal.PlayMove(const move: TChessMove);
 begin
-  chess.PlayMove(move);
+  if(not chess.PlayMove(move)) then begin
+     log.e('Cannot play move: ' + move.GetDescription());
+     exit;
+  end;
 
   {done with this player}
   chess.TogglePlayer();
