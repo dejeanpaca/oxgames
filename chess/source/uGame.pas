@@ -5,6 +5,8 @@ INTERFACE
 
    USES
       uStd, uLog,
+      {app}
+      appuEvents, appuActionEvents,
       {ox}
       oxuTypes,
       {game}
@@ -19,6 +21,8 @@ TYPE
    { TGameGlobal }
 
    TGameGlobal = record
+      ACTION_NEW_GAME: TEventID;
+
       OnNew,
       OnSelectedTile,
       OnUnselectedTile,
@@ -130,6 +134,11 @@ begin
   Result := PlayerControl[loopint(chess.CurrentPlayer)];
 end;
 
+procedure newGame();
+begin
+   game.New();
+end;
+
 INITIALIZATION
    TProcedures.Initialize(game.OnNew);
    TProcedures.Initialize(game.OnSelectedTile);
@@ -138,5 +147,7 @@ INITIALIZATION
 
    game.PlayerControl[loopint(PLAYER_BLACK)] := PLAYER_CONTROL_INPUT;
    game.PlayerControl[loopint(PLAYER_WHITE)] := PLAYER_CONTROL_INPUT;
+
+   game.ACTION_NEW_GAME := appActionEvents.SetCallback(@newGame);
 
 END.

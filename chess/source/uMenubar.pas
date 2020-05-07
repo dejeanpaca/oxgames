@@ -11,7 +11,7 @@ INTERFACE
       uiWidgets,
       wdguMenubar, uiuContextMenu,
       {game}
-      uMain, uAbout,
+      uMain, uAbout, uGame,
       uBoardSwitch;
 
 VAR
@@ -27,7 +27,7 @@ begin
    menubar := wdgMenubar.Add(oxWindow.Current);
 
    menu := menubar.Add('Game');
-   menu.AddItem('New Game');
+   menu.AddItem('New Game', game.ACTION_NEW_GAME);
    menu.AddSeparator();
    menu.AddItem('Quit', appACTION_QUIT);
 
