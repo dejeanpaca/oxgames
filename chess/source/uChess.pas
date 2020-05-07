@@ -365,7 +365,7 @@ begin
    { TODO: Store eaten pieces }
 
    {move to target location}
-   Board[move.pFrom.y, move.pFrom.x] := source;
+   Board[move.pTo.y, move.pTo.x] := source;
 
    log.i(move.GetDescription());
 
