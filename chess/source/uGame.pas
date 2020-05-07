@@ -131,6 +131,7 @@ INITIALIZATION
    TProcedures.Initialize(game.OnNew);
    TProcedures.Initialize(game.OnSelectedTile);
    TProcedures.Initialize(game.OnUnselectedTile);
+   TProcedures.Initialize(game.OnMovePlayed);
 
    game.PlayerControl[loopint(PLAYER_BLACK)] := PLAYER_CONTROL_INPUT;
    game.PlayerControl[loopint(PLAYER_WHITE)] := PLAYER_CONTROL_INPUT;

@@ -19,8 +19,8 @@ TYPE
    );
 
    TPlayer = (
-      PLAYER_WHITE,
-      PLAYER_BLACK
+      PLAYER_BLACK,
+      PLAYER_WHITE
    );
 
    TMoveAction = (
