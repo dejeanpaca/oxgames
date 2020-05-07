@@ -90,6 +90,14 @@ TYPE
       StartingPlayerSide: TPlayerSide;
       PlayerSides: array[0..1] of TPlayer;
 
+      {does the current player have a check}
+      Check,
+      {have we achieved a check mate}
+      CheckMate: boolean;
+
+      {list of moves for the current player}
+      Moves: TMovesList;
+
       procedure New();
 
       {switch the current player to opposing}
@@ -116,7 +124,11 @@ TYPE
       {get allowed moves for the piece on the given coordinates}
       function GetMoves(x, y: loopint): TMovesList;
       {get all allowed moves for the entire board for a player}
+      procedure GetAllMoves(player: TPlayer; var where: TMovesList);
+      {get all allowed moves for the entire board for a player}
       function GetAllMoves(player: TPlayer): TMovesList;
+      {get all allowed moves for the entire board for the current player}
+      procedure GetAllMoves();
 
       {is the given position occupied on the board}
       function Occupied(x, y: loopint): boolean;
@@ -425,31 +437,43 @@ begin
       GetKingMoves(x, y, context);
 end;
 
-function TChess.GetAllMoves(player: TPlayer): TMovesList;
+procedure TChess.GetAllMoves(player: TPlayer; var where: TMovesList);
 var
-   x, y, i: loopint;
-   moves: TMovesList;
+   x,
+   y,
+   i: loopint;
+   current: TMovesList;
 
 begin
-   TMovesList.Initialize(Result);
-
    for y := 0 to 7 do begin
       for x := 0 to 7 do begin
          if(Board[y, x].Player = player) then begin
             {get moves for a specific piece}
-            moves := GetMoves(x, y);
+            current := GetMoves(x, y);
 
             {copy piece moves to all moves list, if any}
-            if(moves.n > 0) then begin
+            if(current.n > 0) then begin
                for i := 0 to moves.n - 1 do begin
-                  Result.Add(moves.List[i]);
+                  where.Add(moves.List[i]);
                end;
             end;
 
-            moves.Dispose();
+            current.Dispose();
          end;
       end;
    end;
+end;
+
+function TChess.GetAllMoves(player: TPlayer): TMovesList;
+begin
+   TMovesList.Initialize(Result);
+   GetAllMoves(player, Result);
+end;
+
+procedure TChess.GetAllMoves();
+begin
+   Moves.RemoveAll();
+   GetAllMoves(CurrentPlayer, Moves);
 end;
 
 function TChess.Occupied(x, y: loopint): boolean;
@@ -468,18 +492,18 @@ end;
 function TChess.MovePossible(const from, target: oxTPoint; out move: TChessMove): boolean;
 var
    i: loopint;
-   moves: TMovesList;
+   current: TMovesList;
 
 begin
    Result := false;
 
    {get all possible moves for given piece}
-   moves := GetMoves(from.x, from.y);
+   current := GetMoves(from.x, from.y);
 
-   if(moves.n > 0) then begin
-      for i := 0 to moves.n - 1 do begin
-         if(moves.List[i].pTo = target) then begin
-            move := moves.List[i];
+   if(current.n > 0) then begin
+      for i := 0 to current.n - 1 do begin
+         if(current.List[i].pTo = target) then begin
+            move := current.List[i];
             exit(true);
          end;
       end;
@@ -517,6 +541,10 @@ begin
    {move to target location}
    Board[move.pTo.y, move.pTo.x] := source;
 
+   {if we capture a king, we've achieved check-mate}
+   if(target.Piece = PIECE_KING) then
+      CheckMate := true;
+
    log.i(move.GetDescription());
 
    Result := true;
@@ -530,6 +558,9 @@ var
    playerSecond: TPlayer;
 
 begin
+   CheckMate := false;
+   Check := false;
+
    for i := 0 to 7 do begin
       for j := 0 to 7 do begin
          Board[i][j].Clear();
@@ -566,6 +597,7 @@ begin
 end;
 
 INITIALIZATION
+   TMovesList.Initialize(chess.Moves);
    chess.StartingPlayer := PLAYER_WHITE;
    chess.StartingPlayerSide := PLAYER_BOTTOM;
    chess.CurrentPlayer := chess.StartingPlayer;

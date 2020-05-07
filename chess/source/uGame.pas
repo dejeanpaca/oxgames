@@ -112,16 +112,19 @@ end;
 
 procedure TGameGlobal.PlayMove(const move: TChessMove);
 begin
-  if(not chess.PlayMove(move)) then begin
-     log.e('Cannot play move: ' + move.GetDescription());
-     exit;
-  end;
+   if(not chess.PlayMove(move)) then begin
+      log.e('Cannot play move: ' + move.GetDescription());
+      exit;
+   end;
 
-  {done with this player}
-  chess.TogglePlayer();
+   {switch to the other player, unless we've reached check mate}
+   if(not chess.CheckMate) then begin
+      {done with this player}
+      chess.TogglePlayer();
+   end;
 
-  LastMove := move;
-  OnMovePlayed.Call();
+   LastMove := move;
+   OnMovePlayed.Call();
 end;
 
 function TGameGlobal.IsInputControllable(player: TPlayer): boolean;
