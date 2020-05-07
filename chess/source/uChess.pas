@@ -1,3 +1,10 @@
+{
+   TODO: Implement check and check mate
+   TODO: Implement promotion
+   TODO: Implement castling
+   TODO: Implement en passant
+}
+
 {$INCLUDE oxdefines.inc}
 UNIT uChess;
 
@@ -101,6 +108,10 @@ TYPE
       procedure GetBishopMoves(var context: TMovesBuilderContext);
       {get allowed moves for the rook on the given coordinates}
       procedure GetRookMoves(var context: TMovesBuilderContext);
+      {get allowed moves for the queen on the given coordinates}
+      procedure GetQueenMoves(var context: TMovesBuilderContext);
+      {get allowed moves for the king on the given coordinates}
+      procedure GetKingMoves(x, y: loopint; var context: TMovesBuilderContext);
 
       {get allowed moves for the piece on the given coordinates}
       function GetMoves(x, y: loopint): TMovesList;
@@ -358,6 +369,34 @@ begin
    AddLineMoves(0, -1, context);
 end;
 
+procedure TChess.GetQueenMoves(var context: TMovesBuilderContext);
+begin
+   {diagonal}
+   AddLineMoves(1,  1, context);
+   AddLineMoves(1,  -1, context);
+   AddLineMoves(-1, 1, context);
+   AddLineMoves(-1, -1, context);
+
+   {rank and file}
+   AddLineMoves(1,  0, context);
+   AddLineMoves(-1, 0, context);
+   AddLineMoves(0,  1, context);
+   AddLineMoves(0, -1, context);
+end;
+
+procedure TChess.GetKingMoves(x, y: loopint; var context: TMovesBuilderContext);
+begin
+  AddMove(x + 1, y, context);
+  AddMove(x - 1, y, context);
+  AddMove(x, y + 1, context);
+  AddMove(x, y - 1, context);
+
+  AddMove(x + 1, y + 1, context);
+  AddMove(x - 1, y + 1, context);
+  AddMove(x + 1, y - 1, context);
+  AddMove(x - 1, y - 1, context);
+end;
+
 function TChess.GetMoves(x, y: loopint): TMovesList;
 var
    pieceType: TPieceType;
@@ -379,7 +418,11 @@ begin
    else if(pieceType = PIECE_BISHOP) then
       GetBishopMoves(context)
    else if(pieceType = PIECE_ROOK) then
-      GetRookMoves(context);
+      GetRookMoves(context)
+   else if(pieceType = PIECE_QUEEN) then
+      GetQueenMoves(context)
+   else if(pieceType = PIECE_KING) then
+      GetKingMoves(x, y, context);
 end;
 
 function TChess.GetAllMoves(player: TPlayer): TMovesList;
