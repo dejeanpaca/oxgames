@@ -30,7 +30,7 @@ TYPE
 
    TMoveAction = (
       ACTION_MOVE,
-      ACTION_EAT
+      ACTION_CAPTURE
    );
 
    { TPiece }
@@ -100,7 +100,7 @@ TYPE
       {get allowed moves for the bishop on the given coordinates}
       procedure GetBishopMoves(var context: TMovesBuilderContext);
       {get allowed moves for the rook on the given coordinates}
-      procedure GetRookMoves(x, y: loopint; var context: TMovesBuilderContext);
+      procedure GetRookMoves(var context: TMovesBuilderContext);
 
       {get allowed moves for the piece on the given coordinates}
       function GetMoves(x, y: loopint): TMovesList;
@@ -262,7 +262,7 @@ begin
    if(not Occupied(toX, toY)) then
       move.Action := ACTION_MOVE
    else
-      move.Action := ACTION_EAT;
+      move.Action := ACTION_CAPTURE;
 
    move.Source.Piece := pieceType;
    move.Source.Player := Board[context.y, context.x].Player;
@@ -350,7 +350,7 @@ begin
    AddLineMoves(-1, -1, context);
 end;
 
-procedure TChess.GetRookMoves(x, y: loopint; var context: TMovesBuilderContext);
+procedure TChess.GetRookMoves(var context: TMovesBuilderContext);
 begin
    AddLineMoves(1,  0, context);
    AddLineMoves(-1, 0, context);
@@ -379,7 +379,7 @@ begin
    else if(pieceType = PIECE_BISHOP) then
       GetBishopMoves(context)
    else if(pieceType = PIECE_ROOK) then
-      GetRookMoves(x, y, context);
+      GetRookMoves(context);
 end;
 
 function TChess.GetAllMoves(player: TPlayer): TMovesList;
@@ -454,7 +454,7 @@ begin
 
    { do some sanity checks }
 
-   if(move.Action = ACTION_EAT) then begin
+   if(move.Action = ACTION_CAPTURE) then begin
       {can't eat your own pieces}
       if(source.Player = target.Player) then
          exit(false);
