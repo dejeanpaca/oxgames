@@ -88,9 +88,20 @@ TYPE
       {switch the current player to opposing}
       procedure TogglePlayer();
 
-      procedure AddMove(toX, toY: loopint; var context: TMovesBuilderContext);
-      {get allowed moves for the piece on the given coordinates}
+      {add a piece move/eat action to the given position}
+      function AddMove(toX, toY: loopint; var context: TMovesBuilderContext): boolean;
+      {add moves by line (diagonal, rank or file)}
+      procedure AddLineMoves(xmul, ymul: loopint; var context: TMovesBuilderContext);
+
+      {get allowed moves for the pawn on the given coordinates}
       procedure GetPawnMoves(x, y: loopint; var context: TMovesBuilderContext);
+      {get allowed moves for the knight on the given coordinates}
+      procedure GetKnightMoves(x, y: loopint; var context: TMovesBuilderContext);
+      {get allowed moves for the bishop on the given coordinates}
+      procedure GetBishopMoves(var context: TMovesBuilderContext);
+      {get allowed moves for the rook on the given coordinates}
+      procedure GetRookMoves(x, y: loopint; var context: TMovesBuilderContext);
+
       {get allowed moves for the piece on the given coordinates}
       function GetMoves(x, y: loopint): TMovesList;
       {get all allowed moves for the entire board for a player}
@@ -229,7 +240,7 @@ begin
       CurrentPlayer := PLAYER_BLACK;
 end;
 
-procedure TChess.AddMove(toX, toY: loopint; var context: TMovesBuilderContext);
+function TChess.AddMove(toX, toY: loopint; var context: TMovesBuilderContext): boolean;
 var
    pieceType: TPieceType;
    move: TChessMove;
@@ -237,7 +248,12 @@ var
 begin
    {can't move outside the chess board}
    if(not Valid(toX, toY)) then
-      exit;
+      exit(False);
+
+   {can't eat or move into ourselves}
+   if(Board[toY, toX].Player = Board[context.y, context.x].Player)
+      and(Board[toY, toX].Piece <> PIECE_NONE) then
+      exit(false);
 
    pieceType := Board[context.y, context.x].Piece;
 
@@ -259,6 +275,27 @@ begin
    move.pTo.y := toY;
 
    context.Moves^.Add(move);
+
+   Result := true;
+end;
+
+procedure TChess.AddLineMoves(xmul, ymul: loopint; var context: TMovesBuilderContext);
+var
+   x,
+   y,
+   i: loopint;
+
+begin
+   x := context.x;
+   y := context.y;
+
+   for i := 1 to 7 do begin
+      AddMove(x + (i * xmul), y + (i * ymul), context);
+
+      {stop when we hit something}
+      if(Occupied(x + (i * xmul), y + (i * ymul))) then
+         break;
+   end;
 end;
 
 procedure TChess.GetPawnMoves(x, y: loopint; var context: TMovesBuilderContext);
@@ -292,6 +329,35 @@ begin
    end;
 end;
 
+procedure TChess.GetKnightMoves(x, y: loopint; var context: TMovesBuilderContext);
+begin
+   AddMove(x + 2, y + 1, context);
+   AddMove(x + 2, y - 1, context);
+   AddMove(x - 2, y - 1, context);
+   AddMove(x - 2, y + 1, context);
+
+   AddMove(x + 1, y + 2, context);
+   AddMove(x - 1, y + 2, context);
+   AddMove(x + 1, y - 2, context);
+   AddMove(x - 1, y - 2, context);
+end;
+
+procedure TChess.GetBishopMoves(var context: TMovesBuilderContext);
+begin
+   AddLineMoves(1,  1, context);
+   AddLineMoves(1,  -1, context);
+   AddLineMoves(-1, 1, context);
+   AddLineMoves(-1, -1, context);
+end;
+
+procedure TChess.GetRookMoves(x, y: loopint; var context: TMovesBuilderContext);
+begin
+   AddLineMoves(1,  0, context);
+   AddLineMoves(-1, 0, context);
+   AddLineMoves(0,  1, context);
+   AddLineMoves(0, -1, context);
+end;
+
 function TChess.GetMoves(x, y: loopint): TMovesList;
 var
    pieceType: TPieceType;
@@ -307,7 +373,13 @@ begin
    pieceType := Board[y, x].Piece;
 
    if(pieceType = PIECE_PAWN) then
-      GetPawnMoves(x, y, context);
+      GetPawnMoves(x, y, context)
+   else if(pieceType = PIECE_KNIGHT) then
+      GetKnightMoves(x, y, context)
+   else if(pieceType = PIECE_BISHOP) then
+      GetBishopMoves(context)
+   else if(pieceType = PIECE_ROOK) then
+      GetRookMoves(x, y, context);
 end;
 
 function TChess.GetAllMoves(player: TPlayer): TMovesList;
