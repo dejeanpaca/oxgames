@@ -211,9 +211,38 @@ begin
       component.Model.SetMaterial(resources.Materials.WhiteTile);
 end;
 
+procedure movePlayed();
+var
+   move: TChessMove;
+   sourceReference,
+   targetReference: oxTEntity;
+
+begin
+   move := game.LastMove;
+
+   {destroy target piece entity}
+   targetReference := board2d.Reference[move.pTo.y, move.pTo.x];
+   sourceReference := board2d.Reference[move.pFrom.y, move.pFrom.x];
+
+   {sanity check if we've been fed invalid state}
+   if(sourceReference = nil) then
+      exit;
+
+   if(targetReference <> nil) then
+      oxEntity.Remove(targetReference);
+
+   {replace target entity with old}
+   board2d.Reference[move.pTo.y, move.pTo.x] := sourceReference;
+   board2d.PositionPiece(sourceReference, move.pTo.x, move.pTo.y);
+
+   {should nothing be left at old one}
+   board2d.Reference[move.pFrom.y, move.pFrom.x] := nil;
+end;
+
 INITIALIZATION
    board2d.Create();
    game.OnSelectedTile.Add(@selectedTile);
    game.OnUnselectedTile.Add(@unselectedTile);
+   game.OnMovePlayed.Add(@movePlayed);
 
 END.
