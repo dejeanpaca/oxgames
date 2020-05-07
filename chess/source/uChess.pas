@@ -317,10 +317,10 @@ begin
       if(not Occupied(x, y + 1)) then
          AddMove(x, y + 1, context);
 
-      if(not Occupied(x + 1, y + 1)) then
+      if(Occupied(x + 1, y + 1)) then
          AddMove(x + 1, y + 1, context);
 
-      if(not Occupied(x - 1, y + 1)) then
+      if(Occupied(x - 1, y + 1)) then
          AddMove(x - 1, y + 1, context);
 
       {move by two positions from starting position}
