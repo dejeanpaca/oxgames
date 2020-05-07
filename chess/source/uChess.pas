@@ -23,6 +23,11 @@ TYPE
       PLAYER_WHITE
    );
 
+   TPlayerSide = (
+      PLAYER_UP,
+      PLAYER_BOTTOM
+   );
+
    TMoveAction = (
       ACTION_MOVE,
       ACTION_EAT
@@ -38,6 +43,7 @@ TYPE
 
       procedure Place(usePiece: TPieceType; usePlayer: TPlayer);
       procedure Clear();
+      function GetPlayerSide(): TPlayerSide;
    end;
 
    TBoard = array[0..7, 0..7] of TPiece;
@@ -71,8 +77,11 @@ TYPE
 
    TChess = record
       Board: TBoard;
+
       StartingPlayer,
       CurrentPlayer: TPlayer;
+      StartingPlayerSide: TPlayerSide;
+      PlayerSides: array[0..1] of TPlayer;
 
       procedure New();
 
@@ -186,11 +195,29 @@ begin
    Player := PLAYER_BLACK;
 end;
 
+function TPiece.GetPlayerSide(): TPlayerSide;
+begin
+  if(chess.PlayerSides[loopint(PLAYER_UP)] = Player) then
+     Result := PLAYER_UP
+  else
+     Result := PLAYER_BOTTOM;
+end;
+
 { TChess }
 
 procedure TChess.New();
 begin
    CurrentPlayer := StartingPlayer;
+
+   if((StartingPlayerSide = PLAYER_BOTTOM) and (StartingPlayer = PLAYER_WHITE)) or
+      (StartingPlayerSide = PLAYER_UP) and (StartingPlayer = PLAYER_BLACK) then begin
+     PlayerSides[loopint(PLAYER_UP)] := PLAYER_BLACK;
+     PlayerSides[loopint(PLAYER_BOTTOM)] := PLAYER_WHITE;
+   end else begin
+      PlayerSides[loopint(PLAYER_UP)] := PLAYER_WHITE;
+      PlayerSides[loopint(PLAYER_BOTTOM)] := PLAYER_BLACK;
+   end;
+
    ResetBoard();
 end;
 
@@ -236,7 +263,7 @@ end;
 
 procedure TChess.GetPawnMoves(x, y: loopint; var context: TMovesBuilderContext);
 begin
-   if(Board[y, x].Player = PLAYER_BLACK) then begin
+   if(Board[y, x].GetPlayerSide() = PLAYER_UP) then begin
       if(not Occupied(x, y - 1)) then
          AddMove(x, y - 1, context);
 
@@ -245,6 +272,10 @@ begin
 
       if(Occupied(x - 1, y - 1)) then
          AddMove(x - 1, y - 1, context);
+
+      {move by two positions from starting position}
+      if(y = 6) then
+         AddMove(x, y - 2, context);
    end else begin
       if(not Occupied(x, y + 1)) then
          AddMove(x, y + 1, context);
@@ -254,6 +285,10 @@ begin
 
       if(not Occupied(x - 1, y + 1)) then
          AddMove(x - 1, y + 1, context);
+
+      {move by two positions from starting position}
+      if(y = 1) then
+         AddMove(x, y + 2, context);
    end;
 end;
 
@@ -387,8 +422,8 @@ begin
    end;
 
    if(StartingPlayer = PLAYER_BLACK) then begin
-      playerFirst := PLAYER_BLACK;
-      playerSecond := PLAYER_WHITE;
+      playerFirst := PlayerSides[loopint(PLAYER_UP)];
+      playerSecond := PlayerSides[loopint(PLAYER_BOTTOM)];
    end else begin
       playerFirst := PLAYER_WHITE;
       playerSecond := PLAYER_BLACK;
@@ -417,6 +452,7 @@ end;
 
 INITIALIZATION
    chess.StartingPlayer := PLAYER_WHITE;
+   chess.StartingPlayerSide := PLAYER_BOTTOM;
    chess.CurrentPlayer := chess.StartingPlayer;
    chess.ResetBoard();
 
