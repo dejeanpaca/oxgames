@@ -47,10 +47,10 @@ TYPE
    { TChessMove }
 
    TChessMove = record
-      From,
-      Target: TPiecePosition;
-      Piece: TPieceType;
-      Player: TPlayer;
+      pFrom,
+      pTo: TPiecePosition;
+      Source,
+      Target: TPiece;
       Action: TMoveAction;
 
       {TODO: Store target piece and player for descriptive purposes}
@@ -194,12 +194,15 @@ begin
    else
       move.Action := ACTION_EAT;
 
-   move.Piece := pieceType;
-   move.Player := Board[context.y, context.x].Player;
-   move.From.x := context.x;
-   move.From.y := context.y;
-   move.Target.x := toX;
-   move.Target.y := toY;
+   move.Source.Piece := pieceType;
+   move.Source.Player := Board[context.y, context.x].Player;
+   move.pFrom.x := context.x;
+   move.pFrom.y := context.y;
+
+   move.Target.Piece := Board[toY, toX].Piece;
+   move.Target.Player := Board[toY, toX].Player;
+   move.pTo.x := toX;
+   move.pTo.y := toY;
 
    context.Moves^.Add(move);
 end;
@@ -298,7 +301,7 @@ begin
 
    if(moves.n > 0) then begin
       for i := 0 to moves.n - 1 do begin
-         if(moves.List[i].Target = target) then begin
+         if(moves.List[i].pTo = target) then begin
             move := moves.List[i];
             exit(true);
          end;
@@ -312,8 +315,8 @@ var
    target: TPiece;
 
 begin
-   source := Board[move.From.y, move.From.y];
-   target := Board[move.Target.y, move.Target.y];
+   source := Board[move.pFrom.y, move.pFrom.y];
+   target := Board[move.pTo.y, move.pTo.y];
 
    { do some sanity checks }
 
@@ -330,12 +333,12 @@ begin
    { perform move }
 
    {clear existing piece}
-   Board[move.From.y, move.From.x].Piece := PIECE_NONE;
+   Board[move.pFrom.y, move.pFrom.x].Piece := PIECE_NONE;
 
    { TODO: Store eaten pieces }
 
    {move to target location}
-   Board[move.From.y, move.From.x] := source;
+   Board[move.pFrom.y, move.pFrom.x] := source;
 
    Result := true;
 end;

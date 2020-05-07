@@ -85,9 +85,8 @@ begin
       {no move possible if selected own piece again}
       if(chess.Board[tile.y, tile.x].Player <> chess.CurrentPlayer) or
          (chess.Board[tile.y, tile.x].Piece = PIECE_NONE) then begin
-         if chess.MovePossible(previousTile, tile, move) then begin
+         if chess.MovePossible(previousTile, tile, move) then
             PlayMove(move);
-         end;
       end;
 
       exit;
