@@ -377,8 +377,8 @@ var
    target: TPiece;
 
 begin
-   source := Board[move.pFrom.y, move.pFrom.y];
-   target := Board[move.pTo.y, move.pTo.y];
+   source := Board[move.pFrom.y, move.pFrom.x];
+   target := Board[move.pTo.y, move.pTo.x];
 
    { do some sanity checks }
 
