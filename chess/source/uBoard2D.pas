@@ -13,7 +13,7 @@ INTERFACE
       oxuProjection,
       oxuCameraComponent, oxuEntity,
       oxuMaterial,
-      oxuPrimitiveModelComponent,
+      oxuPrimitiveModelComponent, oxuTextComponent,
       {game}
       uChess, uGame, uScene, uShared, uResources, uGameComponent, uBoard;
 
@@ -113,10 +113,17 @@ begin
    ZeroOut(TileReference, SizeOf(TileReference));
 end;
 
+function getTextPosition(i: loopint): single;
+begin
+   Result := i * BOARD_2D_TILE_SIZE - BOARD_2D_SIZE / 2 + BOARD_2D_TILE_SIZE / 2;
+end;
+
 function createBoard(): oxTEntity;
 var
+   parent,
    entity: oxTEntity;
    component: oxTPrimitiveModelComponent;
+   text: oxTTextComponent;
    i, j: loopint;
 
 begin
@@ -130,6 +137,8 @@ begin
    entity.SetPosition(0, 0, -0.5);
    component.Model.SetMaterial(resources.Materials.Background);
    Result.Add(entity);
+
+   parent := oxEntity.New('Tiles');
 
    {create tiles}
    for i := 0 to 7 do begin
@@ -150,9 +159,33 @@ begin
             component.Model.SetMaterial(resources.Materials.WhiteTile);
 
          board2d.TileReference[i, j] := entity;
-         Result.Add(entity);
+         parent.Add(entity);
       end;
    end;
+
+   Result.Add(parent);
+
+   {add text to board}
+
+   parent := oxEntity.New('Text');
+
+   for i := 0 to 7 do begin
+      entity := oxTTextComponent.GetEntity(sf(i + 1), text);
+      entity.Name := sf(i + 1);
+      entity.SetPosition(-4.7, GetTextPosition(i), 0.0);
+      entity.SetScale(0.3, 0.3, 0.3);
+
+      parent.Add(entity);
+
+      entity := oxTTextComponent.GetEntity(chess.HorizontalCoordinate(i), text);
+      entity.Name := chess.HorizontalCoordinate(i);
+      entity.SetPosition(getTextPosition(i), 4.7, 0.0);
+      entity.SetScale(0.3, 0.3, 0.3);
+
+      parent.Add(entity);
+   end;
+
+   Result.Add(parent);
 end;
 
 procedure TBoard2D.BuildBoard();
