@@ -142,6 +142,7 @@ TYPE
 
       procedure ResetBoard();
 
+      class function HorizontalCoordinate(index: loopint): StdString; static;
       class function GetBoardPosition(const p: oxTPoint): StdString; static;
    end;
 
@@ -588,12 +589,18 @@ begin
    end;
 end;
 
-class function TChess.GetBoardPosition(const p: oxTPoint): StdString;
+class function TChess.HorizontalCoordinate(index: loopint): StdString;
 const
    horizontal: array[0..7] of char = ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H');
 
 begin
-   Result := horizontal[p.x] + 'x' + sf(p.y + 1);
+   Result := horizontal[index];
+end;
+
+class function TChess.GetBoardPosition(const p: oxTPoint): StdString;
+
+begin
+   Result := HorizontalCoordinate(p.x) + 'x' + sf(p.y + 1);
 end;
 
 INITIALIZATION
