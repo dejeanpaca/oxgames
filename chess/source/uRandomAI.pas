@@ -4,7 +4,9 @@ UNIT uRandomAI;
 INTERFACE
 
    USES
-      uAI;
+      uStd, uLog,
+      {game}
+      uAI, uChess, uGame;
 
 TYPE
 
@@ -35,11 +37,19 @@ begin
 end;
 
 procedure TRandomAI.PlayMove();
-begin
+var
+   index: loopint;
 
+begin
+   if(chess.Moves.n > 0) then begin
+      index := Random(chess.Moves.n);
+      game.PlayMove(chess.Moves.List[index]);
+   end else
+      log.w('Random AI can''t play any more moves');
 end;
 
 INITIALIZATION
    RandomAI.Create();
+   CurrentAI := @RandomAI;
 
 END.
