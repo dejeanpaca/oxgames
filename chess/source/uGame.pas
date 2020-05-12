@@ -10,7 +10,7 @@ INTERFACE
       {ox}
       oxuTypes,
       {game}
-      uChess;
+      uChess, uAI;
 
 TYPE
    TPlayerControlType = (
@@ -60,6 +60,7 @@ begin
    SelectedTile.x := -1;
    SelectedTile.y := -1;
 
+   CurrentAI^.Reset();
    OnNew.Call();
 end;
 
@@ -149,7 +150,7 @@ INITIALIZATION
    TProcedures.Initialize(game.OnUnselectedTile);
    TProcedures.Initialize(game.OnMovePlayed);
 
-   game.PlayerControl[loopint(PLAYER_BLACK)] := PLAYER_CONTROL_INPUT;
+   game.PlayerControl[loopint(PLAYER_BLACK)] := PLAYER_CONTROL_AI;
    game.PlayerControl[loopint(PLAYER_WHITE)] := PLAYER_CONTROL_INPUT;
 
    game.ACTION_NEW_GAME := appActionEvents.SetCallback(@newGame);

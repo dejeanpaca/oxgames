@@ -12,7 +12,7 @@ INTERFACE
       oxuCameraComponent,
       oxuMaterial, oxumPrimitive, oxuPrimitiveModelComponent,
       {game}
-      uScene, uChess, uGame;
+      uScene, uChess, uGame, uAI;
 
 TYPE
    { TGameComponent }
@@ -41,9 +41,8 @@ IMPLEMENTATION
 
 procedure TGameComponent.Update();
 begin
-   if(game.PlayerControlType() = PLAYER_CONTROL_AI) then begin
-      {TODO: Implement AI control}
-   end;
+   if(game.PlayerControlType() = PLAYER_CONTROL_AI) then
+      CurrentAI^.PlayMove();
 end;
 
 function TGameComponent.GetDescriptor(): oxPComponentDescriptor;
@@ -56,10 +55,8 @@ end;
 procedure TGameComponentGlobal.Initialize();
 begin
    gameComponent.Descriptor.Create('game', TGameComponent);
-   gameComponent.Descriptor.Name := 'Game';
 
-   Entity := oxEntity.New('Game');
-   Entity.Add(TGameComponent.Create());
+   Entity := oxEntity.New('Game', TGameComponent.Create());
 
    Entity.LoadComponentsInChildren();
 

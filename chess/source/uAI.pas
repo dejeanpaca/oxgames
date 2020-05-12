@@ -7,6 +7,7 @@ INTERFACE
       uStd;
 
 TYPE
+   PAI = ^TAI;
 
    { TAI }
 
@@ -19,6 +20,9 @@ TYPE
       procedure Reset(); virtual;
       procedure PlayMove(); virtual;
    end;
+
+VAR
+   CurrentAI: PAI;
 
 IMPLEMENTATION
 
