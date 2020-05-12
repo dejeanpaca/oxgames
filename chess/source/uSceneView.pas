@@ -64,12 +64,11 @@ var
    tile: oxTPoint;
 
 begin
-   p := @uScene.scene.Camera.Projection;
-
    if(not e.IsReleased()) then
       exit;
 
-   if(not main.Board3D) then begin
+   if(not main.Board3D) and (game.IsInputControllable(chess.CurrentPlayer)) then begin
+      p := @uScene.scene.Camera.Projection;
       p^.Unproject(x, y, Camera.Matrix, world);
 
       {convert projection coordinates into tile coordinates}
