@@ -55,7 +55,7 @@ end;
 
 procedure TBoard.Reset();
 begin
-   gameComponent.Entity.Empty();
+   gameComponent.Entity.EmptyChildren();
    Empty();
    Activate();
 end;
