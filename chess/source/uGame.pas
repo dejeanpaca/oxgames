@@ -117,13 +117,14 @@ begin
       exit;
    end;
 
+   LastMove := move;
+
    {switch to the other player, unless we've reached check mate}
    if(not chess.CheckMate) then begin
       {done with this player}
       chess.TogglePlayer();
    end;
 
-   LastMove := move;
    OnMovePlayed.Call();
 end;
 
