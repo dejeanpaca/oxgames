@@ -501,6 +501,10 @@ var
 begin
    Result := false;
 
+   {can't do any moves if we have a checkmate}
+   if(CheckMate) then
+      exit(false);
+
    {get all possible moves for given piece}
    current := GetMoves(from.x, from.y);
 

@@ -82,6 +82,10 @@ begin
    if(not game.IsInputControllable(chess.CurrentPlayer)) then
       exit;
 
+   {can't do anything if checkmate}
+   if(chess.CheckMate) then
+      exit;
+
    {if a tile is already selected, play a move}
    if(SelectedTile.x >= 0) then begin
       previousTile := SelectedTile;
