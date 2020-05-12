@@ -102,6 +102,8 @@ TYPE
 
       {switch the current player to opposing}
       procedure TogglePlayer();
+      {set player as current}
+      procedure SetPlayer(p: TPlayer);
 
       {add a piece move/eat action to the given position}
       function AddMove(toX, toY: loopint; var context: TMovesBuilderContext): boolean;
@@ -123,6 +125,8 @@ TYPE
 
       {get allowed moves for the piece on the given coordinates}
       function GetMoves(x, y: loopint): TMovesList;
+      {get allowed moves for the piece on the given coordinates}
+      procedure GetMoves(x, y: loopint; var where: TMovesList);
       {get all allowed moves for the entire board for a player}
       procedure GetAllMoves(player: TPlayer; var where: TMovesList);
       {get all allowed moves for the entire board for a player}
@@ -242,8 +246,6 @@ end;
 
 procedure TChess.New();
 begin
-   CurrentPlayer := StartingPlayer;
-
    if((StartingPlayerSide = PLAYER_BOTTOM) and (StartingPlayer = PLAYER_WHITE)) or
       (StartingPlayerSide = PLAYER_UP) and (StartingPlayer = PLAYER_BLACK) then begin
      PlayerSides[loopint(PLAYER_UP)] := PLAYER_BLACK;
@@ -254,14 +256,21 @@ begin
    end;
 
    ResetBoard();
+   SetPlayer(StartingPlayer);
 end;
 
 procedure TChess.TogglePlayer();
 begin
    if(CurrentPlayer = PLAYER_BLACK) then
-      CurrentPlayer := PLAYER_WHITE
+      SetPlayer(PLAYER_WHITE)
    else
-      CurrentPlayer := PLAYER_BLACK;
+      SetPlayer(PLAYER_BLACK);
+end;
+
+procedure TChess.SetPlayer(p: TPlayer);
+begin
+   CurrentPlayer := p;
+   GetAllMoves();
 end;
 
 function TChess.AddMove(toX, toY: loopint; var context: TMovesBuilderContext): boolean;
@@ -411,16 +420,21 @@ begin
 end;
 
 function TChess.GetMoves(x, y: loopint): TMovesList;
+begin
+   TMovesList.Initialize(Result);
+
+   GetMoves(x, y, Result);
+end;
+
+procedure TChess.GetMoves(x, y: loopint; var where: TMovesList);
 var
    pieceType: TPieceType;
    context: TMovesBuilderContext;
 
 begin
-   TMovesList.Initialize(Result);
-
    context.x := x;
    context.y := y;
-   context.Moves := @Result;
+   context.Moves := @where;
 
    pieceType := Board[y, x].Piece;
 
@@ -441,25 +455,14 @@ end;
 procedure TChess.GetAllMoves(player: TPlayer; var where: TMovesList);
 var
    x,
-   y,
-   i: loopint;
-   current: TMovesList;
+   y: loopint;
 
 begin
    for y := 0 to 7 do begin
       for x := 0 to 7 do begin
          if(Board[y, x].Player = player) then begin
             {get moves for a specific piece}
-            current := GetMoves(x, y);
-
-            {copy piece moves to all moves list, if any}
-            if(current.n > 0) then begin
-               for i := 0 to moves.n - 1 do begin
-                  where.Add(moves.List[i]);
-               end;
-            end;
-
-            current.Dispose();
+            GetMoves(x, y, where);
          end;
       end;
    end;
@@ -537,7 +540,7 @@ begin
    {clear existing piece}
    Board[move.pFrom.y, move.pFrom.x].Piece := PIECE_NONE;
 
-   { TODO: Store eaten pieces }
+   { TODO: Store captured pieces }
 
    {move to target location}
    Board[move.pTo.y, move.pTo.x] := source;
@@ -598,13 +601,13 @@ begin
 end;
 
 class function TChess.GetBoardPosition(const p: oxTPoint): StdString;
-
 begin
    Result := HorizontalCoordinate(p.x) + 'x' + sf(p.y + 1);
 end;
 
 INITIALIZATION
-   TMovesList.Initialize(chess.Moves);
+   TMovesList.Initialize(chess.Moves, 1024);
+
    chess.StartingPlayer := PLAYER_WHITE;
    chess.StartingPlayerSide := PLAYER_BOTTOM;
    chess.CurrentPlayer := chess.StartingPlayer;
