@@ -344,7 +344,7 @@ begin
          AddMove(x - 1, y - 1, context);
 
       {move by two positions from starting position}
-      if(y = 6) then
+      if(y = 6) and (not Occupied(x, y - 1)) then
          AddMove(x, y - 2, context);
    end else begin
       if(not Occupied(x, y + 1)) then
@@ -357,7 +357,7 @@ begin
          AddMove(x - 1, y + 1, context);
 
       {move by two positions from starting position}
-      if(y = 1) then
+      if(y = 1) and (not Occupied(x, y + 1)) then
          AddMove(x, y + 2, context);
    end;
 end;
