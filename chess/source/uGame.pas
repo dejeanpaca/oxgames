@@ -78,12 +78,12 @@ var
    end;
 
 begin
-   {exit if input can't control the current player}
-   if(not game.IsInputControllable(chess.CurrentPlayer)) then
+   {can't do anything if game over}
+   if(chess.GameOver()) then
       exit;
 
-   {can't do anything if checkmate}
-   if(chess.CheckMate) then
+   {exit if input can't control the current player}
+   if(not game.IsInputControllable(chess.CurrentPlayer)) then
       exit;
 
    {if a tile is already selected, play a move}

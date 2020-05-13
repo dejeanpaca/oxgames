@@ -41,8 +41,10 @@ IMPLEMENTATION
 
 procedure TGameComponent.Update();
 begin
-   if(game.PlayerControlType() = PLAYER_CONTROL_AI) then
-      CurrentAI^.PlayMove();
+   if(game.PlayerControlType() = PLAYER_CONTROL_AI) then begin
+      if(not chess.GameOver()) then
+         CurrentAI^.PlayMove();
+   end;
 end;
 
 function TGameComponent.GetDescriptor(): oxPComponentDescriptor;

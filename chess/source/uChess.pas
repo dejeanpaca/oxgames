@@ -150,6 +150,7 @@ TYPE
       function PlayMove(const move: TChessMove; var b: TBoard): boolean;
 
       function IsCheckMate(var b: TBoard): Boolean;
+      function GameOver(): boolean;
 
       procedure ResetBoard();
 
@@ -519,8 +520,8 @@ var
 begin
    Result := false;
 
-   {can't do any moves if we have a checkmate}
-   if(CheckMate) then
+   {can't do any moves if game over}
+   if(chess.GameOver()) then
       exit(false);
 
    {get all possible moves for given piece}
@@ -593,6 +594,11 @@ begin
    end;
 
    Result := kingCount < 2;
+end;
+
+function TChess.GameOver(): boolean;
+begin
+   Result := chess.CheckMate;
 end;
 
 procedure TChess.ResetBoard();
