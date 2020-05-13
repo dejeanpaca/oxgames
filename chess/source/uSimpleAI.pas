@@ -12,19 +12,7 @@ INTERFACE
       sysutils,
       uStd, uLog, StringUtils, uTiming,
       {game}
-      uAI, uChess, uGame;
-
-CONST
-   PIECE_VALUES: array[0..6] of loopint = (
-      0,
-      10, {pawn}
-      30, {knight}
-      30, {bishop}
-      50, {rook}
-      90, {queen}
-      900 {king}
-   );
-
+      uAI, uChess, uGame, uSimpleAIEvaluation;
 
 TYPE
    { TSimpleAI }
@@ -39,8 +27,7 @@ TYPE
       procedure Reset(); virtual;
       procedure PlayMove(); virtual;
 
-      function GetPieceValue(p: TPlayer; const piece: TPiece): loopint;
-      function GetPieceValue(piece: TPieceType): loopint;
+      function GetPieceValue(p: TPlayer; const piece: TPiece; x, y: loopint): loopint;
 
       function GetBestMove(): TChessMove;
       function EvaluateBoard(p: TPlayer; const board: TBoard): loopint;
@@ -79,18 +66,18 @@ begin
       log.w('Simple AI can''t play any more moves');
 end;
 
-function TSimpleAI.GetPieceValue(p: TPlayer; const piece: TPiece): loopint;
+function TSimpleAI.GetPieceValue(p: TPlayer; const piece: TPiece; x, y: loopint): loopint;
+var
+   value: loopint;
+
 begin
+   value := PIECE_VALUES[loopint(piece.Piece)] + GetBoardEval(piece, p, x, y, chess.AreSidesInverted());
+
    if(piece.Player <> p) then
-      Result := GetPieceValue(piece.Piece)
+      Result := value
    else
       {our piece has a negative value}
-      Result := -GetPieceValue(piece.Piece);
-end;
-
-function TSimpleAI.GetPieceValue(piece: TPieceType): loopint;
-begin
-   Result := PIECE_VALUES[loopint(piece)];
+      Result := -value;
 end;
 
 function TSimpleAI.GetBestMove(): TChessMove;
@@ -108,7 +95,7 @@ begin
 
    for i := 0 to 7 do begin
       for j := 0 to 7 do begin
-         inc(Result, GetPieceValue(p, board[i, j]));
+         inc(Result, GetPieceValue(p, board[i, j], i, j));
       end;
    end;
 end;
@@ -118,7 +105,6 @@ var
    i,
    currentEvaluation,
    bestEvaluation: loopint;
-   testBoard: TBoard;
    start: TDateTime;
    c: TChess;
 

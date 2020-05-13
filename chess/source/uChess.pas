@@ -110,6 +110,9 @@ TYPE
       {get the opposite player to specified one}
       class function OppositePlayer(p: TPlayer): TPlayer; static;
 
+      {tells if sides are inverted (white is up, black is bottom)}
+      function AreSidesInverted(): Boolean;
+
       {add a piece move/eat action to the given position}
       function AddMove(toX, toY: loopint; var context: TMovesBuilderContext): boolean;
       {add moves by line (diagonal, rank or file)}
@@ -290,6 +293,11 @@ begin
       Result := PLAYER_WHITE
    else
       Result := PLAYER_BLACK;
+end;
+
+function TChess.AreSidesInverted(): Boolean;
+begin
+   Result := PlayerSides[loopint(PLAYER_BOTTOM)] = PLAYER_WHITE;
 end;
 
 function TChess.AddMove(toX, toY: loopint; var context: TMovesBuilderContext): boolean;
