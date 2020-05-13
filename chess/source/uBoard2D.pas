@@ -251,7 +251,7 @@ var
    targetReference: oxTEntity;
 
 begin
-   move := game.LastMove;
+   move := chess.LastMove;
 
    {destroy target piece entity}
    targetReference := board2d.Reference[move.pTo.y, move.pTo.x];

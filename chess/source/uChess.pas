@@ -98,6 +98,8 @@ TYPE
 
       {list of moves for the current player}
       Moves: TMovesList;
+      {last played move}
+      LastMove: TChessMove;
 
       procedure New();
 
@@ -540,6 +542,8 @@ end;
 function TChess.PlayMove(const move: TChessMove): boolean;
 begin
    Result := PlayMove(move, Board);
+
+   LastMove := move;
 
    If(IsCheckMate(board)) then
       CheckMate := true;

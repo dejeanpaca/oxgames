@@ -30,7 +30,6 @@ TYPE
 
       SelectedTile: oxTPoint;
       PlayerControl: array[0..1] of TPlayerControlType;
-      LastMove: TChessMove;
 
       procedure New();
 
@@ -121,8 +120,6 @@ begin
       log.e('Cannot play move: ' + move.GetDescription());
       exit;
    end;
-
-   LastMove := move;
 
    log.i(move.GetDescription());
 
