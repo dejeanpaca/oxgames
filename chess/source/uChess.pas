@@ -1,4 +1,5 @@
 {
+   TODO: Store captured pieces
    TODO: Implement check and check mate
    TODO: Implement promotion
    TODO: Implement castling
@@ -141,8 +142,12 @@ TYPE
 
       {checks if a move is possible}
       function MovePossible(const from, target: oxTPoint; out move: TChessMove): boolean;
-      {plays a move from to}
+      {plays a move}
       function PlayMove(const move: TChessMove): boolean;
+      {plays a move on the specified board}
+      function PlayMove(const move: TChessMove; var b: TBoard): boolean;
+
+      function IsCheckMate(var b: TBoard): Boolean;
 
       procedure ResetBoard();
 
@@ -519,13 +524,21 @@ begin
 end;
 
 function TChess.PlayMove(const move: TChessMove): boolean;
+begin
+   Result := PlayMove(move, Board);
+
+   If(IsCheckMate(board)) then
+      CheckMate := true;
+end;
+
+function TChess.PlayMove(const move: TChessMove; var b: TBoard): boolean;
 var
    source,
    target: TPiece;
 
 begin
-   source := Board[move.pFrom.y, move.pFrom.x];
-   target := Board[move.pTo.y, move.pTo.x];
+   source := b[move.pFrom.y, move.pFrom.x];
+   target := b[move.pTo.y, move.pTo.x];
 
    { do some sanity checks }
 
@@ -542,20 +555,33 @@ begin
    { perform move }
 
    {clear existing piece}
-   Board[move.pFrom.y, move.pFrom.x].Piece := PIECE_NONE;
-
-   { TODO: Store captured pieces }
+   b[move.pFrom.y, move.pFrom.x].Piece := PIECE_NONE;
 
    {move to target location}
-   Board[move.pTo.y, move.pTo.x] := source;
-
-   {if we capture a king, we've achieved check-mate}
-   if(target.Piece = PIECE_KING) then
-      CheckMate := true;
+   b[move.pTo.y, move.pTo.x] := source;
 
    log.i(move.GetDescription());
 
    Result := true;
+end;
+
+function TChess.IsCheckMate(var b: TBoard): Boolean;
+var
+   kingCount,
+   i,
+   j: loopint;
+
+begin
+   kingCount := 0;
+
+   for i := 0 to 7 do begin
+      for j := 0 to 7 do begin
+         if(b[i, j].Piece = PIECE_KING) then
+            inc(kingCount);
+      end;
+   end;
+
+   Result := kingCount < 2;
 end;
 
 procedure TChess.ResetBoard();
