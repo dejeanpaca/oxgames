@@ -12,7 +12,7 @@ INTERFACE
       oxuCameraComponent,
       oxuMaterial, oxumPrimitive, oxuPrimitiveModelComponent,
       {game}
-      uScene, uChess, uGame, uAI;
+      uScene, uChess, uGame, uAI, uSimpleAI;
 
 TYPE
    { TGameComponent }
@@ -54,6 +54,7 @@ end;
 
 procedure TGameComponentGlobal.Initialize();
 begin
+   CurrentAI := @SimpleAI;
    gameComponent.Descriptor.Create('game', TGameComponent);
 
    Entity := oxEntity.New('Game', TGameComponent.Create());
