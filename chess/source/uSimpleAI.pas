@@ -24,8 +24,8 @@ TYPE
 
       constructor Create();
 
-      procedure Reset(); virtual;
-      procedure PlayMove(); virtual;
+      procedure OnComputeMove(); virtual;
+      procedure OnPlayMove(); virtual;
 
       function GetPieceValue(p: TPlayer; const piece: TPiece; x, y: loopint): loopint;
 
@@ -49,21 +49,15 @@ begin
    SearchDepth := 4;
 end;
 
-procedure TSimpleAI.Reset();
+procedure TSimpleAI.OnComputeMove();
 begin
-
+   Move := GetBestMove();
+   ComputedMove := true;
 end;
 
-procedure TSimpleAI.PlayMove();
-var
-   move: TChessMove;
-
+procedure TSimpleAI.OnPlayMove();
 begin
-   if(chess.Moves.n > 0) then begin
-      move := GetBestMove();
-      game.PlayMove(move);
-   end else
-      log.w('Simple AI can''t play any more moves');
+   game.PlayMove(Move);
 end;
 
 function TSimpleAI.GetPieceValue(p: TPlayer; const piece: TPiece; x, y: loopint): loopint;

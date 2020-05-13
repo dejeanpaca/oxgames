@@ -4,7 +4,8 @@ UNIT uGameComponent;
 INTERFACE
 
    USES
-      uStd, uLog, uColors,
+      sysutils,
+      uStd, uLog, uColors, uTiming,
       {oX}
       oxuPaths, oxuTexture, oxuTextureGenerate,
       oxuScene, oxuEntity,
@@ -42,8 +43,12 @@ IMPLEMENTATION
 procedure TGameComponent.Update();
 begin
    if(game.PlayerControlType() = PLAYER_CONTROL_AI) then begin
-      if(not chess.GameOver()) then
-         CurrentAI^.PlayMove();
+      if(not chess.GameOver()) then begin
+         CurrentAI^.ComputeMove();
+
+         if(game.MoveStartTime.Elapsedf() > AI_MOVE_DELAY_TIME) then
+            CurrentAI^.PlayMove();
+      end;
    end;
 end;
 

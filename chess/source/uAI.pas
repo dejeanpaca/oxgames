@@ -4,7 +4,7 @@ UNIT uAI;
 INTERFACE
 
    USES
-      uStd;
+      uStd, uChess;
 
 TYPE
    PAI = ^TAI;
@@ -14,11 +14,19 @@ TYPE
    TAI = object
       public
       Name: StdString;
+      Move: TChessMove;
+
+      ComputedMove: boolean;
 
       constructor Create();
 
-      procedure Reset(); virtual;
-      procedure PlayMove(); virtual;
+      procedure Reset();
+      procedure ComputeMove();
+      procedure PlayMove();
+
+      protected
+         procedure OnComputeMove(); virtual;
+         procedure OnPlayMove(); virtual;
    end;
 
 VAR
@@ -35,12 +43,30 @@ end;
 
 procedure TAI.Reset();
 begin
+   ComputedMove := false;
+end;
 
+procedure TAI.ComputeMove();
+begin
+   if(not ComputedMove) then begin
+     OnComputeMove();
+     ComputedMove := true;
+   end;
 end;
 
 procedure TAI.PlayMove();
 begin
+   if(ComputedMove) then
+      OnPlayMove();
+end;
 
+procedure TAI.OnComputeMove();
+begin
+
+end;
+
+procedure TAI.OnPlayMove();
+begin
 end;
 
 END.

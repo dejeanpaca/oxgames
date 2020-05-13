@@ -4,13 +4,16 @@ UNIT uGame;
 INTERFACE
 
    USES
-      uStd, uLog,
+      sysutils, uStd, uLog,
       {app}
       appuEvents, appuActionEvents,
       {ox}
       oxuTypes,
       {game}
       uChess, uAI;
+
+CONST
+   AI_MOVE_DELAY_TIME = 0.5;
 
 TYPE
    TPlayerControlType = (
@@ -23,6 +26,8 @@ TYPE
    TGameGlobal = record
       ACTION_NEW_GAME: TEventID;
 
+      MoveStartTime: TDateTime;
+
       OnNew,
       OnSelectedTile,
       OnUnselectedTile,
@@ -32,6 +37,8 @@ TYPE
       PlayerControl: array[0..1] of TPlayerControlType;
 
       procedure New();
+      {called when the player is switched}
+      procedure SwitchedPlayer();
 
       {select a tile to play}
       procedure SelectTile(const tile: oxTPoint);
@@ -61,6 +68,12 @@ begin
 
    CurrentAI^.Reset();
    OnNew.Call();
+   game.SwitchedPlayer();
+end;
+
+procedure TGameGlobal.SwitchedPlayer();
+begin
+   MoveStartTime := Now();
 end;
 
 procedure TGameGlobal.SelectTile(const tile: oxTPoint);
@@ -127,6 +140,11 @@ begin
    if(not chess.CheckMate) then begin
       {done with this player}
       chess.TogglePlayer();
+
+      {reset AI on player toggle}
+      CurrentAI^.Reset();
+
+      game.SwitchedPlayer();
    end;
 
    OnMovePlayed.Call();

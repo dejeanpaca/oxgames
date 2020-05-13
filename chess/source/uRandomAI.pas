@@ -15,8 +15,8 @@ TYPE
    TRandomAI = object(TAI)
       constructor Create();
 
-      procedure Reset(); virtual;
-      procedure PlayMove(); virtual;
+      procedure OnComputeMove(); virtual;
+      procedure OnPlayMove(); virtual;
    end;
 
 VAR
@@ -31,21 +31,21 @@ begin
    Name := 'Random';
 end;
 
-procedure TRandomAI.Reset();
-begin
-
-end;
-
-procedure TRandomAI.PlayMove();
+procedure TRandomAI.OnComputeMove();
 var
    index: loopint;
 
 begin
    if(chess.Moves.n > 0) then begin
       index := Random(chess.Moves.n);
-      game.PlayMove(chess.Moves.List[index]);
-   end else
-      log.w('Random AI can''t play any more moves');
+      Move := chess.Moves.List[index];
+      ComputedMove := true;
+   end;
+end;
+
+procedure TRandomAI.OnPlayMove();
+begin
+   game.PlayMove(Move);
 end;
 
 INITIALIZATION
