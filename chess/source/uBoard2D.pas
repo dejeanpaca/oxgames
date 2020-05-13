@@ -1,7 +1,3 @@
-{
-   TODO: Add tile coordinate text to board border
-}
-
 {$INCLUDE oxdefines.inc}
 UNIT uBoard2D;
 
