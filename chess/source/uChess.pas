@@ -105,6 +105,8 @@ TYPE
       procedure TogglePlayer();
       {set player as current}
       procedure SetPlayer(p: TPlayer);
+      {get the opposite player to specified one}
+      class function OppositePlayer(p: TPlayer): TPlayer; static;
 
       {add a piece move/eat action to the given position}
       function AddMove(toX, toY: loopint; var context: TMovesBuilderContext): boolean;
@@ -153,6 +155,10 @@ TYPE
 
       class function HorizontalCoordinate(index: loopint): StdString; static;
       class function GetBoardPosition(const p: oxTPoint): StdString; static;
+
+      procedure Copy(out newC: TChess);
+      {dispose of all resources}
+      procedure Destroy();
    end;
 
 CONST
@@ -266,16 +272,21 @@ end;
 
 procedure TChess.TogglePlayer();
 begin
-   if(CurrentPlayer = PLAYER_BLACK) then
-      SetPlayer(PLAYER_WHITE)
-   else
-      SetPlayer(PLAYER_BLACK);
+   SetPlayer(OppositePlayer(CurrentPlayer));
 end;
 
 procedure TChess.SetPlayer(p: TPlayer);
 begin
    CurrentPlayer := p;
    GetAllMoves();
+end;
+
+class function TChess.OppositePlayer(p: TPlayer): TPlayer;
+begin
+   if(p = PLAYER_BLACK) then
+      Result := PLAYER_WHITE
+   else
+      Result := PLAYER_BLACK;
 end;
 
 function TChess.AddMove(toX, toY: loopint; var context: TMovesBuilderContext): boolean;
@@ -562,8 +573,6 @@ begin
    {move to target location}
    b[move.pTo.y, move.pTo.x] := source;
 
-   log.i(move.GetDescription());
-
    Result := true;
 end;
 
@@ -637,8 +646,30 @@ begin
    Result := HorizontalCoordinate(p.x) + 'x' + sf(p.y + 1);
 end;
 
+procedure TChess.Copy(out newC: TChess);
+begin
+   newC.Board := Board;
+
+   newC.StartingPlayer := StartingPlayer;
+   newC.CurrentPlayer := CurrentPlayer;
+   newC.StartingPlayerSide := StartingPlayerSide;
+   newC.PlayerSides := PlayerSides;
+
+   {does the current player have a check}
+   newC.Check := Check;
+   {have we achieved a check mate}
+   newC.CheckMate := CheckMate;
+
+   TMovesList.Initialize(newC.Moves, 512);
+end;
+
+procedure TChess.Destroy();
+begin
+   Moves.Dispose();
+end;
+
 INITIALIZATION
-   TMovesList.Initialize(chess.Moves, 1024);
+   TMovesList.Initialize(chess.Moves, 512);
 
    chess.StartingPlayer := PLAYER_WHITE;
    chess.StartingPlayerSide := PLAYER_BOTTOM;
