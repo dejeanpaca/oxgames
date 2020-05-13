@@ -9,7 +9,8 @@ UNIT uSimpleAI;
 INTERFACE
 
    USES
-      uStd, uLog, StringUtils,
+      sysutils,
+      uStd, uLog, StringUtils, uTiming,
       {game}
       uAI, uChess, uGame;
 
@@ -38,14 +39,14 @@ TYPE
       procedure Reset(); virtual;
       procedure PlayMove(); virtual;
 
-      function GetPieceValue(currentPlayer: TPlayer; const piece: TPiece): loopint;
+      function GetPieceValue(p: TPlayer; const piece: TPiece): loopint;
       function GetPieceValue(piece: TPieceType): loopint;
 
       function GetBestMove(): TChessMove;
-      function EvaluateBoard(currentPlayer: TPlayer; const board: TBoard): loopint;
+      function EvaluateBoard(p: TPlayer; const board: TBoard): loopint;
 
       function MinMaxRoot(): TChessMove;
-      function MinMax(depth: loopint; var b: TBoard; isMaximising: boolean): loopint;
+      function MinMax(depth, alpha, beta: loopint; var b: TChess): loopint;
    end;
 
 VAR
@@ -78,9 +79,9 @@ begin
       log.w('Simple AI can''t play any more moves');
 end;
 
-function TSimpleAI.GetPieceValue(currentPlayer: TPlayer; const piece: TPiece): loopint;
+function TSimpleAI.GetPieceValue(p: TPlayer; const piece: TPiece): loopint;
 begin
-   if(piece.Player <> currentPlayer) then
+   if(piece.Player <> p) then
       Result := GetPieceValue(piece.Piece)
    else
       {our piece has a negative value}
@@ -97,7 +98,7 @@ begin
    Result := MinMaxRoot();
 end;
 
-function TSimpleAI.EvaluateBoard(currentPlayer: TPlayer; const board: TBoard): loopint;
+function TSimpleAI.EvaluateBoard(p: TPlayer; const board: TBoard): loopint;
 var
    i,
    j: loopint;
@@ -107,7 +108,7 @@ begin
 
    for i := 0 to 7 do begin
       for j := 0 to 7 do begin
-         inc(Result, GetPieceValue(currentPlayer, board[i, j]));
+         inc(Result, GetPieceValue(p, board[i, j]));
       end;
    end;
 end;
@@ -118,28 +119,35 @@ var
    currentEvaluation,
    bestEvaluation: loopint;
    testBoard: TBoard;
+   start: TDateTime;
+   c: TChess;
 
 begin
+   start := Now();
+
    bestEvaluation := -99999;
    SearchedPositionCount := 0;
    Result := chess.Moves.List[0];
 
-   for i := 0 to chess.Moves.n - 1 do begin
-      testBoard := chess.Board;
-      chess.PlayMove(chess.Moves.List[i], testBoard);
+   chess.Copy(c);
 
-      currentEvaluation := MinMax(SearchDepth - 1, testBoard, true);
+   for i := 0 to chess.Moves.n - 1 do begin
+      c.PlayMove(chess.Moves.List[i]);
+
+      currentEvaluation := MinMax(SearchDepth - 1, -100000, 100000, c);
 
       if(currentEvaluation > bestEvaluation) then begin
          bestEvaluation := currentEvaluation;
          Result := chess.Moves.List[i];
       end;
+
+      c.Board := chess.Board;
    end;
 
-   log.i('Searched: ' + sf(SearchedPositionCount));
+   log.i('Searched: ' + sf(SearchedPositionCount) + ', Elapsed: ' + start.ElapsedfToString(4) + 's');
 end;
 
-function TSimpleAI.MinMax(depth: loopint; var b: TBoard; isMaximising: boolean): loopint;
+function TSimpleAI.MinMax(depth, alpha, beta: loopint; var b: TChess): loopint;
 var
    i,
    currentEvaluation,
@@ -151,35 +159,51 @@ begin
    inc(SearchedPositionCount);
 
    if(depth = 0) then
-      exit(-EvaluateBoard(chess.CurrentPlayer, b));
+      exit(EvaluateBoard(b.CurrentPlayer, b.Board));
 
-   chess.Copy(c);
-   c.Board := b;
+   b.Copy(c);
+   c.TogglePlayer();
    c.GetAllMoves();
 
-   if(isMaximising) then begin
+   if(c.CurrentPlayer = chess.CurrentPlayer) then begin
       bestEvaluation := -99999;
 
       for i := 0 to c.Moves.n - 1 do begin
          c.PlayMove(c.Moves.List[i]);
-         currentEvaluation := MinMax(depth - 1, c.Board, false);
+         currentEvaluation := MinMax(depth - 1, alpha, beta, c);
 
          if(currentEvaluation > bestEvaluation) then
             bestEvaluation := currentEvaluation;
 
-         c.Board := b;
+         if(bestEvaluation > alpha) then
+            alpha := bestEvaluation;
+
+         if(beta <= alpha) then begin
+            c.Destroy();
+            exit(bestEvaluation);
+         end;
+
+         c.Board := b.Board;
       end;
    end else begin
       bestEvaluation := 99999;
 
       for i := 0 to c.Moves.n - 1 do begin
          c.PlayMove(c.Moves.List[i]);
-         currentEvaluation := MinMax(depth - 1, c.Board, true);
+         currentEvaluation := MinMax(depth - 1, alpha, beta, c);
 
          if(currentEvaluation < bestEvaluation) then
             bestEvaluation := currentEvaluation;
 
-         c.Board := b;
+         if(bestEvaluation < beta) then
+            beta := bestEvaluation;
+
+         if(beta <= alpha) then begin
+            c.Destroy();
+            exit(bestEvaluation);
+         end;
+
+         c.Board := b.Board;
       end;
    end;
 
