@@ -124,6 +124,8 @@ begin
 
    LastMove := move;
 
+   log.i(move.GetDescription());
+
    {switch to the other player, unless we've reached check mate}
    if(not chess.CheckMate) then begin
       {done with this player}
