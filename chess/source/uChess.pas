@@ -88,13 +88,13 @@ TYPE
 
       StartingPlayer,
       CurrentPlayer: TPlayer;
-      StartingPlayerSide: TPlayerSide;
-      PlayerSides: array[0..1] of TPlayer;
 
       {does the current player have a check}
       Check,
       {have we achieved a check mate}
-      CheckMate: boolean;
+      CheckMate,
+      {sides are inverted}
+      InvertSides: boolean;
 
       {list of moves for the current player}
       Moves: TMovesList;
@@ -109,9 +109,6 @@ TYPE
       procedure SetPlayer(p: TPlayer);
       {get the opposite player to specified one}
       class function OppositePlayer(p: TPlayer): TPlayer; static;
-
-      {tells if sides are inverted (white is up, black is bottom)}
-      function AreSidesInverted(): Boolean;
 
       {add a piece move/eat action to the given position}
       function AddMove(toX, toY: loopint; var context: TMovesBuilderContext): boolean;
@@ -252,26 +249,25 @@ begin
 end;
 
 function TPiece.GetPlayerSide(): TPlayerSide;
+var
+   upPlayer: boolean;
+
 begin
-  if(chess.PlayerSides[loopint(PLAYER_UP)] = Player) then
-     Result := PLAYER_UP
-  else
-     Result := PLAYER_BOTTOM;
+   upPlayer := Player = PLAYER_BLACK;
+
+   if(chess.InvertSides) then
+      upPlayer := not upPlayer;
+
+   if(upPlayer) then
+      Result := PLAYER_UP
+   else
+      Result := PLAYER_BOTTOM;
 end;
 
 { TChess }
 
 procedure TChess.New();
 begin
-   if((StartingPlayerSide = PLAYER_BOTTOM) and (StartingPlayer = PLAYER_WHITE)) or
-      (StartingPlayerSide = PLAYER_UP) and (StartingPlayer = PLAYER_BLACK) then begin
-     PlayerSides[loopint(PLAYER_UP)] := PLAYER_BLACK;
-     PlayerSides[loopint(PLAYER_BOTTOM)] := PLAYER_WHITE;
-   end else begin
-      PlayerSides[loopint(PLAYER_UP)] := PLAYER_WHITE;
-      PlayerSides[loopint(PLAYER_BOTTOM)] := PLAYER_BLACK;
-   end;
-
    ResetBoard();
    SetPlayer(StartingPlayer);
 end;
@@ -293,11 +289,6 @@ begin
       Result := PLAYER_WHITE
    else
       Result := PLAYER_BLACK;
-end;
-
-function TChess.AreSidesInverted(): Boolean;
-begin
-   Result := PlayerSides[loopint(PLAYER_BOTTOM)] = PLAYER_WHITE;
 end;
 
 function TChess.AddMove(toX, toY: loopint; var context: TMovesBuilderContext): boolean;
@@ -617,8 +608,8 @@ procedure TChess.ResetBoard();
 var
    i,
    j: loopint;
-   playerFirst,
-   playerSecond: TPlayer;
+   playerBottom,
+   playerUp: TPlayer;
 
 begin
    CheckMate := false;
@@ -630,24 +621,24 @@ begin
       end;
    end;
 
-   if(StartingPlayer = PLAYER_BLACK) then begin
-      playerFirst := PlayerSides[loopint(PLAYER_UP)];
-      playerSecond := PlayerSides[loopint(PLAYER_BOTTOM)];
+   if(not InvertSides) then begin
+      playerBottom := PLAYER_WHITE;
+      playerUp := PLAYER_BLACK;
    end else begin
-      playerFirst := PLAYER_WHITE;
-      playerSecond := PLAYER_BLACK;
+      playerBottom := PLAYER_BLACK;
+      playerUp := PLAYER_WHITE;
    end;
 
    {place pawns}
    for j := 0 to 7 do begin
-      Board[6][j].Place(PIECE_PAWN, playerSecond);
-      Board[1][j].Place(PIECE_PAWN, playerFirst);
+      Board[6][j].Place(PIECE_PAWN, playerUp);
+      Board[1][j].Place(PIECE_PAWN, playerBottom);
    end;
 
    {place other pieces}
    for j := 0 to 7 do begin
-      Board[7][7 - j].Place(PIECE_PLACEMENT[7 - j], playerSecond);
-      Board[0][j].Place(PIECE_PLACEMENT[j], playerFirst);
+      Board[7][7 - j].Place(PIECE_PLACEMENT[7 - j], playerUp);
+      Board[0][j].Place(PIECE_PLACEMENT[j], playerBottom);
    end;
 end;
 
@@ -670,8 +661,6 @@ begin
 
    newC.StartingPlayer := StartingPlayer;
    newC.CurrentPlayer := CurrentPlayer;
-   newC.StartingPlayerSide := StartingPlayerSide;
-   newC.PlayerSides := PlayerSides;
 
    {does the current player have a check}
    newC.Check := Check;
@@ -690,7 +679,6 @@ INITIALIZATION
    TMovesList.Initialize(chess.Moves, 512);
 
    chess.StartingPlayer := PLAYER_WHITE;
-   chess.StartingPlayerSide := PLAYER_BOTTOM;
    chess.CurrentPlayer := chess.StartingPlayer;
    chess.ResetBoard();
 

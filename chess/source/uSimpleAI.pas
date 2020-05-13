@@ -71,7 +71,7 @@ var
    value: loopint;
 
 begin
-   value := PIECE_VALUES[loopint(piece.Piece)] + GetBoardEval(piece, p, x, y, chess.AreSidesInverted());
+   value := PIECE_VALUES[loopint(piece.Piece)] + GetBoardEval(piece, p, x, y, chess.InvertSides);
 
    if(piece.Player <> p) then
       Result := value
