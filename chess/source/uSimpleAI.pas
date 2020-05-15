@@ -121,7 +121,7 @@ begin
          Result := chess.Moves.List[i];
       end;
 
-      c.Board := chess.Board;
+      c.Undo();
    end;
 
    log.i('Searched: ' + sf(SearchedPositionCount) + ', Elapsed: ' + start.ElapsedfToString(4) + 's');
@@ -163,7 +163,7 @@ begin
             exit(bestEvaluation);
          end;
 
-         c.Board := b.Board;
+         c.Undo();
       end;
    end else begin
       bestEvaluation := 99999;
@@ -183,7 +183,7 @@ begin
             exit(bestEvaluation);
          end;
 
-         c.Board := b.Board;
+         c.Undo();
       end;
    end;
 
