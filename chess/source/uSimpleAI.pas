@@ -27,10 +27,10 @@ TYPE
       procedure OnComputeMove(); virtual;
       procedure OnPlayMove(); virtual;
 
-      function GetPieceValue(p: TPlayer; const piece: TPiece; x, y: loopint): loopint;
+      class function GetPieceValue(p: TPlayer; const piece: TPiece; x, y: loopint): loopint; static; inline;
 
       function GetBestMove(): TChessMove;
-      function EvaluateBoard(p: TPlayer; const board: TBoard): loopint;
+      class function EvaluateBoard(p: TPlayer; const board: TBoard): loopint; static;
 
       function MinMaxRoot(): TChessMove;
       function MinMax(depth, alpha, beta: loopint; var b: TChess): loopint;
@@ -60,7 +60,7 @@ begin
    game.PlayMove(Move);
 end;
 
-function TSimpleAI.GetPieceValue(p: TPlayer; const piece: TPiece; x, y: loopint): loopint;
+class function TSimpleAI.GetPieceValue(p: TPlayer; const piece: TPiece; x, y: loopint): loopint;
 var
    value: loopint;
 
@@ -79,7 +79,7 @@ begin
    Result := MinMaxRoot();
 end;
 
-function TSimpleAI.EvaluateBoard(p: TPlayer; const board: TBoard): loopint;
+class function TSimpleAI.EvaluateBoard(p: TPlayer; const board: TBoard): loopint;
 var
    i,
    j: loopint;
@@ -139,7 +139,7 @@ begin
    inc(SearchedPositionCount);
 
    if(depth = 0) then
-      exit(EvaluateBoard(b.CurrentPlayer, b.Board));
+      exit(-EvaluateBoard(chess.CurrentPlayer, b.Board));
 
    b.Copy(c);
    c.TogglePlayer();
