@@ -46,10 +46,18 @@ begin
       switch2d();
 end;
 
+procedure resetBoard();
+begin
+   CurrentBoard^.Reset();
+end;
+
 INITIALIZATION
    scene.OnInitialize.Add(@initialize);
 
    ACTION_SWITCH_2D := appActionEvents.SetCallback(@switch2d);
    ACTION_SWITCH_3D := appActionEvents.SetCallback(@switch3d);
+
+   game.OnResetBoard.Add(@resetBoard);
+
 
 END.

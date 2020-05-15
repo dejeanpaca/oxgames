@@ -15,18 +15,25 @@ INTERFACE
       uBoardSwitch;
 
 VAR
-   menubar: wdgTMenubar;
+   ChessMenubar: record
+      menu: wdgTMenubar;
+      undo: uiPContextMenuItem;
+   end;
 
 IMPLEMENTATION
 
 procedure initialize();
 var
+   menubar: wdgTMenubar;
    menu: uiTContextMenu;
 
 begin
    menubar := wdgMenubar.Add(oxWindow.Current);
+   ChessMenubar.menu := menubar;
 
    menu := menubar.Add('Game');
+   ChessMenubar.undo := menu.AddItem('Undo', game.ACTION_UNDO);
+   menu.AddSeparator();
    menu.AddItem('New Game', game.ACTION_NEW_GAME);
    menu.AddSeparator();
    menu.AddItem('Quit', appACTION_QUIT);
@@ -39,12 +46,14 @@ begin
    menu.AddItem('About', oxwndAbout.OpenWindowAction);
 end;
 
-procedure deinitialize();
+procedure storedBoardChange();
 begin
-
+   ChessMenubar.undo^.Enable(game.HasStoredBoard);
 end;
 
 INITIALIZATION
-   main.Init.Add('menubar', @initialize, @deinitialize)
+   main.Init.Add('menubar', @initialize);
+
+   game.OnStoredBoard.Add(@storedBoardChange);
 
 END.

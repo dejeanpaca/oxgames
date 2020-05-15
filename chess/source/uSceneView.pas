@@ -38,8 +38,8 @@ begin
    SceneView.SetCaption('Game');
 
    {move}
-   SceneView.Move(oxPoint(0, menubar.BelowOf(0)));
-   SceneView.Resize(oxWindow.Current.Dimensions.w, menubar.BelowOf(0) + 1);
+   SceneView.Move(oxPoint(0, ChessMenubar.menu.BelowOf(0)));
+   SceneView.Resize(oxWindow.Current.Dimensions.w, ChessMenubar.menu.BelowOf(0) + 1);
 
    {render via scene view, not window renderer}
    oxSceneRender.RenderAutomatically := false;

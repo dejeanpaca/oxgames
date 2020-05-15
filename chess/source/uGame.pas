@@ -27,6 +27,7 @@ TYPE
    { TGameGlobal }
 
    TGameGlobal = record
+      ACTION_UNDO,
       ACTION_NEW_GAME: TEventID;
 
       MoveStartTime: TDateTime;
@@ -34,14 +35,23 @@ TYPE
       OnNew,
       OnSelectedTile,
       OnUnselectedTile,
-      OnMovePlayed: TProcedures;
+      OnMovePlayed,
+      {called when a stored board become available/unavailable}
+      OnStoredBoard,
+      {called when we want to reset the board view}
+      OnResetBoard: TProcedures;
 
       SelectedTile: oxTPoint;
       PlayerControl: array[0..1] of TPlayerControlType;
 
+      StoredBoard: TChess;
+      HasStoredBoard: Boolean;
+
       procedure New();
       {called when the player is switched}
       procedure SwitchedPlayer();
+      {undo last move}
+      procedure Undo();
 
       {select a tile to play}
       procedure SelectTile(const tile: oxTPoint);
@@ -52,6 +62,9 @@ TYPE
       function IsInputControllable(player: TPlayer): boolean;
       {control type for the current player}
       function PlayerControlType(): TPlayerControlType;
+
+      {clear the stored board if we have one}
+      procedure ClearStoredBoard();
    end;
 
 VAR
@@ -71,12 +84,24 @@ begin
 
    CurrentAI^.Reset();
    OnNew.Call();
-   game.SwitchedPlayer();
+   SwitchedPlayer();
+
+   ClearStoredBoard();
 end;
 
 procedure TGameGlobal.SwitchedPlayer();
 begin
    MoveStartTime := Now();
+end;
+
+procedure TGameGlobal.Undo();
+begin
+   StoredBoard.Copy(chess);
+   chess.GetAllMoves();
+   ClearStoredBoard();
+   SwitchedPlayer();
+
+   OnResetBoard.Call();
 end;
 
 procedure TGameGlobal.SelectTile(const tile: oxTPoint);
@@ -131,10 +156,25 @@ begin
 end;
 
 procedure TGameGlobal.PlayMove(const move: TChessMove);
+var
+   inputControlled: boolean;
+
 begin
+   inputControlled := IsInputControllable(chess.CurrentPlayer);
+
+   {if input controlled, store board before a move is made}
+   if(inputControlled) then
+      chess.Copy(StoredBoard);
+
    if(not chess.PlayMove(move)) then begin
       log.e('Cannot play move: ' + move.GetDescription());
       exit;
+   end else begin
+     if(inputControlled) then begin
+        {notify game we have a board stored}
+        HasStoredBoard := true;
+        game.OnStoredBoard.Call();
+     end;
    end;
 
    log.i(move.GetDescription());
@@ -163,9 +203,22 @@ begin
   Result := PlayerControl[loopint(chess.CurrentPlayer)];
 end;
 
+procedure TGameGlobal.ClearStoredBoard();
+begin
+   if(HasStoredBoard) then begin
+      HasStoredBoard := false;
+      OnStoredBoard.Call();
+   end;
+end;
+
 procedure newGame();
 begin
    game.New();
+end;
+
+procedure undo();
+begin
+   game.Undo();
 end;
 
 INITIALIZATION
@@ -173,10 +226,13 @@ INITIALIZATION
    TProcedures.Initialize(game.OnSelectedTile);
    TProcedures.Initialize(game.OnUnselectedTile);
    TProcedures.Initialize(game.OnMovePlayed);
+   TProcedures.Initialize(game.OnResetBoard);
+   TProcedures.Initialize(game.OnStoredBoard);
 
    game.PlayerControl[loopint(PLAYER_BLACK)] := PLAYER_CONTROL_AI;
    game.PlayerControl[loopint(PLAYER_WHITE)] := PLAYER_CONTROL_INPUT;
 
+   game.ACTION_UNDO := appActionEvents.SetCallback(@undo);
    game.ACTION_NEW_GAME := appActionEvents.SetCallback(@newGame);
 
 END.
