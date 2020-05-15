@@ -44,6 +44,9 @@ procedure TGameComponent.Update();
 begin
    if(game.PlayerControlType() = PLAYER_CONTROL_AI) then begin
       if(not chess.GameOver()) then begin
+         if(game.MoveStartTime.Elapsedf() < AI_COMPUTE_DELAY_TIME) then
+            exit;
+
          CurrentAI^.ComputeMove();
 
          if(game.MoveStartTime.Elapsedf() > AI_MOVE_DELAY_TIME) then

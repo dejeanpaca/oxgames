@@ -13,6 +13,9 @@ INTERFACE
       uChess, uAI;
 
 CONST
+   {delay compute start by a small time, so that rendering can show the change on the board if we're not computing in a thread}
+   AI_COMPUTE_DELAY_TIME = 0.1;
+   {delay AI move time so it's more easily noticeable, instead of instant}
    AI_MOVE_DELAY_TIME = 0.5;
 
 TYPE
