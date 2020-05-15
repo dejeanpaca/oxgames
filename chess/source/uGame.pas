@@ -96,6 +96,9 @@ end;
 
 procedure TGameGlobal.Undo();
 begin
+   if(not HasStoredBoard) then
+      exit;
+
    StoredBoard.Copy(chess);
    chess.GetAllMoves();
    ClearStoredBoard();

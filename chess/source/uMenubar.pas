@@ -22,6 +22,11 @@ VAR
 
 IMPLEMENTATION
 
+procedure storedBoardChange();
+begin
+   ChessMenubar.undo^.Enable(game.HasStoredBoard);
+end;
+
 procedure initialize();
 var
    menubar: wdgTMenubar;
@@ -44,11 +49,8 @@ begin
 
    menu := menubar.Add('Help');
    menu.AddItem('About', oxwndAbout.OpenWindowAction);
-end;
 
-procedure storedBoardChange();
-begin
-   ChessMenubar.undo^.Enable(game.HasStoredBoard);
+   storedBoardChange();
 end;
 
 INITIALIZATION
