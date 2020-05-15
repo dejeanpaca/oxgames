@@ -77,7 +77,8 @@ TYPE
    TMovesList = specialize TSimpleList<TChessMove>;
 
    TMovesBuilderContext = record
-      x, y: loopint;
+      x,
+      y: loopint;
       Moves: PMovesList;
    end;
 
@@ -162,6 +163,9 @@ TYPE
       procedure Copy(out newC: TChess);
       {dispose of all resources}
       procedure Destroy();
+
+      {undo last move}
+      procedure Undo();
    end;
 
 CONST
@@ -667,7 +671,7 @@ begin
    {have we achieved a check mate}
    newC.CheckMate := CheckMate;
 
-   TMovesList.Initialize(newC.Moves, 512);
+   TMovesList.Initialize(newC.Moves, 256);
 end;
 
 procedure TChess.Destroy();
@@ -675,8 +679,16 @@ begin
    Moves.Dispose();
 end;
 
+procedure TChess.Undo();
+begin
+   CurrentPlayer := LastMove.Source.Player;
+
+   Board[LastMove.pFrom.y, LastMove.pFrom.x] := LastMove.Source;
+   Board[LastMove.pTo.y, LastMove.pTo.x] := LastMove.Target;
+end;
+
 INITIALIZATION
-   TMovesList.Initialize(chess.Moves, 512);
+   TMovesList.Initialize(chess.Moves, 256);
 
    chess.StartingPlayer := PLAYER_WHITE;
    chess.CurrentPlayer := chess.StartingPlayer;
