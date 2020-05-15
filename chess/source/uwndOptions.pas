@@ -10,11 +10,11 @@ INTERFACE
    USES
       uStd,
       {oX}
-      oxuTypes, oxuConsoleBackend,
+      oxuConsoleBackend,
       {wnd}
       oxuwndBase, oxuwndSettingsBase,
       {ui}
-      uiuControl, uiuWidget, uiWidgets, uiuMessageBox, uiuTypes,
+      uiuControl, uiWidgets, uiuMessageBox, uiuTypes,
       {wdg}
       wdguList, wdguButton, wdguDivisor, wdguLabel,
       {game}
@@ -28,7 +28,6 @@ TYPE
       end;
 
       constructor Create();
-      procedure Open(); virtual;
 
       protected
       procedure AddWidgets(); virtual;
@@ -38,7 +37,7 @@ TYPE
    end;
 
 VAR
-   wndOptions: oxedTOptionsWindow;
+   wndOptions: wndTOptions;
 
 IMPLEMENTATION
 
@@ -49,15 +48,15 @@ end;
 
 { oxedTOptionsWindow }
 
-procedure oxedTOptionsWindow.AddWidgets();
+procedure wndTOptions.AddWidgets();
 begin
 end;
 
-procedure oxedTOptionsWindow.Revert();
+procedure wndTOptions.Revert();
 begin
 end;
 
-procedure oxedTOptionsWindow.Save();
+procedure wndTOptions.Save();
 begin
 end;
 
@@ -68,22 +67,17 @@ begin
 end;
 {$ENDIF}
 
-constructor oxedTOptionsWindow.Create();
+constructor wndTOptions.Create();
 begin
-   Name := 'project_features';
-   Title := 'Project Features';
+   Name := 'options';
+   Title := 'Chess Options';
 
    {$IFDEF OX_FEATURE_CONSOLE}
    if(console.Selected <> nil) then
-      console.Selected^.AddCommand('wnd:project_features', @consoleCallback);
+      console.Selected^.AddCommand('wnd:options', @consoleCallback);
    {$ENDIF}
 
    inherited Create;
-end;
-
-procedure oxedTOptionsWindow.Open();
-begin
-   inherited Open;
 end;
 
 procedure init();
