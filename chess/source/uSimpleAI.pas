@@ -46,6 +46,7 @@ IMPLEMENTATION
 constructor TSimpleAI.Create();
 begin
    Name := 'Simple';
+   Id := 'simple';
    SearchDepth := 4;
 end;
 

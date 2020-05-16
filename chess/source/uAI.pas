@@ -13,7 +13,10 @@ TYPE
 
    TAI = object
       public
-      Name: StdString;
+      Name,
+      {identification string}
+      Id: StdString;
+
       Move: TChessMove;
 
       ComputedMove: boolean;

@@ -29,6 +29,7 @@ IMPLEMENTATION
 constructor TRandomAI.Create();
 begin
    Name := 'Random';
+   Id := 'random';
 end;
 
 procedure TRandomAI.OnComputeMove();
