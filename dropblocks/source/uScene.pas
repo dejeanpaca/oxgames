@@ -4,7 +4,7 @@ UNIT uScene;
 INTERFACE
 
    USES
-      oxuScene, oxuSceneLoader, oxuProjectionType, oxuProjection,
+      oxuScene, oxuSceneLoader, oxuProjection,
       oxuCameraComponent, oxuCameraEntity,
       {game}
       uMain, uGrid, uGame, uDropBlocksComponent, uGameComponent;
@@ -13,7 +13,6 @@ IMPLEMENTATION
 
 procedure init();
 var
-   projection: oxPProjection;
    camera: oxTCameraComponent;
 
 begin
@@ -21,8 +20,7 @@ begin
 
    camera := oxCameraEntity.CreateInScene();
 
-   projection := camera.GetProjection();
-   projection^.DefaultOrtho();
+   camera.Projection.DefaultOrtho();
 
    GameComponent.Initialize();
    grid.Initialize();
