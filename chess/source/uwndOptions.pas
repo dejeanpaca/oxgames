@@ -139,9 +139,7 @@ begin
    widgets.AIMoveDepth.AutoSetDimensions(true);
 
    addSection('Note');
-   wdgLabel.Add('Saving will reset your game');
-
-   {TODO: Apply changes without resetting the game. Will require reversing the board if players are inverted}
+   wdgLabel.Add('Options will be applied on next new game');
 
    AddCancelSaveButtons();
    AddRevertButton();
@@ -159,7 +157,7 @@ procedure wndTOptions.Revert();
    end;
 
 begin
-   if(options.AIId = 'random') then begin
+   if(options.AIId = 'simple') then begin
       widgets.AI.SelectItem(0)
    end else
       widgets.AI.SelectItem(1);
@@ -206,6 +204,7 @@ begin
    else
       options.StartingPlayer := PLAYER_BLACK;
 
+   options.PendingOptions := true;
    Close();
 end;
 

@@ -32,6 +32,7 @@ TYPE
 
       MoveStartTime: TDateTime;
 
+      OnBeforeNew,
       OnNew,
       OnSelectedTile,
       OnUnselectedTile,
@@ -76,6 +77,8 @@ IMPLEMENTATION
 
 procedure TGameGlobal.New();
 begin
+   OnBeforeNew.Call();
+
    chess.New();
 
    {unselect tile}
@@ -225,6 +228,7 @@ begin
 end;
 
 INITIALIZATION
+   TProcedures.Initialize(game.OnBeforeNew);
    TProcedures.Initialize(game.OnNew);
    TProcedures.Initialize(game.OnSelectedTile);
    TProcedures.Initialize(game.OnUnselectedTile);

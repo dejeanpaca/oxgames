@@ -28,6 +28,10 @@ TYPE
       {swap player sides on the board}
       InvertSides: boolean;
 
+      {options have been changed and applying should be made}
+
+      PendingOptions: boolean;
+
       {apply options}
       procedure Apply();
    end;
@@ -51,6 +55,8 @@ var
    selectedAI: PAI;
 
 begin
+   PendingOptions := false;
+
    { validate options in case they were set to weird values in the config file }
 
    {validate starting type}
@@ -89,6 +95,12 @@ begin
    CurrentAI := selectedAI;
 end;
 
+procedure beforeNewGame();
+begin
+   if(options.PendingOptions) then
+      options.Apply();
+end;
+
 INITIALIZATION
    options.StartingPlayer := chess.StartingPlayer;
    options.BlackControl := game.PlayerControl[loopint(PLAYER_BLACK)];
@@ -104,5 +116,7 @@ INITIALIZATION
    ox.ProgramDvar.Add(dvSearchDepth, 'ai_search_depth', dtcSIZEINT, @options.AISearchDepth);
 
    oxProgramDvarFile.FileName := 'chess.options';
+
+   game.OnBeforeNew.Add(@beforeNewGame);
 
 END.
