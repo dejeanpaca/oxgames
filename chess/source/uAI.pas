@@ -32,10 +32,36 @@ TYPE
          procedure OnPlayMove(); virtual;
    end;
 
+   TAIList = specialize TSimpleList<PAI>;
+
+   { TAIGlobal }
+
+   TAIGlobal = record
+      List: TAIList;
+
+      function FindById(const id: StdString): PAI;
+   end;
+
 VAR
+   AI: TAIGlobal;
    CurrentAI: PAI;
 
 IMPLEMENTATION
+
+{ TAIGlobal }
+
+function TAIGlobal.FindById(const id: StdString): PAI;
+var
+   i: loopint;
+
+begin
+   for i := 0 to List.n - 1 do begin
+      if(List.List[i]^.Id = id) then
+         exit(List.List[i]);
+   end;
+
+   Result := nil;
+end;
 
 { TAI }
 
