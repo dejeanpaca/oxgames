@@ -66,8 +66,8 @@ begin
    if appk.JustPressed(kcP) then
       oxTime.TogglePause();
 
-{   if appk.JustPressed(kcF2) then
-      game.New();}
+   if appk.JustPressed(kcF2) then
+      game.New();
 end;
 
 procedure TChessComponent.Update();
