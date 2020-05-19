@@ -10,7 +10,7 @@ INTERFACE
       oxuCameraComponent, oxuCameraEntity,
       oxuScene, oxuSceneLoader, oxuWorld,
       {game}
-      uGame;
+      uGame, uOptions;
 
 TYPE
    TScene = record
@@ -31,6 +31,7 @@ begin
    scene.Camera := oxCameraEntity.CreateInScene();
    scene.OnInitialize.Call();
 
+   options.Apply();
    game.New();
 end;
 

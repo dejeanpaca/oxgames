@@ -19,7 +19,7 @@ INTERFACE
       {wdg}
       wdguList, wdguButton, wdguDivisor, wdguLabel, wdguDropDownList, wdguCheckbox,
       {game}
-      uMain, uChess, uGame, uAI, uSimpleAI, uRandomAI;
+      uMain, uChess, uGame, uAI, uSimpleAI, uRandomAI, uOptions;
 
 TYPE
 
@@ -159,22 +159,22 @@ procedure wndTOptions.Revert();
    end;
 
 begin
-   if(CurrentAI = @SimpleAI) then begin
+   if(options.AIId = 'random') then begin
       widgets.AI.SelectItem(0)
    end else
       widgets.AI.SelectItem(1);
 
-   widgets.AIMoveDepth.SelectItem(SimpleAI.SearchDepth);
+   widgets.AIMoveDepth.SelectItem(options.AISearchDepth - 1);
 
-   setPlayerControl(widgets.BlackPlayer, game.PlayerControl[loopint(PLAYER_BLACK)]);
-   setPlayerControl(widgets.WhitePlayer, game.PlayerControl[loopint(PLAYER_WHITE)]);
+   setPlayerControl(widgets.BlackPlayer, options.BlackControl);
+   setPlayerControl(widgets.WhitePlayer, options.WhiteControl);
 
-   if(chess.StartingPlayer = PLAYER_WHITE) then
+   if(options.StartingPlayer = PLAYER_WHITE) then
       widgets.StartingPlayer.SelectItem(0)
    else
       widgets.StartingPlayer.SelectItem(1);
 
-   widgets.InvertSides.Check(chess.InvertSides);
+   widgets.InvertSides.Check(options.InvertSides);
 end;
 
 procedure wndTOptions.Save();
@@ -188,25 +188,23 @@ procedure wndTOptions.Save();
    end;
 
 begin
-   chess.InvertSides := widgets.InvertSides.Checked();
+   options.InvertSides := widgets.InvertSides.Checked();
 
-   game.PlayerControl[loopint(PLAYER_BLACK)] := getControl(widgets.BlackPlayer);
-   game.PlayerControl[loopint(PLAYER_WHITE)] := getControl(widgets.WhitePlayer);
+   options.BlackControl := getControl(widgets.BlackPlayer);
+   options.WhiteControl := getControl(widgets.WhitePlayer);
 
    if(widgets.AIMoveDepth.CurrentItem > -1) then
-      SimpleAI.SearchDepth := widgets.AIMoveDepth.CurrentItem + 1;
+      options.AISearchDepth := widgets.AIMoveDepth.CurrentItem + 1;
 
    if(widgets.AI.CurrentItem = 0) then
-      CurrentAI := @SimpleAI
+      options.AIId := SimpleAI.Id
    else if(widgets.AI.CurrentItem = 1) then
-      CurrentAI := @RandomAI;
+      options.AIId := RandomAI.Id;
 
    if(widgets.StartingPlayer.CurrentItem = 0) then
-      chess.StartingPlayer := PLAYER_WHITE
+      options.StartingPlayer := PLAYER_WHITE
    else
-      chess.StartingPlayer := PLAYER_BLACK;
-
-   game.New();
+      options.StartingPlayer := PLAYER_BLACK;
 
    Close();
 end;
