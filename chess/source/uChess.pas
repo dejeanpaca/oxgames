@@ -82,6 +82,11 @@ TYPE
       Moves: PMovesList;
    end;
 
+   TCapturedPieces = record
+      Count: loopint;
+      Pieces: array[0..63] of TPieceType;
+   end;
+
    { TChess }
 
    TChess = record
@@ -99,8 +104,10 @@ TYPE
 
       {list of moves for the current player}
       Moves: TMovesList;
-      {last played move}
-      LastMove: TChessMove;
+      {last played moves for each player}
+      LastMoves: array[0..1] of TChessMove;
+
+      Captured: array[0..1] of TCapturedPieces;
 
       procedure New();
 
@@ -166,6 +173,8 @@ TYPE
 
       {undo last move}
       procedure Undo();
+
+      function GetLastMove(): TChessMove;
    end;
 
 CONST
@@ -543,10 +552,20 @@ begin
 end;
 
 function TChess.PlayMove(const move: TChessMove): boolean;
+var
+   {player}
+   p: loopint;
+
 begin
    Result := PlayMove(move, Board);
 
-   LastMove := move;
+   LastMoves[loopint(move.Source.Player)] := move;
+
+   if(move.Action = ACTION_CAPTURE) then begin
+      p := loopint(move.Source.Player);
+      inc(Captured[p].Count);
+      Captured[p].Pieces[Captured[p].Count - 1] := move.Target.Piece;
+   end;
 
    If(IsCheckMate(board)) then
       CheckMate := true;
@@ -680,11 +699,20 @@ begin
 end;
 
 procedure TChess.Undo();
-begin
-   CurrentPlayer := LastMove.Source.Player;
+var
+   move: TChessMove;
 
-   Board[LastMove.pFrom.y, LastMove.pFrom.x] := LastMove.Source;
-   Board[LastMove.pTo.y, LastMove.pTo.x] := LastMove.Target;
+begin
+   move := GetLastMove();
+   CurrentPlayer := move.Source.Player;
+
+   Board[move.pFrom.y, move.pFrom.x] := move.Source;
+   Board[move.pTo.y, move.pTo.x] := move.Target;
+end;
+
+function TChess.GetLastMove(): TChessMove;
+begin
+   Result := LastMoves[loopint(OppositePlayer(CurrentPlayer))];
 end;
 
 INITIALIZATION
