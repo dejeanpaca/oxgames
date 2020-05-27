@@ -1,5 +1,4 @@
 {
-   TODO: Store captured pieces
    TODO: Implement check and check mate
    TODO: Implement promotion
    TODO: Implement castling
@@ -71,6 +70,8 @@ TYPE
 
       {get a description of this move}
       function GetDescription(): StdString;
+      {checks if the move is valid}
+      function IsValid(): boolean;
    end;
 
    PMovesList = ^TMovesList;
@@ -101,6 +102,9 @@ TYPE
       CheckMate,
       {sides are inverted}
       InvertSides: boolean;
+
+      {how many moves we made so far}
+      MoveCount: loopint;
 
       {list of moves for the current player}
       Moves: TMovesList;
@@ -245,6 +249,14 @@ begin
    end else
       Result := sourcePlayer + ' ' + PIECE_IDS[loopint(Source.Piece)] + ' from ' + chess.GetBoardPosition(pFrom) +
          ' eats ' + targetPlayer + ' ' + PIECE_IDS[loopint(Target.Piece)] + ' at ' + chess.GetBoardPosition(pTo);
+end;
+
+function TChessMove.IsValid(): boolean;
+begin
+   Result := true;
+
+   if(Source.Piece = PIECE_NONE) then
+      Result := false;
 end;
 
 { TPiece }
@@ -567,6 +579,8 @@ begin
       Captured[p].Pieces[Captured[p].Count - 1] := move.Target.Piece;
    end;
 
+   inc(MoveCount);
+
    If(IsCheckMate(board)) then
       CheckMate := true;
 end;
@@ -690,6 +704,9 @@ begin
    {have we achieved a check mate}
    newC.CheckMate := CheckMate;
 
+   newC.LastMoves := LastMoves;
+   newC.Captured := Captured;
+
    TMovesList.Initialize(newC.Moves, 256);
 end;
 
@@ -708,6 +725,10 @@ begin
 
    Board[move.pFrom.y, move.pFrom.x] := move.Source;
    Board[move.pTo.y, move.pTo.x] := move.Target;
+
+   {TODO: Also have to undo last moves}
+
+   dec(MoveCount);
 end;
 
 function TChess.GetLastMove(): TChessMove;
