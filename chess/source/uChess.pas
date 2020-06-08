@@ -165,7 +165,6 @@ TYPE
       {plays a move on the specified board}
       function PlayMove(const move: TChessMove; var b: TBoard): boolean;
 
-      function IsCheckMate(var b: TBoard): Boolean;
       function GameOver(): boolean;
 
       procedure ResetBoard();
@@ -599,12 +598,12 @@ begin
       p := loopint(move.Source.Player);
       inc(Captured[p].Count);
       Captured[p].Pieces[Captured[p].Count - 1] := move.Target.Piece;
+
+      if(move.Target.Piece = PIECE_KING) then
+         CheckMate := true;
    end;
 
    inc(MoveCount);
-
-   if(IsCheckMate(board)) then
-      CheckMate := true;
 end;
 
 function TChess.PlayMove(const move: TChessMove; var b: TBoard): boolean;
@@ -626,25 +625,6 @@ begin
    b[move.pTo.y, move.pTo.x] := source;
 
    Result := true;
-end;
-
-function TChess.IsCheckMate(var b: TBoard): Boolean;
-var
-   kingCount,
-   i,
-   j: loopint;
-
-begin
-   kingCount := 0;
-
-   for i := 0 to 7 do begin
-      for j := 0 to 7 do begin
-         if(b[i, j].Piece = PIECE_KING) then
-            inc(kingCount);
-      end;
-   end;
-
-   Result := kingCount < 2;
 end;
 
 function TChess.GameOver(): boolean;
