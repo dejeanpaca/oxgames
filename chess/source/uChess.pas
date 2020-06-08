@@ -115,6 +115,8 @@ TYPE
 
       procedure New();
 
+      class procedure Initialize(out c: TChess); static;
+
       {switch the current player to opposing}
       procedure TogglePlayer();
       {set player as current}
@@ -171,7 +173,7 @@ TYPE
       class function HorizontalCoordinate(index: loopint): StdString; static;
       class function GetBoardPosition(const p: oxTPoint): StdString; static;
 
-      procedure Copy(out newC: TChess);
+      procedure Copy(var newC: TChess);
       {dispose of all resources}
       procedure Destroy();
 
@@ -257,6 +259,16 @@ begin
 
    if(Source.Piece = PIECE_NONE) then
       Result := false;
+
+   if(Action = ACTION_CAPTURE) then begin
+      {can't eat your own pieces}
+      if(source.Player = target.Player) then
+         exit(false);
+
+      {can't eat non-existent piece}
+      if(target.Piece = PIECE_NONE) then
+         exit(false);
+   end;
 end;
 
 { TPiece }
@@ -295,6 +307,12 @@ procedure TChess.New();
 begin
    ResetBoard();
    SetPlayer(StartingPlayer);
+end;
+
+class procedure TChess.Initialize(out c: TChess);
+begin
+   ZeroPtr(@c, SizeOf(TChess));
+   TMovesList.InitializeValues(c.Moves, 128);
 end;
 
 procedure TChess.TogglePlayer();
@@ -466,7 +484,7 @@ end;
 
 function TChess.GetMoves(x, y: loopint): TMovesList;
 begin
-   TMovesList.Initialize(Result);
+   TMovesList.Initialize(Result, 128);
 
    GetMoves(x, y, Result);
 end;
@@ -503,6 +521,10 @@ var
    y: loopint;
 
 begin
+   {no moves can be had}
+   if(GameOver()) then
+      exit;
+
    for y := 0 to 7 do begin
       for x := 0 to 7 do begin
          if(Board[y, x].Player = player) then begin
@@ -515,7 +537,7 @@ end;
 
 function TChess.GetAllMoves(player: TPlayer): TMovesList;
 begin
-   TMovesList.Initialize(Result);
+   TMovesList.Initialize(Result, 128);
    GetAllMoves(player, Result);
 end;
 
@@ -581,30 +603,19 @@ begin
 
    inc(MoveCount);
 
-   If(IsCheckMate(board)) then
+   if(IsCheckMate(board)) then
       CheckMate := true;
 end;
 
 function TChess.PlayMove(const move: TChessMove; var b: TBoard): boolean;
 var
-   source,
-   target: TPiece;
+   source: TPiece;
 
 begin
    source := b[move.pFrom.y, move.pFrom.x];
-   target := b[move.pTo.y, move.pTo.x];
 
-   { do some sanity checks }
-
-   if(move.Action = ACTION_CAPTURE) then begin
-      {can't eat your own pieces}
-      if(source.Player = target.Player) then
-         exit(false);
-
-      {can't eat non-existent piece}
-      if(target.Piece = PIECE_NONE) then
-         exit(false);
-   end;
+   if(not move.IsValid()) then
+      exit;
 
    { perform move }
 
@@ -692,7 +703,7 @@ begin
    Result := HorizontalCoordinate(p.x) + 'x' + sf(p.y + 1);
 end;
 
-procedure TChess.Copy(out newC: TChess);
+procedure TChess.Copy(var newC: TChess);
 begin
    newC.Board := Board;
 
@@ -706,8 +717,6 @@ begin
 
    newC.LastMoves := LastMoves;
    newC.Captured := Captured;
-
-   TMovesList.Initialize(newC.Moves, 256);
 end;
 
 procedure TChess.Destroy();
@@ -737,7 +746,7 @@ begin
 end;
 
 INITIALIZATION
-   TMovesList.Initialize(chess.Moves, 256);
+   TChess.Initialize(chess);
 
    chess.StartingPlayer := PLAYER_WHITE;
    chess.CurrentPlayer := chess.StartingPlayer;

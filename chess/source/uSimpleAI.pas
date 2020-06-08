@@ -110,9 +110,10 @@ begin
    SearchedPositionCount := 0;
    Result := chess.Moves.List[0];
 
-   chess.Copy(c);
+   TChess.Initialize(c);
 
    for i := 0 to chess.Moves.n - 1 do begin
+      chess.Copy(c);
       c.PlayMove(chess.Moves.List[i]);
 
       currentEvaluation := MinMax(SearchDepth - 1, -100000, 100000, c);
@@ -121,8 +122,6 @@ begin
          bestEvaluation := currentEvaluation;
          Result := chess.Moves.List[i];
       end;
-
-      c.Undo();
    end;
 
    log.i('Searched: ' + sf(SearchedPositionCount) + ', Elapsed: ' + start.ElapsedfToString(4) + 's');
@@ -142,6 +141,7 @@ begin
    if(depth = 0) then
       exit(-EvaluateBoard(chess.CurrentPlayer, b.Board));
 
+   TChess.Initialize(c);
    b.Copy(c);
    c.TogglePlayer();
    c.GetAllMoves();
@@ -151,8 +151,8 @@ begin
 
       for i := 0 to c.Moves.n - 1 do begin
          c.PlayMove(c.Moves.List[i]);
-         currentEvaluation := MinMax(depth - 1, alpha, beta, c);
 
+         currentEvaluation := MinMax(depth - 1, alpha, beta, c);
          if(currentEvaluation > bestEvaluation) then
             bestEvaluation := currentEvaluation;
 
@@ -164,13 +164,14 @@ begin
             exit(bestEvaluation);
          end;
 
-         c.Undo();
+         b.Copy(c);
       end;
    end else begin
       bestEvaluation := 99999;
 
       for i := 0 to c.Moves.n - 1 do begin
          c.PlayMove(c.Moves.List[i]);
+
          currentEvaluation := MinMax(depth - 1, alpha, beta, c);
 
          if(currentEvaluation < bestEvaluation) then
@@ -184,7 +185,7 @@ begin
             exit(bestEvaluation);
          end;
 
-         c.Undo();
+         b.Copy(c);
       end;
    end;
 
