@@ -1,8 +1,11 @@
 {
-   TODO: Implement check and check mate
+   TODO: Implement check and check mate properly
    TODO: Implement promotion
    TODO: Implement castling
    TODO: Implement en passant
+   TODO: Implement proper half move and full move count
+
+   NOTE: Forsyth-Edwards notation is abbreviated as FE notation (FEN) throughout code.
 }
 
 {$INCLUDE oxdefines.inc}
@@ -40,6 +43,69 @@ TYPE
       ACTION_CAPTURE
    );
 
+CONST
+   PLAYER_IDS: array[0..1] of StdString = (
+      'black',
+      'white'
+   );
+
+   PIECE_TYPE_MAX = loopint(PIECE_KING);
+
+   PIECE_NAMES: array[0..PIECE_TYPE_MAX] of StdString = (
+      'None',
+      'Pawn',
+      'Knight',
+      'Bishop',
+      'Rook',
+      'Queen',
+      'King'
+   );
+
+   PIECE_IDS: array[0..PIECE_TYPE_MAX] of StdString = (
+      'none',
+      'pawn',
+      'knight',
+      'bishop',
+      'rook',
+      'queen',
+      'king'
+   );
+
+   {piece characters for FE notation}
+   PIECE_CHARACTERS: array[0..PIECE_TYPE_MAX] of char = (
+      'x', {should not be used as it's for NONE piece}
+      'p',
+      'n',
+      'b',
+      'r',
+      'q',
+      'k'
+   );
+
+   {white piece characters for FE notation}
+   PIECE_CHARACTERS_WHITe: array[0..PIECE_TYPE_MAX] of char = (
+      'X', {should not be used as it's for NONE piece}
+      'P',
+      'n',
+      'B',
+      'R',
+      'Q',
+      'K'
+   );
+
+   PIECE_PLACEMENT: array[0..7] of TPieceType = (
+      PIECE_ROOK,
+      PIECE_KNIGHT,
+      PIECE_BISHOP,
+      PIECE_QUEEN,
+      PIECe_KING,
+      PIECE_BISHOP,
+      PIECE_KNIGHT,
+      PIECE_ROOK
+   );
+
+TYPE
+
    { TPiece }
 
    TPiece = record
@@ -54,6 +120,7 @@ TYPE
    end;
 
    TBoard = array[0..7, 0..7] of TPiece;
+   TBoardLinear = array[0..63] of TPiece;
 
    TPiecePosition = oxTPoint;
 
@@ -179,47 +246,14 @@ TYPE
       {undo last move}
       procedure Undo();
 
+      {get last move made (by previous player)}
       function GetLastMove(): TChessMove;
+
+      {create board from FE notation (and return if it was succesful)}
+      function FromFEN(const fen: StdString): boolean;
+      {create FE notation from current board}
+      function ToFEN(): StdString;
    end;
-
-CONST
-   PLAYER_IDS: array[0..1] of StdString = (
-      'black',
-      'white'
-   );
-
-   PIECE_TYPE_MAX = loopint(PIECE_KING);
-
-   PIECE_NAMES: array[0..PIECE_TYPE_MAX] of StdString = (
-      'None',
-      'Pawn',
-      'Knight',
-      'Bishop',
-      'Rook',
-      'Queen',
-      'King'
-   );
-
-   PIECE_IDS: array[0..PIECE_TYPE_MAX] of StdString = (
-      'none',
-      'pawn',
-      'knight',
-      'bishop',
-      'rook',
-      'queen',
-      'king'
-   );
-
-   PIECE_PLACEMENT: array[0..7] of TPieceType = (
-      PIECE_ROOK,
-      PIECE_KNIGHT,
-      PIECE_BISHOP,
-      PIECE_QUEEN,
-      PIECe_KING,
-      PIECE_BISHOP,
-      PIECE_KNIGHT,
-      PIECE_ROOK
-   );
 
 VAR
    chess: TChess;
@@ -723,6 +757,168 @@ end;
 function TChess.GetLastMove(): TChessMove;
 begin
    Result := LastMoves[loopint(OppositePlayer(CurrentPlayer))];
+end;
+
+function TChess.FromFEN(const fen: StdString): boolean;
+var
+   c: char;
+   i,
+   index,
+   p: loopint;
+
+   linearBoard: TBoardLinear absolute Board;
+
+   {temporary row for swapping }
+   tempRow: array[0..7] of TPiece;
+
+begin
+   p := 0;
+   Result := false;
+
+   { read piece placement }
+
+   for index := 1 to Length(fen) do begin
+      c := fen[index];
+
+      if(c = '') then
+         break;
+
+      if c in ['1', '2', '3', '4', '5', '6', '7', '8'] then begin
+         inc(p, Ord(c) - 48);
+      end else begin
+         if(c = 'p') then begin
+            linearBoard[p].Piece := PIECE_PAWN;
+            linearBoard[p].Player := PLAYER_BLACK;
+         end else if(c = 'n') then begin
+            linearBoard[p].Piece := PIECE_KNIGHT;
+            linearBoard[p].Player := PLAYER_BLACK;
+         end else if(c = 'b') then begin
+            linearBoard[p].Piece := PIECE_BISHOP;
+            linearBoard[p].Player := PLAYER_BLACK;
+         end else if(c = 'r') then begin
+            linearBoard[p].Piece := PIECE_ROOK;
+            linearBoard[p].Player := PLAYER_BLACK;
+         end else if(c = 'q') then begin
+            linearBoard[p].Piece := PIECE_QUEEN;
+            linearBoard[p].Player := PLAYER_BLACK;
+         end else if(c = 'k') then begin
+            linearBoard[p].Piece := PIECE_KING;
+            linearBoard[p].Player := PLAYER_BLACK;
+         end else if(c = 'P') then begin
+            linearBoard[p].Piece := PIECE_PAWN;
+            linearBoard[p].Player := PLAYER_BLACK;
+         end else if(c = 'N') then begin
+            linearBoard[p].Piece := PIECE_KNIGHT;
+            linearBoard[p].Player := PLAYER_WHITE;
+         end else if(c = 'B') then begin
+            linearBoard[p].Piece := PIECE_BISHOP;
+            linearBoard[p].Player := PLAYER_WHITE;
+         end else if(c = 'R') then begin
+            linearBoard[p].Piece := PIECE_ROOK;
+            linearBoard[p].Player := PLAYER_WHITE;
+         end else if(c = 'Q') then begin
+            linearBoard[p].Piece := PIECE_QUEEN;
+            linearBoard[p].Player := PLAYER_WHITE;
+         end else if(c = 'K') then begin
+            linearBoard[p].Piece := PIECE_KING;
+            linearBoard[p].Player := PLAYER_WHITE;
+         end else begin
+            exit(false);
+         end;
+
+         inc(p);
+      end;
+   end;
+
+   {move from row placement}
+   inc(index);
+
+   { swap rows, since we read rank 1 to 8 for simplicity and memory layout, but FEN is rank 8 to 1 }
+
+   for i := 0 to 3 do begin
+      tempRow := Board[7 - i];
+      Board[7 - i] := Board[i];
+      Board[i] := tempRow;
+   end;
+
+   { read starting position }
+
+   if(fen[index] = 'b') then
+      CurrentPlayer := PLAYER_BLACK
+   else if(fen[index] = 'w') then
+      CurrentPlayer := PLAYER_WHITE
+   else
+      exit(False);
+
+   { TODO: Read castling availability }
+   { TODO: Read en passant target square }
+   { TODO: Read halfmove clock }
+   { TODO: Read fullmove clock }
+
+   Result := true;
+end;
+
+function TChess.ToFEN(): StdString;
+var
+   fen: shortstring;
+   i,
+   j,
+   emptyCount: loopint;
+
+begin
+   fen := '';
+
+   { build piece positions }
+
+   for i := 0 to 7 do begin
+      emptyCount := 0;
+
+      for j := 0 to 7 do begin
+         if(Board[i][j].Piece = PIECE_NONE) then
+            inc(emptyCount)
+         else begin
+            if(emptyCount > 0) then begin
+               fen := fen + sf(emptyCount);
+               emptyCount := 0;
+            end;
+
+            if(Board[i][j].Player = PLAYER_BLACK) then
+               fen := fen + PIECE_CHARACTERS[loopint(Board[i][j].Piece)]
+            else
+               fen := fen + PIECE_CHARACTERS_WHITE[loopint(Board[i][j].Piece)];
+         end;
+      end;
+
+      if(emptyCount > 0) then
+         fen := fen + sf(emptyCount);
+
+      if(i < 7) then
+         fen := fen + '/';
+   end;
+
+   { player to move }
+
+   if(CurrentPlayer = PLAYER_BLACK) then
+      fen := fen + ' b '
+   else
+      fen := fen + ' w ';
+
+   { TODO: castling availability }
+   fen := fen + ' KQkq ';
+
+   { TODO: en passant target square }
+
+   fen := fen + ' - ';
+
+   { TODO: halfmove clock }
+
+   fen := fen + sf(MoveCount);
+
+   { TODO: fullmove clock }
+
+   fen := fen + sf(MoveCount div 2 + 1);
+
+   Result := fen;
 end;
 
 INITIALIZATION
