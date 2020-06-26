@@ -48,6 +48,8 @@ begin
    Name := 'Simple';
    Id := 'simple';
    SearchDepth := 4;
+
+   inherited;
 end;
 
 procedure TSimpleAI.OnComputeMove();

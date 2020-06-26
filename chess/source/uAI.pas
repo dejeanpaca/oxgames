@@ -68,6 +68,8 @@ end;
 constructor TAI.Create();
 begin
    Name := 'Unknown';
+
+   AI.List.Add(@Self);
 end;
 
 procedure TAI.Reset();
@@ -97,5 +99,8 @@ end;
 procedure TAI.OnPlayMove();
 begin
 end;
+
+INITIALIZATION
+   TAIList.Initialize(AI.List, 8);
 
 END.
