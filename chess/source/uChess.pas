@@ -83,10 +83,10 @@ CONST
    );
 
    {white piece characters for FE notation}
-   PIECE_CHARACTERS_WHITe: array[0..PIECE_TYPE_MAX] of char = (
+   PIECE_CHARACTERS_WHIT: array[0..PIECE_TYPE_MAX] of char = (
       'X', {should not be used as it's for NONE piece}
       'P',
-      'n',
+      'N',
       'B',
       'R',
       'Q',
@@ -283,7 +283,7 @@ begin
          ' moves to ' + chess.GetBoardPosition(pTo);
    end else
       Result := sourcePlayer + ' ' + PIECE_IDS[loopint(Source.Piece)] + ' from ' + chess.GetBoardPosition(pFrom) +
-         ' eats ' + targetPlayer + ' ' + PIECE_IDS[loopint(Target.Piece)] + ' at ' + chess.GetBoardPosition(pTo);
+         ' captures ' + targetPlayer + ' ' + PIECE_IDS[loopint(Target.Piece)] + ' at ' + chess.GetBoardPosition(pTo);
 end;
 
 function TChessMove.IsValid(): boolean;
@@ -294,11 +294,11 @@ begin
       Result := false;
 
    if(Action = ACTION_CAPTURE) then begin
-      {can't eat your own pieces}
+      {can't capture your own pieces}
       if(source.Player = target.Player) then
          exit(false);
 
-      {can't eat non-existent piece}
+      {can't capture non-existent piece}
       if(target.Piece = PIECE_NONE) then
          exit(false);
    end;
@@ -377,7 +377,7 @@ begin
    if(not Valid(toX, toY)) then
       exit(False);
 
-   {can't eat or move into ourselves}
+   {can't capture or move into ourselves}
    if(Board[toY, toX].Player = Board[context.y, context.x].Player)
       and(Board[toY, toX].Piece <> PIECE_NONE) then
       exit(false);
