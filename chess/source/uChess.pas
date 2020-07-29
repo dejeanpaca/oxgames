@@ -83,7 +83,7 @@ CONST
    );
 
    {white piece characters for FE notation}
-   PIECE_CHARACTERS_WHIT: array[0..PIECE_TYPE_MAX] of char = (
+   PIECE_CHARACTERS_WHITE: array[0..PIECE_TYPE_MAX] of char = (
       'X', {should not be used as it's for NONE piece}
       'P',
       'N',
