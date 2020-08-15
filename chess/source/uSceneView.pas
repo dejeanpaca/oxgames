@@ -11,10 +11,10 @@ INTERFACE
       oxuTypes, oxuWindow, oxuSceneRender, oxuScene,
       oxuProjectionType, oxuProjection,
       {ui}
-      uiWidgets, uiuWindow, uiuTypes,
+      uiWidgets, uiuWindow, uiuTypes, uiuPointer,
       wdguSceneRender,
       {game}
-      uMain, uChess, uMenubar, uScene, uBoard2D, uGame;
+      uMain, uChess, uMenubar, uScene, uBoard2D, uGame, uAI;
 
 TYPE
 
@@ -22,6 +22,7 @@ TYPE
 
    wdgTChessSceneRender = class(wdgTSceneRender)
       procedure Point(var e: appTMouseEvent; x, y: longint); override;
+      procedure Update(); override;
    end;
 
 VAR
@@ -79,6 +80,16 @@ begin
       if(chess.Valid(tile.x, tile.y)) then
          game.SelectTile(tile);
    end;
+end;
+
+procedure wdgTChessSceneRender.Update();
+begin
+   inherited Update();
+
+   if(AI.ComputeTask = nil) or (AI.ComputeTask.IsFinished()) then
+      SetCursorType(uiCURSOR_TYPE_DEFAULT)
+   else
+      SetCursorType(uiCURSOR_TYPE_BUSY);
 end;
 
 INITIALIZATION
