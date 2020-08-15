@@ -42,15 +42,22 @@ IMPLEMENTATION
 
 procedure TGameComponent.Update();
 begin
+   if(chess.GameOver()) then
+      exit;
+
    if(game.PlayerControlType() = PLAYER_CONTROL_AI) then begin
-      if(not chess.GameOver()) then begin
-         if(game.MoveStartTime.Elapsedf() < AI_COMPUTE_DELAY_TIME) then
-            exit;
+      if(game.MoveStartTime.Elapsedf() < AI_COMPUTE_DELAY_TIME) then
+         exit;
 
-         CurrentAI^.ComputeMove();
-
+      if(CurrentAI^.ComputedMove) then begin
          if(game.MoveStartTime.Elapsedf() > AI_MOVE_DELAY_TIME) then
             CurrentAI^.PlayMove();
+
+         exit;
+      end;
+
+      if(AI.ComputeTask = nil) or (AI.ComputeTask.IsFinished()) then begin
+         AI.Compute();
       end;
    end;
 end;

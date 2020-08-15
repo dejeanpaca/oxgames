@@ -4,10 +4,17 @@ UNIT uAI;
 INTERFACE
 
    USES
-      uStd, uChess;
+      uStd, uChess, oxuThreadTask;
 
 TYPE
    PAI = ^TAI;
+
+   { TAIThreadTask }
+
+   TAIThreadTask = class(oxTThreadTask)
+      constructor Create(); override;
+      procedure Run(); override;
+   end;
 
    { TAI }
 
@@ -38,8 +45,10 @@ TYPE
 
    TAIGlobal = record
       List: TAIList;
+      ComputeTask: TAIThreadTask;
 
       function FindById(const id: StdString): PAI;
+      procedure Compute();
    end;
 
 VAR
@@ -47,6 +56,19 @@ VAR
    CurrentAI: PAI;
 
 IMPLEMENTATION
+
+{ TAIThreadTask }
+
+constructor TAIThreadTask.Create();
+begin
+   inherited Create();
+   SingleRun := true;
+end;
+
+procedure TAIThreadTask.Run();
+begin
+   CurrentAI^.ComputeMove();
+end;
 
 { TAIGlobal }
 
@@ -61,6 +83,14 @@ begin
    end;
 
    Result := nil;
+end;
+
+procedure TAIGlobal.Compute();
+begin
+   If(ComputeTask = nil) then
+      ComputeTask := TAIThreadTask.Create();
+
+   ComputeTask.Start();
 end;
 
 { TAI }
@@ -80,8 +110,8 @@ end;
 procedure TAI.ComputeMove();
 begin
    if(not ComputedMove) then begin
-     OnComputeMove();
-     ComputedMove := true;
+      OnComputeMove();
+      ComputedMove := true;
    end;
 end;
 
