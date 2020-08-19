@@ -38,6 +38,7 @@ TYPE
       White: oxTMaterial;
    end;
 
+
    { TResources }
 
    TResources = record
@@ -46,14 +47,11 @@ TYPE
       Board: oxTModel;
 
       Materials: record
-         Background,
-         WhiteTile,
-         BlackTile: oxTMaterial;
+         Background: oxTMaterial;
 
-         Selected: record
-            WhiteTile,
-            BlackTile: oxTMaterial;
-         end;
+         Tile,
+         SelectedTile,
+         HighlightedPiece: TPiece2DMaterial;
 
          Pieces2D: array[0..PIECE_TYPE_MAX] of TPiece2DMaterial;
       end;
@@ -105,10 +103,10 @@ begin
    {board materials}
 
    Materials.Background := CreateMaterial('board_background', TColor4ub.Create(32, 64, 64, 255));
-   Materials.BlackTile := CreateMaterial('black_tile', TColor4ub.Create(115, 115, 115, 255));
-   Materials.WhiteTile := CreateMaterial('white_tile', TColor4ub.Create(175, 175, 175, 255));
-   Materials.Selected.BlackTile := CreateMaterial('black_tile_selected', TColor4ub.Create(96, 96, 255, 255));
-   Materials.Selected.WhiteTile := CreateMaterial('white_tile_selected', TColor4ub.Create(115, 115, 255, 255));
+   Materials.Tile.Black := CreateMaterial('black_tile', TColor4ub.Create(115, 115, 115, 255));
+   Materials.Tile.White := CreateMaterial('white_tile', TColor4ub.Create(175, 175, 175, 255));
+   Materials.SelectedTile.Black := CreateMaterial('black_tile_selected', TColor4ub.Create(96, 96, 255, 255));
+   Materials.SelectedTile.White := CreateMaterial('white_tile_selected', TColor4ub.Create(115, 115, 255, 255));
 
    {2d icons}
    for i := 1 to PIECE_TYPE_MAX do begin
@@ -131,10 +129,10 @@ var
 
 begin
    oxResource.Destroy(resources.Materials.Background);
-   oxResource.Destroy(resources.Materials.BlackTile);
-   oxResource.Destroy(resources.Materials.WhiteTile);
-   oxResource.Destroy(resources.Materials.Selected.BlackTile);
-   oxResource.Destroy(resources.Materials.Selected.WhiteTile);
+   oxResource.Destroy(resources.Materials.Tile.Black);
+   oxResource.Destroy(resources.Materials.Tile.White);
+   oxResource.Destroy(resources.Materials.SelectedTile.Black);
+   oxResource.Destroy(resources.Materials.SelectedTile.White);
 
    for i := 1 to PIECE_TYPE_MAX do begin
       oxResource.Destroy(Models[i].Black);

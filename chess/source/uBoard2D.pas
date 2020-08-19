@@ -150,9 +150,9 @@ begin
          entity.SetScale(board2d.GridSize.d, board2d.GridSize.d, 1);
 
          if((i * 7 + j) mod 2 = 0) then
-            component.Model.SetMaterial(resources.Materials.BlackTile)
+            component.Model.SetMaterial(resources.Materials.Tile.Black)
          else
-            component.Model.SetMaterial(resources.Materials.WhiteTile);
+            component.Model.SetMaterial(resources.Materials.Tile.White);
 
          board2d.TileReference[i, j] := entity;
          parent.Add(entity);
@@ -223,10 +223,10 @@ begin
    tile := board2d.TileReference[game.SelectedTile.y, game.SelectedTile.x];
    component := oxTPrimitiveModelComponent(tile.GetComponent('oxTPrimitiveModelComponent'));
 
-   if(component.Model.Material = resources.Materials.BlackTile) then
-      component.Model.SetMaterial(resources.Materials.Selected.BlackTile)
+   if(component.Model.Material = resources.Materials.Tile.Black) then
+      component.Model.SetMaterial(resources.Materials.SelectedTile.Black)
    else
-      component.Model.SetMaterial(resources.Materials.Selected.WhiteTile);
+      component.Model.SetMaterial(resources.Materials.SelectedTile.White);
 end;
 
 procedure unselectedTile();
@@ -238,10 +238,10 @@ begin
    tile := board2d.TileReference[game.SelectedTile.y, game.SelectedTile.x];
    component := oxTPrimitiveModelComponent(tile.GetComponent('oxTPrimitiveModelComponent'));
 
-   if(component.Model.Material = resources.Materials.Selected.BlackTile) then
-      component.Model.SetMaterial(resources.Materials.BlackTile)
+   if(component.Model.Material = resources.Materials.SelectedTile.Black) then
+      component.Model.SetMaterial(resources.Materials.Tile.Black)
    else
-      component.Model.SetMaterial(resources.Materials.WhiteTile);
+      component.Model.SetMaterial(resources.Materials.Tile.White);
 end;
 
 procedure movePlayed();
