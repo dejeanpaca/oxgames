@@ -8,7 +8,7 @@ INTERFACE
       {ox}
       oxuResourcePool, oxuPaths, oxuTexture,
       oxuModel, oxuModelFile, oxuMaterial,
-      oxuGlyphs,
+      oxuGlyphs, oxuFont, oxuFreetypeFonts,
       {game}
       uChess, uMain, uShared;
 
@@ -38,13 +38,13 @@ TYPE
       White: oxTMaterial;
    end;
 
-
    { TResources }
 
    TResources = record
       Models: array[0..PIECE_TYPE_MAX] of TPieceModel;
       Icons: array[0..PIECE_TYPE_MAX] of TPieceIcon;
       Board: oxTModel;
+      Font: oxTFont;
 
       Materials: record
          Background: oxTMaterial;
@@ -85,7 +85,8 @@ end;
 procedure TResources.Initialize();
 var
    i: loopint;
-   pieceName: StdString;
+   pieceName,
+   assetPath: StdString;
 
 begin
    {piece type none has no model}
@@ -121,6 +122,10 @@ begin
       Materials.Pieces2D[i].White := CreateMaterial(PIECE_IDS[i] + '_white',
          TColor4ub.Create(255, 255, 255, 255), Icons[i]);
    end;
+
+   {create a font}
+   assetPath := oxPaths.Find(oxPaths.Fonts + 'Inconsolata.ttf');
+   Font := oxFreetypeManager.CreateFont(assetPath, 36);
 end;
 
 procedure TResources.Deinitialize();
@@ -141,6 +146,8 @@ begin
       oxResource.Destroy(resources.Materials.Pieces2D[i].Black);
       oxResource.Destroy(resources.Materials.Pieces2D[i].White);
    end;
+
+   FreeObject(resources.Font);
 end;
 
 function TResources.GetModel(piece: TPieceType; player: TPlayer): oxTModel;

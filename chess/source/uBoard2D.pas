@@ -167,6 +167,7 @@ begin
 
    for i := 0 to 7 do begin
       entity := oxTTextComponent.GetEntity(sf(i + 1), text);
+      text.SetFont(resources.Font);
       entity.Name := sf(i + 1);
       entity.SetPosition(-4.7, GetTextPosition(i), 0.0);
       entity.SetScale(0.3, 0.3, 0.3);
@@ -174,6 +175,7 @@ begin
       parent.Add(entity);
 
       entity := oxTTextComponent.GetEntity(chess.HorizontalCoordinate(i), text);
+      text.SetFont(resources.Font);
       entity.Name := chess.HorizontalCoordinate(i);
       entity.SetPosition(getTextPosition(i), 4.7, 0.0);
       entity.SetScale(0.3, 0.3, 0.3);
