@@ -19,7 +19,6 @@ begin
    oxScene.Empty();
 
    camera := oxCameraEntity.CreateInScene();
-
    camera.Projection.DefaultOrtho();
 
    GameComponent.Initialize();
