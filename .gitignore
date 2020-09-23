@@ -21,7 +21,7 @@ testresults.txt
 *.app
 .DS_Store
 *.dSYM
-.oxproject/session.dvar
+.oxsession/
 test_data
 *.test
 .vscode
