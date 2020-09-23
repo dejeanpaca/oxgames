@@ -5,21 +5,17 @@ INTERFACE
 
    USES
       oxuScene, oxuSceneLoader, oxuProjection,
-      oxuCameraComponent, oxuCameraEntity,
+      oxuCameraComponent,
       {game}
-      uMain, uGrid, uGame, uDropBlocksComponent, uGameComponent;
+      uMain, uGrid, uGame, uDropBlocksComponent, uGameComponent, uCamera2D;
 
 IMPLEMENTATION
 
 procedure init();
-var
-   camera: oxTCameraComponent;
-
 begin
    oxScene.Empty();
 
-   camera := oxCameraEntity.CreateInScene();
-   camera.Projection.DefaultOrtho();
+   InitializeCamera2D();
 
    GameComponent.Initialize();
    grid.Initialize();

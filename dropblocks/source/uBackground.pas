@@ -10,7 +10,7 @@ INTERFACE
       oxuProjection, oxuProjectionType, oxuCameraComponent,
       oxuScene, oxuEntity, oxuPrimitiveModelComponent, oxuPrimitiveModelEntities,
       {game}
-      uMain, uShared, uScene;
+      uMain, uShared, uScene, uCamera2D;
 
 IMPLEMENTATION
 
@@ -22,7 +22,6 @@ VAR
 procedure init();
 var
    tex: oxTTexture;
-   camera: oxTCameraComponent;
 
 begin
    oxTextureGenerate.Generate(oxPaths.Find('textures' + DirectorySeparator + 'background.png'), tex);
@@ -35,12 +34,8 @@ begin
 
    background := oxPrimitiveModelEntities.Plane();
 
-   camera := oxTCameraComponent(oxScene.GetComponentInChildren('oxTCameraComponent'));
-
    background.SetPosition(0, 0, -0.9);
-
-   if(camera <> nil) then
-      background.SetScale(camera.Projection.p.GetWidth() / 2, camera.Projection.p.GetHeight() / 2, 1.0);
+   background.SetScale(camera.Projection.p.GetWidth() / 2, camera.Projection.p.GetHeight() / 2, 1.0);
 
    component := oxTPrimitiveModelComponent(background.GetComponent('oxTPrimitiveModelComponent'));
 
