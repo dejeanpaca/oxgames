@@ -15,13 +15,14 @@ tools/*
 *.trace
 testresults.txt
 *.dbg
-.oxtemp
 *.compiled
 *.res
 *.app
 .DS_Store
 *.dSYM
 .oxsession/
+.oxtemp/
+android/
 test_data
 *.test
 .vscode
