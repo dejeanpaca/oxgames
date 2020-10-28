@@ -15,13 +15,14 @@ tools/*
 *.trace
 testresults.txt
 *.dbg
-.oxtemp
 *.compiled
 *.res
 *.app
 .DS_Store
 *.dSYM
 .oxsession/
+.oxtemp/
+android_project/
 test_data
 *.test
 .vscode
@@ -30,3 +31,4 @@ oxprojectdefines.inc
 *.lpi
 *.log
 *.dbg
+build/user.config
