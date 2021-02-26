@@ -137,8 +137,6 @@ TYPE
 
       {get a description of this move}
       function GetDescription(): StdString;
-      {checks if the move is valid}
-      function IsValid(): boolean;
    end;
 
    PMovesList = ^TMovesList;
@@ -239,6 +237,9 @@ TYPE
       class function HorizontalCoordinate(index: loopint): StdString; static;
       class function GetBoardPosition(const p: oxTPoint): StdString; static;
 
+      {checks if a move is valid in this board current state}
+      function IsMoveValid(const move: TChessMove): boolean;
+
       procedure Copy(var newC: TChess);
       {dispose of all resources}
       procedure Destroy();
@@ -284,24 +285,6 @@ begin
    end else
       Result := sourcePlayer + ' ' + PIECE_IDS[loopint(Source.Piece)] + ' from ' + chess.GetBoardPosition(pFrom) +
          ' captures ' + targetPlayer + ' ' + PIECE_IDS[loopint(Target.Piece)] + ' at ' + chess.GetBoardPosition(pTo);
-end;
-
-function TChessMove.IsValid(): boolean;
-begin
-   Result := true;
-
-   if(Source.Piece = PIECE_NONE) then
-      Result := false;
-
-   if(Action = ACTION_CAPTURE) then begin
-      {can't capture your own pieces}
-      if(source.Player = target.Player) then
-         exit(false);
-
-      {can't capture non-existent piece}
-      if(target.Piece = PIECE_NONE) then
-         exit(false);
-   end;
 end;
 
 { TPiece }
@@ -647,7 +630,7 @@ var
 begin
    source := b[move.pFrom.y, move.pFrom.x];
 
-   if(not move.IsValid()) then
+   if(IsMoveValid(move)) then
       exit;
 
    { perform move }
@@ -715,6 +698,30 @@ end;
 class function TChess.GetBoardPosition(const p: oxTPoint): StdString;
 begin
    Result := HorizontalCoordinate(p.x) + 'x' + sf(p.y + 1);
+end;
+
+function TChess.IsMoveValid(const move: TChessMove): boolean;
+begin
+   Result := true;
+
+   if move.Source.Piece = PIECE_NONE then
+      exit(false);
+
+   if move.pFrom = move.pTo then
+      exit(false);
+
+   if Valid(move.pFrom.x, move.pFrom.y) then
+      exit(false);
+
+   if move.Action = ACTION_CAPTURE then begin
+      {can't capture your own pieces}
+      if move.Source.Player = move.Target.Player then
+         exit(false);
+
+      {can't capture non-existent piece}
+      if move.Target.Piece = PIECE_NONE then
+         exit(false);
+   end;
 end;
 
 procedure TChess.Copy(var newC: TChess);
