@@ -225,6 +225,10 @@ TYPE
 
       {checks if a move is possible}
       function MovePossible(const from, target: oxTPoint; out move: TChessMove): boolean;
+      {checks if a move is possible}
+      function MoveInList(const from, target: oxTPoint; var list: TMovesList): boolean;
+      {plays a move}
+      function ConstructMove(const from, target: oxTPoint; out move: TChessMove): boolean;
       {plays a move}
       function PlayMove(const move: TChessMove): boolean;
       {plays a move on the specified board}
@@ -596,6 +600,35 @@ begin
          end;
       end;
    end;
+end;
+
+function TChess.MoveInList(const from, target: oxTPoint; var list: TMovesList): boolean;
+var
+   i: loopint;
+
+begin
+   Result := false;
+
+   for i := 0 to list.n - 1 do begin
+      if(list.List[i].pFrom = from) and (list.List[i].pTo = target) then
+         exit(true);
+   end;
+end;
+
+function TChess.ConstructMove(const from, target: oxTPoint; out move: TChessMove): boolean;
+begin
+   ZeroOut(move, SizeOf(move));
+
+   move.pFrom := from;
+   move.pTo := target;
+
+   move.Source := Board[from.y, from.x];
+   move.Target := Board[target.y, target.x];
+
+   if(move.Target.Piece = PIECE_NONE) then
+      move.Action := ACTION_MOVE
+   else
+      move.Action := ACTION_CAPTURE;
 end;
 
 function TChess.PlayMove(const move: TChessMove): boolean;
