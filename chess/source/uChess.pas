@@ -352,7 +352,6 @@ end;
 
 function TChess.AddMove(toX, toY: loopint; var context: TMovesBuilderContext): boolean;
 var
-   pieceType: TPieceType;
    move: TChessMove;
 
 begin
@@ -365,8 +364,6 @@ begin
       and(Board[toY, toX].Piece <> PIECE_NONE) then
       exit(false);
 
-   pieceType := Board[context.y, context.x].Piece;
-
    TChessMove.Initialize(move);
 
    if(not Occupied(toX, toY)) then
@@ -374,13 +371,11 @@ begin
    else
       move.Action := ACTION_CAPTURE;
 
-   move.Source.Piece := pieceType;
-   move.Source.Player := Board[context.y, context.x].Player;
+   move.Source := Board[context.y, context.x];
    move.pFrom.x := context.x;
    move.pFrom.y := context.y;
 
-   move.Target.Piece := Board[toY, toX].Piece;
-   move.Target.Player := Board[toY, toX].Player;
+   move.Target := Board[toY, toX];
    move.pTo.x := toX;
    move.pTo.y := toY;
 
@@ -487,15 +482,17 @@ end;
 
 procedure TChess.GetKingMoves(x, y: loopint; var context: TMovesBuilderContext);
 begin
-  AddMove(x + 1, y, context);
-  AddMove(x - 1, y, context);
-  AddMove(x, y + 1, context);
-  AddMove(x, y - 1, context);
+   // diagonal
+   AddMove(x + 1, y + 1, context);
+   AddMove(x - 1, y + 1, context);
+   AddMove(x + 1, y - 1, context);
+   AddMove(x - 1, y - 1, context);
 
-  AddMove(x + 1, y + 1, context);
-  AddMove(x - 1, y + 1, context);
-  AddMove(x + 1, y - 1, context);
-  AddMove(x - 1, y - 1, context);
+   // rank and file
+   AddMove(x + 1, y, context);
+   AddMove(x - 1, y, context);
+   AddMove(x, y + 1, context);
+   AddMove(x, y - 1, context);
 end;
 
 function TChess.GetMoves(x, y: loopint): TMovesList;
