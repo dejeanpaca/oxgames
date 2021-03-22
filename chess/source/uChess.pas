@@ -221,7 +221,7 @@ TYPE
       {is the given position occupied on the board}
       function Occupied(x, y: loopint): boolean;
       {is the given position valid on the board}
-      function Valid(x, y: loopint): boolean;
+      class function Valid(x, y: loopint): boolean; static;
 
       {checks if a move is possible}
       function MovePossible(const from, target: oxTPoint; out move: TChessMove): boolean;
@@ -572,7 +572,7 @@ begin
       Result := Board[y, x].Piece <> PIECE_NONE;
 end;
 
-function TChess.Valid(x, y: loopint): boolean;
+class function TChess.Valid(x, y: loopint): boolean;
 begin
    Result := (x >= 0) and (x < 8) and (y >= 0) and (y < 8);
 end;
@@ -619,16 +619,22 @@ function TChess.ConstructMove(const from, target: oxTPoint; out move: TChessMove
 begin
    ZeroOut(move, SizeOf(move));
 
-   move.pFrom := from;
-   move.pTo := target;
+   if TChess.Valid(from.x, from.y) and TChess.Valid(target.x, target.y) then begin
+      move.pFrom := from;
+      move.pTo := target;
 
-   move.Source := Board[from.y, from.x];
-   move.Target := Board[target.y, target.x];
+      move.Source := Board[from.y, from.x];
+      move.Target := Board[target.y, target.x];
 
-   if(move.Target.Piece = PIECE_NONE) then
-      move.Action := ACTION_MOVE
-   else
-      move.Action := ACTION_CAPTURE;
+      if(move.Target.Piece = PIECE_NONE) then
+         move.Action := ACTION_MOVE
+      else
+         move.Action := ACTION_CAPTURE;
+
+      exit(IsMoveValid(move));
+   end;
+
+   Result := false;
 end;
 
 function TChess.PlayMove(const move: TChessMove): boolean;
