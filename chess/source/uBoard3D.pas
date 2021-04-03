@@ -123,14 +123,20 @@ end;
 
 procedure selectedTile();
 begin
+   if(CurrentBoard <> @board3d) then
+      exit;
 end;
 
 procedure unselectedTile();
 begin
+   if(CurrentBoard <> @board3d) then
+      exit;
 end;
 
 procedure movePlayed();
 begin
+   if(CurrentBoard <> @board3d) then
+      exit;
 end;
 
 INITIALIZATION
