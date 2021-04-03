@@ -222,6 +222,9 @@ var
    component: oxTPrimitiveModelComponent;
 
 begin
+   if(CurrentBoard <> @board2d) then
+      exit;
+
    tile := board2d.TileReference[game.SelectedTile.y, game.SelectedTile.x];
    component := oxTPrimitiveModelComponent(tile.GetComponent('oxTPrimitiveModelComponent'));
 
@@ -237,6 +240,9 @@ var
    component: oxTPrimitiveModelComponent;
 
 begin
+   if(CurrentBoard <> @board2d) then
+      exit;
+
    tile := board2d.TileReference[game.SelectedTile.y, game.SelectedTile.x];
    component := oxTPrimitiveModelComponent(tile.GetComponent('oxTPrimitiveModelComponent'));
 
@@ -253,6 +259,9 @@ var
    targetReference: oxTEntity;
 
 begin
+   if(CurrentBoard <> @board2d) then
+      exit;
+
    move := chess.GetLastMove();
 
    {destroy target piece entity}
