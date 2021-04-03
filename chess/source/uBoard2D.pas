@@ -35,6 +35,10 @@ TYPE
       procedure Empty(); virtual;
       procedure BuildBoard();
       procedure Activate(); virtual;
+
+      procedure SelectedTile(); virtual;
+      procedure UnselectedTile(); virtual;
+      procedure MovePlayed(); virtual;
    end;
 
 VAR
@@ -216,16 +220,13 @@ begin
    BuildBoard();
 end;
 
-procedure selectedTile();
+procedure TBoard2D.SelectedTile();
 var
    tile: oxTEntity;
    component: oxTPrimitiveModelComponent;
 
 begin
-   if(CurrentBoard <> @board2d) then
-      exit;
-
-   tile := board2d.TileReference[game.SelectedTile.y, game.SelectedTile.x];
+   tile := TileReference[game.SelectedTile.y, game.SelectedTile.x];
    component := oxTPrimitiveModelComponent(tile.GetComponent('oxTPrimitiveModelComponent'));
 
    if(component.Model.Material = resources.Materials.Tile.Black) then
@@ -234,16 +235,13 @@ begin
       component.Model.SetMaterial(resources.Materials.SelectedTile.White);
 end;
 
-procedure unselectedTile();
+procedure TBoard2D.UnselectedTile();
 var
    tile: oxTEntity;
    component: oxTPrimitiveModelComponent;
 
 begin
-   if(CurrentBoard <> @board2d) then
-      exit;
-
-   tile := board2d.TileReference[game.SelectedTile.y, game.SelectedTile.x];
+   tile := TileReference[game.SelectedTile.y, game.SelectedTile.x];
    component := oxTPrimitiveModelComponent(tile.GetComponent('oxTPrimitiveModelComponent'));
 
    if(component.Model.Material = resources.Materials.SelectedTile.Black) then
@@ -252,21 +250,18 @@ begin
       component.Model.SetMaterial(resources.Materials.Tile.White);
 end;
 
-procedure movePlayed();
+procedure TBoard2D.MovePlayed();
 var
    move: TChessMove;
    sourceReference,
    targetReference: oxTEntity;
 
 begin
-   if(CurrentBoard <> @board2d) then
-      exit;
-
    move := chess.GetLastMove();
 
    {destroy target piece entity}
-   targetReference := board2d.Reference[move.pTo.y, move.pTo.x];
-   sourceReference := board2d.Reference[move.pFrom.y, move.pFrom.x];
+   targetReference := Reference[move.pTo.y, move.pTo.x];
+   sourceReference := Reference[move.pFrom.y, move.pFrom.x];
 
    {sanity check if we've been fed invalid state}
    if(sourceReference = nil) then
@@ -276,17 +271,14 @@ begin
       oxEntity.Remove(targetReference);
 
    {replace target entity with old}
-   board2d.Reference[move.pTo.y, move.pTo.x] := sourceReference;
-   board2d.PositionPiece(sourceReference, move.pTo.x, move.pTo.y);
+   Reference[move.pTo.y, move.pTo.x] := sourceReference;
+   PositionPiece(sourceReference, move.pTo.x, move.pTo.y);
 
    {should nothing be left at old one}
-   board2d.Reference[move.pFrom.y, move.pFrom.x] := nil;
+   Reference[move.pFrom.y, move.pFrom.x] := nil;
 end;
 
 INITIALIZATION
    board2d.Create();
-   game.OnSelectedTile.Add(@selectedTile);
-   game.OnUnselectedTile.Add(@unselectedTile);
-   game.OnMovePlayed.Add(@movePlayed);
 
 END.

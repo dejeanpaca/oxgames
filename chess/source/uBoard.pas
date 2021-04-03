@@ -29,6 +29,10 @@ TYPE
       procedure Reset(); virtual;
 
       procedure SwitchTo();
+
+      procedure SelectedTile(); virtual;
+      procedure UnselectedTile(); virtual;
+      procedure MovePlayed(); virtual;
    end;
 
 VAR
@@ -65,12 +69,46 @@ begin
    Reset();
 end;
 
+procedure TBoard.SelectedTile();
+begin
+
+end;
+
+procedure TBoard.UnselectedTile();
+begin
+
+end;
+
+procedure TBoard.MovePlayed();
+begin
+
+end;
+
 procedure onNew();
 begin
    CurrentBoard^.Reset();
 end;
 
+procedure selectedTile();
+begin
+   CurrentBoard^.SelectedTile();
+end;
+
+procedure unselectedTile();
+begin
+   CurrentBoard^.UnselectedTile();
+end;
+
+procedure movePlayed();
+begin
+   CurrentBoard^.MovePlayed();
+end;
+
 INITIALIZATION
    game.OnNew.Add(@onNew);
+
+   game.OnSelectedTile.Add(@selectedTile);
+   game.OnUnselectedTile.Add(@unselectedTile);
+   game.OnMovePlayed.Add(@movePlayed);
 
 END.

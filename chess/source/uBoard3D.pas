@@ -23,6 +23,10 @@ TYPE
       procedure PositionPiece(entity: oxTEntity; x, y: loopint);
       {activate this board}
       procedure Activate(); virtual;
+
+      procedure SelectedTile(); virtual;
+      procedure UnselectedTile(); virtual;
+      procedure MovePlayed(); virtual;
    end;
 
 VAR
@@ -121,33 +125,26 @@ begin
    gameComponent.Entity.Add(White);
 end;
 
-procedure selectedTile();
+procedure TBoard3D.SelectedTile();
 begin
-   if(CurrentBoard <> @board3d) then
-      exit;
 end;
 
-procedure unselectedTile();
+procedure TBoard3D.UnselectedTile();
 begin
-   if(CurrentBoard <> @board3d) then
-      exit;
 end;
 
-procedure movePlayed();
+procedure TBoard3D.MovePlayed();
 var
    move: TChessMove;
    sourceReference,
    targetReference: oxTEntity;
 
 begin
-   if(CurrentBoard <> @board3d) then
-      exit;
-
    move := chess.GetLastMove();
 
    {destroy target piece entity}
-   targetReference := board3d.Reference[move.pTo.y, move.pTo.x];
-   sourceReference := board3d.Reference[move.pFrom.y, move.pFrom.x];
+   targetReference := Reference[move.pTo.y, move.pTo.x];
+   sourceReference := Reference[move.pFrom.y, move.pFrom.x];
 
    {sanity check if we've been fed invalid state}
    if(sourceReference = nil) then
@@ -157,19 +154,15 @@ begin
       oxEntity.Remove(targetReference);
 
    {replace target entity with old}
-   board3d.Reference[move.pTo.y, move.pTo.x] := sourceReference;
-   board3d.PositionPiece(sourceReference, move.pTo.x, move.pTo.y);
+   Reference[move.pTo.y, move.pTo.x] := sourceReference;
+   PositionPiece(sourceReference, move.pTo.x, move.pTo.y);
 
    {should nothing be left at old one}
-   board3d.Reference[move.pFrom.y, move.pFrom.x] := nil;
+   Reference[move.pFrom.y, move.pFrom.x] := nil;
 end;
 
 INITIALIZATION
    board3d.Create();
    board3d.SquareSize := 2.0;
-
-   game.OnSelectedTile.Add(@selectedTile);
-   game.OnUnselectedTile.Add(@unselectedTile);
-   game.OnMovePlayed.Add(@movePlayed);
 
 END.
