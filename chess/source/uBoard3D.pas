@@ -10,7 +10,7 @@ INTERFACE
       oxuCameraComponent, oxuModelComponent,
       oxuEntity, oxuModel,
       {game}
-      uChess, uScene, uGameComponent, uResources, uBoard;
+      uChess, uScene, uGame, uGameComponent, uResources, uBoard;
 
 TYPE
    { TBoard3D }
@@ -121,8 +121,24 @@ begin
    gameComponent.Entity.Add(White);
 end;
 
+procedure selectedTile();
+begin
+end;
+
+procedure unselectedTile();
+begin
+end;
+
+procedure movePlayed();
+begin
+end;
+
 INITIALIZATION
    board3d.Create();
    board3d.SquareSize := 2.0;
+
+   game.OnSelectedTile.Add(@selectedTile);
+   game.OnUnselectedTile.Add(@unselectedTile);
+   game.OnMovePlayed.Add(@movePlayed);
 
 END.
