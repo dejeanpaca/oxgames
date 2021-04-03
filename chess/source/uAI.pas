@@ -4,7 +4,7 @@ UNIT uAI;
 INTERFACE
 
    USES
-      uStd, uChess, oxuThreadTask;
+      uStd, uMain, uChess, oxuThreadTask;
 
 TYPE
    PAI = ^TAI;
@@ -130,7 +130,15 @@ procedure TAI.OnPlayMove();
 begin
 end;
 
+procedure deinitialize();
+begin
+   if(AI.ComputeTask <> nil) then
+      FreeObject(AI.ComputeTask);
+end;
+
 INITIALIZATION
    TAIList.Initialize(AI.List, 8);
+
+   main.Init.dAdd('ai', @deinitialize);
 
 END.
