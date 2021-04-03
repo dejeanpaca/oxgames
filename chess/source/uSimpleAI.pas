@@ -115,6 +115,9 @@ begin
    TChess.Initialize(c);
 
    for i := 0 to chess.Moves.n - 1 do begin
+      if(Terminated) then
+         break;
+
       chess.Copy(c);
       c.PlayMove(chess.Moves.List[i]);
 
@@ -152,6 +155,9 @@ begin
       bestEvaluation := -99999;
 
       for i := 0 to c.Moves.n - 1 do begin
+         if(Terminated) then
+            break;
+
          c.PlayMove(c.Moves.List[i]);
 
          currentEvaluation := MinMax(depth - 1, alpha, beta, c);
@@ -172,6 +178,9 @@ begin
       bestEvaluation := 99999;
 
       for i := 0 to c.Moves.n - 1 do begin
+         if(Terminated) then
+            break;
+
          c.PlayMove(c.Moves.List[i]);
 
          currentEvaluation := MinMax(depth - 1, alpha, beta, c);

@@ -14,6 +14,7 @@ TYPE
    TAIThreadTask = class(oxTThreadTask)
       constructor Create(); override;
       procedure Run(); override;
+      destructor Destroy(); override;
    end;
 
    { TAI }
@@ -27,6 +28,8 @@ TYPE
       Move: TChessMove;
 
       ComputedMove: boolean;
+      {indicates the compute task is terminated}
+      Terminated: boolean;
 
       constructor Create();
 
@@ -70,6 +73,15 @@ begin
    CurrentAI^.ComputeMove();
 end;
 
+destructor TAIThreadTask.Destroy();
+begin
+   {stop the compute task for AI}
+   if(CurrentAI <> nil) then
+      CurrentAI^.Terminated := true;
+
+   inherited Destroy();
+end;
+
 { TAIGlobal }
 
 function TAIGlobal.FindById(const id: StdString): PAI;
@@ -105,6 +117,7 @@ end;
 procedure TAI.Reset();
 begin
    ComputedMove := false;
+   Terminated := false;
 end;
 
 procedure TAI.ComputeMove();
