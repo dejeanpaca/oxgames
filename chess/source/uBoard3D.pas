@@ -134,9 +134,34 @@ begin
 end;
 
 procedure movePlayed();
+var
+   move: TChessMove;
+   sourceReference,
+   targetReference: oxTEntity;
+
 begin
    if(CurrentBoard <> @board3d) then
       exit;
+
+   move := chess.GetLastMove();
+
+   {destroy target piece entity}
+   targetReference := board3d.Reference[move.pTo.y, move.pTo.x];
+   sourceReference := board3d.Reference[move.pFrom.y, move.pFrom.x];
+
+   {sanity check if we've been fed invalid state}
+   if(sourceReference = nil) then
+      exit;
+
+   if(targetReference <> nil) then
+      oxEntity.Remove(targetReference);
+
+   {replace target entity with old}
+   board3d.Reference[move.pTo.y, move.pTo.x] := sourceReference;
+   board3d.PositionPiece(sourceReference, move.pTo.x, move.pTo.y);
+
+   {should nothing be left at old one}
+   board3d.Reference[move.pFrom.y, move.pFrom.x] := nil;
 end;
 
 INITIALIZATION
