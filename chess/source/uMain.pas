@@ -21,9 +21,6 @@ VAR
 
 IMPLEMENTATION
 
-VAR
-   dvBoard3D: TDVar;
-
 procedure initialize();
 begin
    main.Init.iCall();
@@ -38,7 +35,6 @@ end;
 
 INITIALIZATION
    dvar.Add('chess', main.dv);
-   main.dv.Add(dvBoard3D, 'board3d', dtcBOOL, @main.Board3D);
 
    ox.OnInitialize.Add('chess.initialize', @initialize, @deinitialize);
 

@@ -8,7 +8,7 @@ INTERFACE
       {ox}
       uOX, oxuProgramConfig,
       {game}
-      uChess, uAI, uSimpleAI, uGame;
+      uChess, uMain, uAI, uSimpleAI, uGame;
 
 TYPE
 
@@ -42,6 +42,7 @@ VAR
 IMPLEMENTATION
 
 VAR
+   dvBoard3D,
    dvStartingPlayer,
    dvAIId,
    dvWhiteControl,
@@ -109,6 +110,7 @@ INITIALIZATION
    options.AIId := CurrentAI^.Id;
    options.AISearchDepth := SimpleAI.SearchDepth;
 
+   ox.ProgramDvar.Add(dvBoard3D, 'board3d', dtcBOOL, @main.Board3D);
    ox.ProgramDvar.Add(dvStartingPlayer, 'starting_player', dtcENUM, @options.StartingPlayer);
    ox.ProgramDvar.Add(dvAIId, 'ai_id', dtcSTRING, @options.AIId);
    ox.ProgramDvar.Add(dvBlackControl, 'black_control', dtcENUM, @options.BlackControl);
